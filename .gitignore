@@ -1,0 +1,16 @@
+# Build & Executable Artifacts
+build/
+dist/
+*.exe
+*.pkg
+*.toc
+*.spec
+*.pyc
+__pycache__/
+
+# Scratch & Temporary Logs
+*.log
+scratch/
+test_*.py
+stress_test_*.py
+apply_*.py

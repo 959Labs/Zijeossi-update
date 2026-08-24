@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="지 저 씨">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#050811">
+    <title>지 저 씨 - &lt;지저씨 : 각성했지만 게으르고 싶어&gt;</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Game Canvas -->
+    <canvas id="gameCanvas"></canvas>
+
+        <!-- 959 Labs Game Studio Cinematic Splash Screen -->
+    <div id="studioSplash" class="studio-splash-screen" onclick="if (window.game && window.game.skipStudioSplash) window.game.skipStudioSplash();">
+        <img src="logo_959.png" alt="959 Labs Studio Logo" id="studioLogoImg" class="studio-logo-img">
+        <div class="splash-skip-hint">스킵: <strong>[Space / ENTER / ESC / 클릭]</strong></div>
+    </div>
+
+    <!-- Atmospheric Direct Title Screen & Main Menu -->
+    <div id="introTitleScreen" class="intro-screen-overlay">
+        <!-- Live Animated Title Background Canvas (Embers, Cosmic Aurora, Silhouettes) -->
+        <canvas id="titleBackgroundCanvas" class="title-bg-canvas"></canvas>
+
+                <div id="cinematicTitleMenuLayer" class="cinematic-title-menu-layer">
+            <!-- Top Developer Comment Banner (Above Title) -->
+            <div class="intro-top-dev-comment">
+                <div class="dev-comment-badge">📢 개발자 코멘트</div>
+                <div class="dev-comment-bubble">
+                    <p class="dev-comment-line">누가 플레이 하게 될지는 모르지만 피드백은 언제나 환영입니다 ~~ ^3^</p>
+                </div>
+            </div>
+
+            <!-- 3D Fiery Stamped Title -->
+            <div class="stamped-title-box">
+                <div class="stamped-chars-row">
+                    <span id="stampChar1" class="stamp-char">지</span>
+                    <span id="stampChar2" class="stamp-char">저</span>
+                    <span id="stampChar3" class="stamp-char">씨</span>
+                </div>
+                <div id="stampSubtitle" class="stamp-subtitle">&lt; 지저씨 : 각성했지만 게으르고 싶어 &gt;</div>
+            </div>
+
+            <!-- Main Menu Buttons with Direct In-Line Click Handlers -->
+            <div id="introMenuContainer" class="intro-menu-container">
+                <button id="introBtnContinue" class="intro-menu-btn active" data-index="0" onclick="game.startAdventure(true, false)">
+                    <span class="btn-arrow">▶</span>
+                    <span class="btn-label" id="introBtnContinueLabel">💾 싱글플레이 이어하기 (Continue)</span>
+                </button>
+                <button id="introBtnNewGame" class="intro-menu-btn" data-index="1" onclick="game.startAdventure(false, false)">
+                    <span class="btn-arrow">▶</span>
+                    <span class="btn-label">⚔️ 싱글플레이 새로 시작 (New Game)</span>
+                </button>
+                <button id="introBtnMultiplayer" class="intro-menu-btn highlight-multi-menu" data-index="2" onclick="game.openMultiplayerModal()">
+                    <span class="btn-arrow">▶</span>
+                    <span class="btn-label">🌐 코옵 멀티플레이 (Co-op Multiplayer) <span class="hot-badge">HOT</span></span>
+                </button>
+                <button id="introBtnSettings" class="intro-menu-btn" data-index="3" onclick="game.toggleSettings()">
+                    <span class="btn-arrow">▶</span>
+                    <span class="btn-label">⚙️ 게임 가이드 & 환경설정 [P]</span>
+                </button>
+                <button id="introBtnQuit" class="intro-menu-btn" data-index="4" onclick="game.quitGame()">
+                    <span class="btn-arrow">▶</span>
+                    <span class="btn-label">🚪 게임 완전 종료 (Quit Game)</span>
+                </button>
+            </div>
+        </div>
+
+<!-- Bottom-Right: Floating Control Guide Badge -->
+        <div class="intro-bottom-right-guide">
+            <div class="guide-badge-header">🎮 조작 가이드</div>
+            <div class="guide-badge-content">
+                <div class="guide-row"><span class="key-pill">↑ / ↓</span><span>메뉴 이동</span></div>
+                <div class="guide-row"><span class="key-pill">ENTER / 클릭</span><span>선택 & 시작</span></div>
+                <div class="guide-row"><span class="key-pill">F</span><span>NPC & 상점 대화</span></div>
+                <div class="guide-row"><span class="key-pill">A / Space</span><span>기본 공격 / 대시</span></div>
+                <div class="guide-row"><span class="key-pill">W, E, S, D, Q</span><span>스킬 및 궁극기</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Zone Transition Overlay -->
+    <div id="zoneTransitionOverlay">
+        <div id="zoneTitleText">고대 미궁 던전 B1</div>
+        <div id="zoneSubText">위험한 몬스터와 함정이 도사리고 있습니다.</div>
+    </div>
+
+    <!-- Top Left HUD: Compact Quest Tracker -->
+        <!-- Top Center: Epic Raid Boss Health Bar (Soul/Diablo Style) -->
+    <div id="hudBossHealthBar" class="boss-health-container hidden">
+        <div class="boss-header-row">
+            <span id="hudBossIcon" class="boss-icon">👑</span>
+            <div class="boss-name-group">
+                <span id="hudBossName" class="boss-main-name">고블린 대족장 그룩타</span>
+                <span id="hudBossTitle" class="boss-sub-title">비취 숲의 약탈자</span>
+            </div>
+            <span id="hudBossPhaseBadge" class="boss-phase-badge">Phase 1</span>
+        </div>
+        <div class="boss-bar-frame">
+            <div id="hudBossHpLagBar" class="boss-hp-lag-bar"></div>
+            <div id="hudBossHpFill" class="boss-hp-fill"></div>
+            <div id="hudBossHpText" class="boss-hp-text">850 / 850 (100%)</div>
+        </div>
+    </div>
+
+    <!-- Top Left HUD: Quest & Tower Floor Tracker Stack (No Overlap) -->
+    <div id="hudTopLeftStack" class="hud-top-left-stack">
+        <!-- Party Status Frame (Monster Hunter / MMO Co-op Style) -->
+        <div id="hudPartyFrame" class="hud-party-frame"></div>
+
+        <div id="hudQuestTracker" class="quest-tracker-box">
+            <div class="quest-title">📜 퀘스트</div>
+        </div>
+
+        <!-- Tower of Trial Floor Tracker -->
+        <div id="hudTowerTracker" class="quest-tracker-box tower-tracker-box hidden">
+            <div class="tower-floor-title">🗼 무한의 시련 탑 <span id="towerFloorNum" class="tower-floor-badge">1F</span></div>
+            <div class="tower-mob-status" id="towerMobStatus">👾 잔여 몬스터: <strong id="towerMobsLeft" style="color:#f43f5e;">0</strong>마리</div>
+            <div class="tower-coin-status">🪙 시련의 증표: <strong id="towerCoinsCount" style="color: #facc15;">0</strong>개</div>
+        </div>
+    </div>
+
+    <!-- Top Right Controls (Mobile: Icon-Only Compact Mode / PC: Full Label Mode) -->
+    <div id="hudTopRight">
+        <div id="autoSaveIndicator" class="auto-save-badge hidden">💾 저장됨</div>
+                <button id="btnPause" class="hud-btn highlight-pause" title="일시정지 [ESC]">
+            <span class="btn-icon">⏸️</span><span class="btn-text"> 일시정지 [ESC]</span>
+        </button>
+        <button id="btnQuit" class="hud-btn highlight-quit desktop-only" title="게임 종료">
+            <span class="btn-icon">🚪</span><span class="btn-text"> 종료</span>
+        </button>
+        <button id="btnWorldMap" class="hud-btn highlight-gold" title="전체 월드맵 [M]">
+            <span class="btn-icon">🗺️</span><span class="btn-text"> 지도 [M]</span>
+        </button>
+        <button id="btnSkillBook" class="hud-btn highlight-gold" title="스킬북 및 9슬롯 스킬 장착 [K]">
+            <span class="btn-icon">⚡</span><span class="btn-text"> 스킬북 [K]</span>
+        </button>
+        <button id="btnInventory" class="hud-btn highlight-gold" title="가방 / 인벤토리 [I]">
+            <span class="btn-icon">🎒</span><span class="btn-text"> 가방 [I]</span>
+        </button>
+        <button id="btnSettings" class="hud-btn highlight" title="환경설정 및 게임 가이드 [P]">
+            <span class="btn-icon">⚙️</span><span class="btn-text"> 설정 [P]</span>
+        </button>
+        <button id="btnSave" class="hud-btn" title="게임 저장">
+            <span class="btn-icon">💾</span><span class="btn-text"> 저장</span>
+        </button>
+        <button id="btnFullscreen" class="hud-btn" title="전체화면">
+            <span class="btn-icon">⛶</span><span class="btn-text"> 전체화면</span>
+        </button>
+        <button id="btnExport" class="hud-btn desktop-only" title="세이브 코드 복사">
+            <span class="btn-icon">📋</span><span class="btn-text"> 복사</span>
+        </button>
+        <button id="btnImport" class="hud-btn desktop-only" title="동기화">
+            <span class="btn-icon">📥</span><span class="btn-text"> 동기화</span>
+        </button>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="gameNotification" class="hidden"></div>
+
+    <!-- Multiplayer Co-op Lobby Modal -->
+    <div id="multiplayerLobbyModal" class="hidden modal-backdrop">
+        <div class="multiplayer-modal-card">
+            <div class="modal-header">
+                <div class="multi-title-group">
+                    <span class="multi-title-icon">🌐</span>
+                    <div>
+                        <h2>코옵 멀티플레이 로비 (Co-op Lobby)</h2>
+                        <div class="multi-subtitle">최대 4인 실시간 파티 협동 & 보스 레이드</div>
+                    </div>
+                </div>
+                <button class="dialogue-close" onclick="game.closeMultiplayerModal()">닫기 [ESC]</button>
+            </div>
+
+            <div class="multiplayer-modal-body">
+                <!-- Nickname Configuration -->
+                <div class="multi-section-card">
+                    <label class="multi-field-label">🏷️ 내 캐릭터 닉네임 설정</label>
+                    <div class="multi-nick-row">
+                        <input type="text" id="multiNicknameInput" class="multi-text-input" placeholder="닉네임 입력 (최대 12자)" maxlength="12">
+                        <button class="multi-btn-secondary" onclick="game.randomizeMultiNickname()">🎲 랜덤 닉네임</button>
+                    </div>
+                </div>
+
+                <!-- Host & Join Mode Selection Grid -->
+                <div class="multi-mode-grid">
+                    <!-- Option A: Host Room -->
+                    <div class="multi-mode-card host-card">
+                        <div class="mode-badge host-badge">👑 방장 (Host)</div>
+                        <h3 class="mode-title">내가 방 만들기</h3>
+                        <p class="mode-desc">내가 방장이 되어 서버를 열고 친구들을 내 월드로 초대하여 함께 사냥합니다.</p>
+                        
+                        <div class="lan-url-box">
+                            <span class="lan-label">📱 같은 Wi-Fi 친구 초대 주소:</span>
+                            <div class="lan-copy-row">
+                                <code id="multiHostLanUrl">http://192.168.0.2:3000</code>
+                                <button class="btn-copy-mini" onclick="game.copyInviteUrl()">📋 복사</button>
+                            </div>
+                        </div>
+
+                        <button class="multi-start-action-btn host-action-btn" onclick="game.startMultiplayerHost()">🚀 방 개설 & 모험 시작</button>
+                    </div>
+
+                    <!-- Option B: Join Room -->
+                    <div class="multi-mode-card join-card">
+                        <div class="mode-badge join-badge">⚔️ 파티원 (Guest)</div>
+                        <h3 class="mode-title">친구 방에 참가하기</h3>
+                        <p class="mode-desc">친구가 알려준 서버 주소(예: <code>http://192.168.0.X:3000</code>)로 접속하여 파티에 합류합니다.</p>
+
+                        <div class="join-input-group">
+                            <label class="join-label">🔗 접속할 방장 서버 주소:</label>
+                            <input type="text" id="multiJoinServerUrl" class="multi-text-input join-input" placeholder="예: http://192.168.0.2:3000" value="http://localhost:3000">
+                        </div>
+
+                        <button class="multi-start-action-btn join-action-btn" onclick="game.startMultiplayerJoin()">⚔️ 방 입장 & 파티 참가</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="multiplayer-modal-footer">
+                <button class="multi-back-btn" onclick="game.closeMultiplayerModal()">← 메인 메뉴로 돌아가기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- World Map Atlas Modal (M Key - Maple-Style Visual Node Roadmap) -->
+    <div id="worldMapModal" class="hidden modal-backdrop">
+        <div class="worldmap-card node-map-theme">
+            <div class="modal-header">
+                <h2>🗺️ 아르카디아 대륙 원정 지도 (Expedition Map)</h2>
+                <div class="current-loc-badge" id="mapCurrentLocBadge">📍 현재 위치: <strong id="mapCurrentZoneName">시작의 마을</strong></div>
+                <button id="worldMapCloseBtn" class="dialogue-close">닫기 [M/F/ESC]</button>
+            </div>
+            
+            <div class="node-map-wrapper">
+                <!-- Visual SVG Route Network & Interactive Nodes -->
+                <div id="nodeMapCanvasContainer" class="node-map-canvas-container">
+                    <svg id="nodeMapSvg" class="node-map-svg"></svg>
+                    <div id="nodeMapPinsLayer" class="node-map-pins-layer"></div>
+                </div>
+
+                <!-- Side Zone Detail Inspection Card -->
+                <div id="nodeZoneDetailCard" class="node-zone-detail-card">
+                    <div class="detail-header-zone">
+                        <span id="mapDetailIcon" class="detail-zone-icon">🌲</span>
+                        <div>
+                            <h3 id="mapDetailTitle">시작의 마을</h3>
+                            <span id="mapDetailLevel" class="level-req-badge">Lv. 1 (안전 마을)</span>
+                        </div>
+                    </div>
+                    <p id="mapDetailDesc" class="detail-desc-text">장로와 대장장이, 상인이 있는 평화로운 안식처입니다.</p>
+                    
+                    <div class="detail-section">
+                        <h4>⚔️ 출현 몬스터 & 보스</h4>
+                        <div id="mapDetailMobs" class="detail-mobs-list">평화로운 안식처 (몬스터 없음)</div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h4>🧭 연결된 원정 경로 (Connected Roads)</h4>
+                        <div id="mapDetailPortals" class="detail-portals-list">
+                            <span class="portal-chip">🌿 요정의 비취 숲</span>
+                            <span class="portal-chip">🌀 고대 미궁 B1</span>
+                        </div>
+                    </div>
+
+                    <div class="map-explore-tip">
+                        💡 <strong>모험 안내</strong>: 지도를 통한 순간이동은 지원되지 않습니다. 필드 가장자리의 포탈을 걸어서 이동하세요. 마을로 복귀하려면 <strong>[📜 마을 귀환 주문서]</strong>를 사용하세요!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Casino Modal (🎲 959 럭키 카지노 하우스) -->
+    <div id="casinoModal" class="hidden modal-backdrop">
+        <div class="casino-card">
+            <div class="modal-header">
+                <h2>🎲 959 럭키 카지노 하우스 (Jackpot House)</h2>
+                <button id="casinoCloseBtn" class="dialogue-close" onclick="game.toggleCasino()">닫기 [F/ESC]</button>
+            </div>
+
+            <!-- Casino Tabs -->
+            <div class="shop-tabs-row">
+                <button id="casinoTabDice" class="shop-tab active" onclick="game.switchCasinoTab('dice')">🎲 더블 다이스 (High-Low)</button>
+                <button id="casinoTabSlot" class="shop-tab" onclick="game.switchCasinoTab('slot')">🎰 3-릴 미니 슬롯</button>
+            </div>
+
+            <div class="shop-gold-bar">
+                <span>🪙 내 보유 골드: <strong id="casinoGold" style="color: #facc15;">0 G</strong></span>
+                <span id="casinoBetDisplay" class="bag-space-badge">🎯 베팅액: <strong id="casinoBetAmount">20 G</strong></span>
+            </div>
+
+            <!-- Bet Selector Row -->
+            <div class="bet-selector-row">
+                <span class="bet-label">베팅 금액:</span>
+                <button class="bet-btn active" onclick="game.setCasinoBet(10)">10 G</button>
+                <button class="bet-btn" onclick="game.setCasinoBet(30)">30 G</button>
+                <button class="bet-btn" onclick="game.setCasinoBet(50)">50 G</button>
+                <button class="bet-btn" onclick="game.setCasinoBet(100)">100 G</button>
+            </div>
+
+            <!-- Panel 1: High-Low Double Dice -->
+            <div id="casinoDicePanel" class="casino-panel">
+                <div class="dice-arena">
+                    <div class="dice-cup">
+                        <div id="diceCube1" class="dice-cube">⚅</div>
+                        <div id="diceCube2" class="dice-cube">⚅</div>
+                    </div>
+                    <div id="diceSumText" class="dice-sum-badge">주사위 합: 12</div>
+                </div>
+
+                <div class="dice-options-grid">
+                    <button id="btnBetLow" class="dice-choice-btn" onclick="game.playHighLowDice('low')">
+                        <div class="choice-title">📉 로우 (LOW)</div>
+                        <div class="choice-sub">주사위 합 2 ~ 6</div>
+                        <div class="choice-payout">배당 2.0x</div>
+                    </button>
+                    <button id="btnBetSeven" class="dice-choice-btn lucky-seven" onclick="game.playHighLowDice('seven')">
+                        <div class="choice-title">🌟 럭키 7 (JACKPOT)</div>
+                        <div class="choice-sub">주사위 합 정확히 7</div>
+                        <div class="choice-payout">대박 5.0x</div>
+                    </button>
+                    <button id="btnBetHigh" class="dice-choice-btn" onclick="game.playHighLowDice('high')">
+                        <div class="choice-title">📈 하이 (HIGH)</div>
+                        <div class="choice-sub">주사위 합 8 ~ 12</div>
+                        <div class="choice-payout">배당 2.0x</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Panel 2: 3-Reel Slots -->
+            <div id="casinoSlotPanel" class="casino-panel hidden">
+                <div class="slot-machine-arena">
+                    <div class="slot-reel-box">
+                        <div id="slotReel1" class="slot-reel">🍒</div>
+                        <div id="slotReel2" class="slot-reel">💎</div>
+                        <div id="slotReel3" class="slot-reel">7️⃣</div>
+                    </div>
+                    <button id="btnSpinSlot" class="slot-spin-btn" onclick="game.playSlotMachine()">
+                        🎰 레버 당기기 (SPIN!)
+                    </button>
+                </div>
+
+                <div class="slot-payout-table">
+                    <span>🍒 3개 (3x)</span>
+                    <span>🔔 3개 (5x)</span>
+                    <span>💎 3개 (10x)</span>
+                    <span>7️⃣ 3개 (25x)</span>
+                    <span>👑 3개 (50x + 전설 강화석)</span>
+                </div>
+            </div>
+
+            <!-- Casino Result Feedback Box -->
+            <div id="casinoResultBanner" class="casino-result-banner">도박사 잭: "원하는 게임과 베팅액을 고르고 도전해 보게나!"</div>
+        </div>
+    </div>
+
+    <!-- Forge (대장간 장비 강화) Modal -->
+    <div id="forgeModal" class="hidden modal-backdrop">
+        <div class="forge-card">
+            <div class="modal-header">
+                <h2>⚒️ 대장장이의 불꽃 대장간</h2>
+                <div style="font-size: 11px; color: #facc15; font-weight: 700; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 8px; padding: 4px 10px; margin-top: 4px; text-align: center;">
+                    ✨ [슬롯 계승 강화] 어떤 새 장비를 착용해도 강화 수치가 100% 영구 유지·계승됩니다!
+                </div>
+                <button id="forgeCloseBtn" class="dialogue-close">닫기 [F]</button>
+            </div>
+            <div class="modal-key-guide desktop-only">
+                <span>조작: <strong>[↑/↓ 방향키]</strong> 항목 이동 &nbsp;•&nbsp; <strong>[ENTER]</strong> 강화 &nbsp;•&nbsp; <strong>[F]</strong> 닫기</span>
+            </div>
+            <div class="shop-gold-bar">
+                <span>보유 골드: <strong id="forgeGold" style="color: #facc15;">0 G</strong></span>
+            </div>
+            <div id="forgeItemList" class="forge-item-list"></div>
+        </div>
+    </div>
+
+    <!-- Inventory & Equipment Modal (I Key - Spacious 3-Column Layout) -->
+    <div id="inventoryModal" class="hidden modal-backdrop">
+        <div class="inv-card">
+            <div class="modal-header">
+                <h2>🎒 인벤토리 & 장비창</h2>
+                <button id="invCloseBtn" class="dialogue-close">닫기 [I/F]</button>
+            </div>
+            <div class="modal-key-guide desktop-only">
+                <span>조작: <strong>[방향키]</strong> 가방 슬롯 이동 &nbsp;•&nbsp; <strong>[ENTER]</strong> 장착/사용 &nbsp;•&nbsp; <strong>[I / F]</strong> 닫기</span>
+            </div>
+
+            <!-- Class Guide Notification Banner -->
+            <div class="class-guide-banner">
+                <span class="guide-sparkle">💡</span>
+                <span><strong>[4대 백수 전직]</strong> 무기(검/활/지팡이/단검)를 가방에서 장착([ENTER])하면 해당 직업으로 즉시 전직되어 고유 평타와 모션이 활성화됩니다!</span>
+            </div>
+
+            <div class="inv-layout">
+                <!-- Column 1: Equipment & Character Stats -->
+                <div class="equip-section">
+                    <h3>장착 장비</h3>
+                    <div class="equip-slots">
+                        <div class="equip-row">
+                            <span class="slot-tag">무기</span>
+                            <div id="slotEquip_weapon" class="equip-box"></div>
+                        </div>
+                        <div class="equip-row">
+                            <span class="slot-tag">갑옷</span>
+                            <div id="slotEquip_armor" class="equip-box"></div>
+                        </div>
+                        <div class="equip-row">
+                            <span class="slot-tag">장신구</span>
+                            <div id="slotEquip_accessory" class="equip-box"></div>
+                        </div>
+                    </div>
+
+                    <div class="player-class-badge-box">
+                        <span class="class-title-tag">현재 전투 직업</span>
+                        <div id="playerClassBadge" class="player-class-badge class-warrior">⚔️ 게으른 검사</div>
+                        <div id="playerClassDesc" class="player-class-desc-tag">묵직한 3단 베기 콤보</div>
+                    </div>
+
+                    <div class="stat-summary-box">
+                        <div class="stat-row"><span>공격력:</span><strong id="statSummaryAtk" style="color: #f87171;">20</strong></div>
+                        <div class="stat-row"><span>최대 체력:</span><strong id="statSummaryHp" style="color: #4ade80;">120</strong></div>
+                        <div class="stat-row"><span>최대 마나:</span><strong id="statSummaryMp" style="color: #60a5fa;">100</strong></div>
+                        <div class="stat-row"><span>이동속도:</span><strong id="statSummarySpd" style="color: #fbbf24;">175</strong></div>
+                        <div class="stat-row"><span>시련의 증표:</span><strong id="invTrialCoins" style="color: #38bdf8;">0 🪙</strong></div>
+                    </div>
+                </div>
+
+                <!-- Column 2: Bag Grid -->
+                <div class="bag-section">
+                    <div class="bag-header">
+                        <h3>소지품 가방 (20칸)</h3>
+                        <span id="invGold" class="gold-badge">0 G</span>
+                    </div>
+                    <div id="bagGrid" class="bag-grid"></div>
+                </div>
+
+                <!-- Column 3: Selected Item Detail Panel (No Tooltip Cutoff) -->
+                <div class="item-detail-section">
+                    <h3>아이템 상세 정보</h3>
+                    <div id="itemDetailCard" class="item-detail-card">
+                        <div class="detail-empty-state">가방에서 아이템을 선택하세요.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shop Modal (Merchant NPC - Buy / Sell Dual Tabs) -->
+    <div id="shopModal" class="hidden modal-backdrop">
+        <div class="shop-card">
+            <div class="modal-header">
+                <h2 id="shopModalTitle">🛒 방랑 상인의 만물상</h2>
+                <button id="shopCloseBtn" class="dialogue-close">닫기 [F]</button>
+            </div>
+            
+            <!-- Dual Mode Tabs -->
+            <div class="shop-tabs-row">
+                <button id="shopTabBuy" class="shop-tab active" onclick="game.switchShopTab('buy')">🛒 아이템 구매</button>
+                <button id="shopTabSell" class="shop-tab" onclick="game.switchShopTab('sell')">💰 아이템 판매</button>
+            </div>
+
+            <div class="modal-key-guide desktop-only">
+                <span>조작: <strong>[← / → 또는 Tab]</strong> 탭 전환 &nbsp;•&nbsp; <strong>[↑ / ↓]</strong> 항목 선택 &nbsp;•&nbsp; <strong>[ENTER]</strong> 구매/판매 &nbsp;•&nbsp; <strong>[F]</strong> 닫기</span>
+            </div>
+
+            <div class="shop-gold-bar">
+                <span>🪙 보유 골드: <strong id="shopGold" style="color: #facc15;">0 G</strong></span>
+                <span id="shopBagSpace" class="bag-space-badge">🎒 가방: <strong id="shopBagCount">0 / 20</strong></span>
+            </div>
+
+            <div id="shopItemList" class="shop-item-list"></div>
+            <div id="shopSellList" class="shop-item-list hidden"></div>
+        </div>
+    </div>
+
+    <!-- Trial Tower Shop (아스텔의 시련 보물소) Modal -->
+    <div id="trialShopModal" class="hidden modal-backdrop">
+        <div class="shop-card trial-shop-theme">
+            <div class="modal-header">
+                <h2>✨ 아스텔의 시련 보물소 (전설 직업 무기 교환)</h2>
+                <button id="trialShopCloseBtn" class="dialogue-close" onclick="game.toggleTrialShop()">닫기 [F/ESC]</button>
+            </div>
+            <div class="modal-key-guide desktop-only">
+                <span>조작: <strong>[↑ / ↓ 방향키]</strong> 품목 선택 &nbsp;•&nbsp; <strong>[ENTER]</strong> 시련의 증표로 교환 &nbsp;•&nbsp; <strong>[F / ESC]</strong> 닫기</span>
+            </div>
+            <div class="shop-gold-bar trial-coin-bar">
+                <span>🪙 보유 시련의 증표: <strong id="trialShopCoins" style="color: #38bdf8;">0 개</strong></span>
+                <span id="trialShopBagSpace" class="bag-space-badge">🎒 가방: <strong id="trialShopBagCount">0 / 20</strong></span>
+            </div>
+            <div id="trialShopItemList" class="shop-item-list"></div>
+        </div>
+    </div>
+
+    <!-- Skill Book Modal (K Key - 9-Slot Custom Loadout & 12 Skill Library) -->
+    <div id="skillModal" class="hidden modal-backdrop">
+        <div class="skillbook-card">
+            <div class="modal-header">
+                <h2>⚡ 지저씨의 스킬북 & 9슬롯 커스텀 장착</h2>
+                <button id="skillCloseBtn" class="dialogue-close">닫기 [K/F/ESC]</button>
+            </div>
+            <div class="modal-key-guide desktop-only">
+                <span>조작: <strong>[↑ / ↓]</strong> 스킬 선택 &nbsp;•&nbsp; <strong>[ENTER]</strong> 선택 후 배치할 키<strong>(Q, W, E, A, S, D, Z, X, C)</strong> 입력 &nbsp;•&nbsp; <strong>[DEL]</strong> 해제 &nbsp;•&nbsp; <strong>[X]</strong> 전체 해제 &nbsp;•&nbsp; <strong>[K / F / ESC]</strong> 닫기</span>
+            </div>
+
+            <div class="skillbook-layout">
+                <!-- Column 1: 9 Equipped Slots Grid -->
+                <div class="skill-slots-deck">
+                    <div class="deck-title-row">
+                        <h3>🎯 장착된 9개 퀵슬롯</h3>
+                        <span class="slot-count-badge" id="equippedSkillCount">6 / 9 슬롯 활성화</span>
+                        <button id="btnClearAllSkills" class="clear-all-btn" onclick="window.game.clearAllEquippedSkills()" title="모든 슬롯의 스킬을 한번에 해제합니다">🗑️ 전체 해제 [X]</button>
+                    </div>
+                    
+                    <div class="slots-3x3-grid" id="equippedSlotsGrid">
+                        <!-- Dynamically rendered 9 slots: Q, W, E, A, S, D, Z, X, C -->
+                    </div>
+
+                    <div class="skill-tip-banner">
+                        💡 <strong>팁</strong>: 모든 슬롯을 다 채우지 않아도 되며, 자주 쓰는 스킬만 원하는 키에 배치할 수 있습니다. 장착된 슬롯을 클릭하면 즉시 해제됩니다.
+                    </div>
+                </div>
+
+                <!-- Column 2: Skill Library Catalog with Class Filter Tabs -->
+                <div class="skill-catalog-section">
+                    <div class="deck-title-row">
+                        <h3 id="skillLibraryTitle">📖 보유 스킬 라이브러리 (25종)</h3>
+                    </div>
+
+                    <!-- Class Filter Tab Bar -->
+                    <div class="skill-filter-bar">
+                        <button id="skillTab_all" class="skill-filter-btn active" data-filter="all" onclick="window.game.filterSkillBook('all')">전체 (All)</button>
+                        <button id="skillTab_warrior" class="skill-filter-btn class-warrior-tab" data-filter="warrior" onclick="window.game.filterSkillBook('warrior')">⚔️ 검사</button>
+                        <button id="skillTab_archer" class="skill-filter-btn class-archer-tab" data-filter="archer" onclick="window.game.filterSkillBook('archer')">🏹 궁수</button>
+                        <button id="skillTab_mage" class="skill-filter-btn class-mage-tab" data-filter="mage" onclick="window.game.filterSkillBook('mage')">🪄 마법사</button>
+                        <button id="skillTab_rogue" class="skill-filter-btn class-rogue-tab" data-filter="rogue" onclick="window.game.filterSkillBook('rogue')">🗡️ 암살자</button>
+                        <button id="skillTab_general" class="skill-filter-btn class-general-tab" data-filter="general" onclick="window.game.filterSkillBook('general')">✨ 공용</button>
+                    </div>
+
+                    <!-- Active 2nd Awakening Passive Info Box -->
+                    <div id="activeAwakeningPassiveBox" class="awakening-passive-banner">
+                        <!-- Rendered dynamically -->
+                    </div>
+
+                    <div id="skillLibraryList" class="skill-library-list">
+                        <!-- Dynamically rendered skill cards -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- Game Pause Modal (ESC Key / Pause Button) -->
+    <div id="pauseModal" class="hidden modal-backdrop">
+        <div class="pause-card">
+            <div class="pause-header">
+                <div class="pause-badge">⏸️ GAME PAUSED</div>
+                <h2>일시정지</h2>
+                <div id="pauseSummaryText" class="pause-summary">Lv.1 · 🌲 평화로운 시작의 마을 · 0 G</div>
+            </div>
+
+            <div class="pause-menu-list">
+                <button id="pauseBtnResume" class="pause-menu-btn focused" data-index="0" onclick="game.togglePause()">
+                    <span class="p-arrow">▶</span>
+                    <span class="p-label">▶️ 게임 계속하기 (Resume) [ESC]</span>
+                </button>
+                <button id="pauseBtnSkills" class="pause-menu-btn" data-index="1" onclick="game.togglePause(); game.toggleSkillBook();">
+                    <span class="p-arrow">▶</span>
+                    <span class="p-label">⚡ 스킬북 & 9슬롯 세팅 [K]</span>
+                </button>
+                <button id="pauseBtnGuide" class="pause-menu-btn" data-index="2" onclick="game.togglePause(); game.toggleGuide();">
+                    <span class="p-arrow">▶</span>
+                    <span class="p-label">📖 모험 & 조작 가이드 (Guide)</span>
+                </button>
+                <button id="pauseBtnSave" class="pause-menu-btn" data-index="3" onclick="game.saveGame(); game.showNotification('💾 게임이 안전하게 저장되었습니다!');">
+                    <span class="p-arrow">▶</span>
+                    <span class="p-label">💾 게임 저장하기 (Quick Save)</span>
+                </button>
+                <button id="pauseBtnSettings" class="pause-menu-btn" data-index="4" onclick="game.togglePause(); game.toggleSettings();">
+                    <span class="p-arrow">▶</span>
+                    <span class="p-label">⚙️ 환경설정 (Settings) [P]</span>
+                </button>
+                <button id="pauseBtnTitle" class="pause-menu-btn" data-index="5" onclick="game.returnToTitle()">
+                    <span class="p-arrow">▶</span>
+                    <span class="p-label">🏠 타이틀 화면으로 나가기 (Main Menu)</span>
+                </button>
+                <button id="pauseBtnQuit" class="pause-menu-btn quit-btn" data-index="6" onclick="game.quitGame()">
+                    <span class="p-arrow">▶</span>
+                    <span class="p-label">🚪 게임 완전 종료 (Quit Game)</span>
+                </button>
+            </div>
+            
+            <div class="modal-key-guide desktop-only" style="margin-top: 14px;">
+                <span>조작: <strong>[↑ / ↓ 방향키]</strong> 이동 &nbsp;•&nbsp; <strong>[ENTER]</strong> 선택 &nbsp;•&nbsp; <strong>[ESC]</strong> 계속하기</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Modal (Real-Time Auto Hot-Patch from GitHub) -->
+    <div id="updateModal" class="hidden modal-backdrop">
+        <div class="update-modal-card">
+            <div class="modal-header">
+                <h2 id="updateModalTitle">🎉 새로운 업데이트가 발견되었습니다!</h2>
+                <button id="updateCloseBtnTop" class="dialogue-close" onclick="game.closeUpdateModal()">닫기 [ESC]</button>
+            </div>
+            
+            <div class="update-version-banner">
+                <span class="version-tag current" id="currentVerTag">현재 v2.2.0</span>
+                <span class="version-arrow">➔</span>
+                <span class="version-tag new" id="newVerTag">신규 v2.2.0</span>
+            </div>
+
+            <div class="patch-notes-container">
+                <div class="patch-notes-header">📋 최신 패치 노트 (Patch Notes)</div>
+                <div id="patchNotesList" class="patch-notes-list">
+                    <!-- Dynamic Notes -->
+                </div>
+            </div>
+
+            <!-- Download Progress Bar (Hidden during prompt, visible during download) -->
+            <div id="patchProgressBox" class="patch-progress-box hidden">
+                <div class="patch-progress-label">
+                    <span id="patchProgressText">최신 리소스 다운로드 중...</span>
+                    <span id="patchProgressPercent">0%</span>
+                </div>
+                <div class="patch-progress-track">
+                    <div id="patchProgressFill" class="patch-progress-fill" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <div class="update-actions-row">
+                <button id="btnDoUpdate" class="patch-btn-primary" onclick="game.executeHotPatch()">
+                    ⚡ 지금 1초 만에 업데이트 (권장)
+                </button>
+                <button id="btnCancelUpdate" class="patch-btn-secondary" onclick="game.closeUpdateModal()">
+                    나중에 하기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal (P Key) -->
+    <div id="settingsModal" class="hidden modal-backdrop">
+        <div class="settings-card">
+            <div class="modal-header">
+                <h2>⚙️ 환경설정 (Settings)</h2>
+                <button id="settingsCloseBtn" class="dialogue-close" onclick="game.closeSettings()">닫기 [P/F/ESC]</button>
+            </div>
+            
+            <div class="settings-scroll-body">
+                <!-- Section 1: 시스템 설정 -->
+                <div>
+                    <div class="settings-section-title">🔊 사운드 설정</div>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div class="setting-item">
+                            <label>배경음악 음량 (BGM)</label>
+                            <input type="range" id="settingBgm" min="0" max="100" value="25">
+                        </div>
+
+                        <div class="setting-item">
+                            <label>효과음 음량 (SFX)</label>
+                            <input type="range" id="settingSfx" min="0" max="100" value="60">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: 편의 기능 & 배달앱 자동 물약 (Auto-Potion) -->
+                <div>
+                    <div class="settings-section-title">🛵 편의 기능 & 배달앱 자동 물약 (Auto-Potion)</div>
+                    <div class="tutorial-card" style="gap: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                            <span style="font-weight: 800; font-size: 13px; color: #f8fafc;">🛵 위기 탈출 자동 물약 결제:</span>
+                            <div class="auto-potion-btn-group" id="autoPotionBtnGroup">
+                                <button class="auto-potion-btn" data-thresh="0" onclick="game.setAutoPotionThreshold(0)">OFF</button>
+                                <button class="auto-potion-btn" data-thresh="0.2" onclick="game.setAutoPotionThreshold(0.2)">20%</button>
+                                <button class="auto-potion-btn active" data-thresh="0.3" onclick="game.setAutoPotionThreshold(0.3)">30%</button>
+                                <button class="auto-potion-btn" data-thresh="0.4" onclick="game.setAutoPotionThreshold(0.4)">40%</button>
+                                <button class="auto-potion-btn" data-thresh="0.5" onclick="game.setAutoPotionThreshold(0.5)">50%</button>
+                            </div>
+                        </div>
+                        <p style="font-size: 11px; color: #94a3b8; margin-top: 2px;">
+                            • 전투 중 체력이 설정 비율 이하로 떨어지면 가방의 HP 물약을 <strong>자동 소비("띵동! 배달 완료!")</strong>하여 위기에서 탈출합니다.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Section 3: 조작 및 전투 옵션 -->
+                <div>
+                    <div class="settings-section-title">⚔️ 조작 및 전투 효과</div>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div class="setting-item">
+                            <label>회피(대시) 조작 방식</label>
+                            <select id="settingDodgeMode" style="background: #0f172a; border: 1.5px solid #334155; border-radius: 8px; padding: 6px 10px; color: #facc15; font-weight: 800; font-size: 12.5px; outline: none; cursor: pointer;">
+                                <option value="both">Space 키 + 방향키 더블 탭 둘 다 허용 (기본 권장)</option>
+                                <option value="space_only">Space 키만 사용</option>
+                                <option value="double_tap">방향키 더블 탭만 사용</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-item-toggle">
+                            <label>화면 흔들림 타격 효과 (Screen Shake)</label>
+                            <input type="checkbox" id="settingShake" checked>
+                        </div>
+
+                        <div class="setting-item-toggle">
+                            <label>스마트 몬스터 자동 타겟팅 (Auto Aim)</label>
+                            <input type="checkbox" id="settingAim" checked>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: 시크릿 코드 / 쿠폰 입력 -->
+                <div>
+                    <div class="settings-section-title">🎁 시크릿 코드 & 쿠폰 입력 (Secret Code)</div>
+                    <div class="tutorial-card" style="gap: 8px;">
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <input type="text" id="devCheatInput" placeholder="시크릿 코드 입력" 
+                                style="flex: 1; background: #0f172a; border: 1.5px solid #f59e0b; border-radius: 8px; padding: 8px 12px; color: #facc15; font-weight: 800; font-size: 13px; outline: none;"
+                                onkeydown="if(event.key==='Enter') { game.applySecretCode(this.value); this.value=''; }"
+                            >
+                            <button class="forge-upgrade-btn" style="padding: 8px 18px; font-size: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); white-space: nowrap;" onclick="const el=document.getElementById('devCheatInput'); game.applySecretCode(el.value); el.value='';">⚡ 코드 입력</button>
+                        </div>
+                        <div id="cheatFeedbackMsg" style="font-size: 11.5px; font-weight: 800; color: #4ade80; display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- Section 5: 버전 정보 & 온라인 핫패치 업데이트 -->
+                <div>
+                    <div class="settings-section-title">🚀 버전 정보 & 온라인 자동 업데이트 (Auto-Patch)</div>
+                    <div class="tutorial-card" style="gap: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <span style="font-weight: 800; color: #f8fafc; font-size: 13px;">현재 게임 버전: </span>
+                                <span id="settingsVersionLabel" style="font-weight: 800; color: #38bdf8; background: #0f172a; padding: 2px 8px; border-radius: 6px; border: 1px solid #0284c7;">v2.2.0</span>
+                            </div>
+                            <button id="btnCheckUpdateManual" class="forge-upgrade-btn" style="padding: 7px 16px; font-size: 11.5px; background: linear-gradient(135deg, #0284c7, #0369a1); white-space: nowrap;" onclick="game.checkForUpdates(true)">
+                                🔄 최신 업데이트 확인
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 6: 세이브 데이터 백업 & 버전/기기 이전 -->
+                <div>
+                    <div class="settings-section-title">💾 세이브 데이터 백업 & 버전/기기 이전 (Cross-Save)</div>
+                    <div class="tutorial-card" style="gap: 8px;">
+                        <div style="display: flex; gap: 8px;">
+                            <button class="forge-upgrade-btn" style="flex: 1; padding: 8px; font-size: 12px;" onclick="game.exportSaveCode()">📋 내 세이브 코드 복사 (백업)</button>
+                            <button class="forge-upgrade-btn" style="flex: 1; padding: 8px; font-size: 12px; background: #0284c7; border-color: #38bdf8;" onclick="const c = prompt('복사해둔 세이브 코드를 붙여넣으세요 (Ctrl+V):'); if(c) game.importSaveCode(c);">📥 세이브 코드 불러오기 (복구)</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-footer">
+                <span>단축키 <strong>[P]</strong> 또는 <strong>[F]</strong>로 닫을 수 있습니다.</span>
+                <button id="settingsCloseBtnBottom" class="dialogue-close" onclick="game.closeSettings()">확인 [P/F]</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Independent Game Guide & Tutorial Modal -->
+    <div id="guideModal" class="hidden modal-backdrop">
+        <div class="settings-card guide-card-theme">
+            <div class="modal-header">
+                <h2>📖 모험 & 조작 가이드 (Game Guide)</h2>
+                <button id="guideCloseBtn" class="dialogue-close" onclick="game.closeGuide()">닫기 [F/ESC]</button>
+            </div>
+
+            <div class="settings-scroll-body">
+                <!-- Section 1: 전체 단축키 일람 -->
+                <div>
+                    <div class="settings-section-title">⌨️ 100% 키보드 전체 단축키 일람 (No-Mouse)</div>
+                    <div class="tutorial-card">
+                        <div class="key-guide-table">
+                            <div><span class="key-pill">W A S D</span> / <span class="key-pill">방향키</span></div>
+                            <div>캐릭터 8방향 자유 이동</div>
+
+                            <div><span class="key-pill">Enter</span> / <span class="key-pill">J</span></div>
+                            <div>기본 공격 (3단 콤보 묵직한 베기, 피니시 1.65배)</div>
+
+                            <div><span class="key-pill">Space</span> / <span class="key-pill">더블탭</span></div>
+                            <div>무적 롤링 대시 회피 (보스 광역 탄막 관통)</div>
+
+                            <div><span class="key-pill">Q W E A S D Z X C</span></div>
+                            <div>9개 커스텀 장착 스킬 즉시 시전</div>
+
+                            <div><span class="key-pill">1</span> <span class="key-pill">2</span> <span class="key-pill">3</span></div>
+                            <div>퀵슬롯 물약 복용 (1: HP, 2: MP, 3: 버프)</div>
+
+                            <div><span class="key-pill">K</span></div>
+                            <div><strong>스킬북 메뉴 (12종 스킬 자유 단축키 지정)</strong></div>
+
+                            <div><span class="key-pill">Tab</span></div>
+                            <div><strong>화면 중앙 반투명 레이더 미니맵 토글</strong></div>
+
+                            <div><span class="key-pill">M</span></div>
+                            <div><strong>24개 대륙 노드 연결 원정 지도</strong></div>
+
+                            <div><span class="key-pill">I</span> / <span class="key-pill">B</span></div>
+                            <div>인벤토리 가방 열기 / 닫기</div>
+
+                            <div><span class="key-pill">F</span></div>
+                            <div><strong>상호작용 (대화, 상점, 대장간, 카지노, 포탈)</strong></div>
+
+                            <div><span class="key-pill">P</span> / <span class="key-pill">ESC</span></div>
+                            <div>환경설정 [P] &nbsp;•&nbsp; 게임 일시정지 [ESC]</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: 4대 백수 전직 & 무기군 분기 시스템 -->
+                <div>
+                    <div class="settings-section-title">🏹 4대 백수 전직 & 2차 각성 가이드</div>
+                    <div class="tutorial-card">
+                        <div style="margin-bottom: 8px; color: #facc15; font-weight: 800; font-size: 13px;">
+                            💡 [전직 방법] 가방([I])에서 원하는 무기(검/활/지팡이/단검)를 선택 후 [ENTER]로 장착하면 즉시 해당 직업으로 실시간 전직됩니다!
+                        </div>
+                        <p style="font-size: 11.5px; color: #94a3b8; margin-bottom: 8px;">
+                            • <strong>직업 전용 스킬 제한</strong>: 각 직업의 전용 액티브 스킬은 일치하는 무기를 착용했을 때만 시전할 수 있습니다. (공용 스킬은 무관)<br>
+                            • <strong>2차 각성 시스템 (Lv 50 해금)</strong>: 직업별 2차 각성 패시브 및 최종 궁극기는 <strong>Lv 50 달성 시 정식 개방</strong>됩니다. (미달성 시: <em>"그 레벨에 잠이 오늬?"</em>)
+                        </p>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid #ef4444; border-radius: 8px; padding: 8px 10px;">
+                                <div style="color: #fca5a5; font-weight: 800; font-size: 12.5px;">⚔️ 게으른 검사 (Warrior)</div>
+                                <div style="font-size: 11px; color: #cbd5e1; margin-top: 3px;">• 무기: 검 (Sword)</div>
+                                <div style="font-size: 11px; color: #fde047;">• 2차 각성 패시브 [불굴의 백수 투기]: HP 30% 이하 시 공격력 +20% & 받는 피해 25% 감소</div>
+                                <div style="font-size: 11px; color: #94a3b8;">• 전용 스킬: [십자 참격], [방패 돌진(기절)], [선풍 대검풍(회전)], [대지 파쇄격(지진)]</div>
+                                <div style="font-size: 11px; color: #fca5a5; font-weight: 700;">• 전용 궁극기: [천지개벽 참격폭풍] (10연타 황금 검기 대폭풍)</div>
+                            </div>
+                            <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid #10b981; border-radius: 8px; padding: 8px 10px;">
+                                <div style="color: #6ee7b7; font-weight: 800; font-size: 12.5px;">🏹 방구석 궁수 (Archer)</div>
+                                <div style="font-size: 11px; color: #cbd5e1; margin-top: 3px;">• 무기: 활 (Bow)</div>
+                                <div style="font-size: 11px; color: #fde047;">• 2차 각성 패시브 [방구석 매의 눈]: 치명타율 +30% & 사거리 250px 밖 타격 시 피해 +30% 증폭</div>
+                                <div style="font-size: 11px; color: #94a3b8;">• 전용 스킬: [속사 난사(7연사)], [바람의 관통 저격(650px)], [서리 빙결 화살(3초동결)], [폭발 지뢰 덫]</div>
+                                <div style="font-size: 11px; color: #6ee7b7; font-weight: 700;">• 전용 궁극기: [유성우 폭격 화살비] (화면 전체 20발 관통 화살 폭격)</div>
+                            </div>
+                            <div style="background: rgba(168, 85, 247, 0.12); border: 1px solid #a855f7; border-radius: 8px; padding: 8px 10px;">
+                                <div style="color: #d8b4fe; font-weight: 800; font-size: 12.5px;">🪄 누워있는 대마법사 (Mage)</div>
+                                <div style="font-size: 11px; color: #cbd5e1; margin-top: 3px;">• 무기: 지팡이 (Staff)</div>
+                                <div style="font-size: 11px; color: #fde047;">• 2차 각성 패시브 [무한의 마력로]: 마나 자연 재생 +100% & 스킬 시전 시 20% 확률 쿨초기화</div>
+                                <div style="font-size: 11px; color: #94a3b8;">• 전용 스킬: [체인 라이트닝(5연쇄)], [비전 특이점(적 흡인)], [메테오 스트라이크(불바다)], [마나 실드(70%흡수)]</div>
+                                <div style="font-size: 11px; color: #d8b4fe; font-weight: 700;">• 전용 궁극기: [시공간 붕괴 블랙홀] (전 맵 적 흡인 12연타 대폭발)</div>
+                            </div>
+                            <div style="background: rgba(234, 179, 8, 0.12); border: 1px solid #eab308; border-radius: 8px; padding: 8px 10px;">
+                                <div style="color: #fde047; font-weight: 800; font-size: 12.5px;">🗡️ 드러누운 암살자 (Rogue)</div>
+                                <div style="font-size: 11px; color: #cbd5e1; margin-top: 3px;">• 무기: 단검 (Dagger)</div>
+                                <div style="font-size: 11px; color: #fde047;">• 2차 각성 패시브 [치명적 암살 본능]: 치명타 피해 +100% & 적 처치 시 2초간 은신 + 이속 +100</div>
+                                <div style="font-size: 11px; color: #94a3b8;">• 전용 스킬: [그림자 은신(치명타 2.8배)], [표창 부메랑(왕복2회)], [출혈 급소 찌르기], [칼날 폭풍 춤(16발)]</div>
+                                <div style="font-size: 11px; color: #fde047; font-weight: 700;">• 전용 궁극기: [그림자 분신 환영살] (3개 분신 15연타 잔영 난무)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: 무한의 시련 탑 (Tower of Trial) -->
+                <div>
+                    <div class="settings-section-title">🗼 무한의 시련 탑 (Tower of Trial) 공략</div>
+                    <div class="tutorial-card">
+                        <h4>🚪 입장 위치 & 진행 규칙</h4>
+                        <p>• <strong>입장 위치:</strong> 시작의 마을 북서쪽 포탈 (좌표 2100, 1500)에서 [F] 키를 눌러 진입합니다.</p>
+                        <p>• <strong>1층 ~ 50층 계단식 도전:</strong> 층별로 몰려오는 몬스터 웨이브를 전멸시키면 다음 층 포탈이 열립니다.</p>
+                        <p>• <strong>5층 단위 엘리트 미니보스 / 10층 단위 수호자 보스:</strong> 강력한 보스를 쓰러뜨리고 대량의 시련의 증표를 획득하세요.</p>
+                        <p>• <strong>층 클리어 보너스:</strong> 층 돌파 시 HP와 MP가 즉시 40% 회복되어 연속 등반을 지원합니다.</p>
+                    </div>
+
+                    <div class="tutorial-card" style="margin-top: 8px;">
+                        <h4>🪙 시련의 증표 & 아스텔 전용 보물 상점</h4>
+                        <p>• 시련의 탑 등반 시 획득하는 <strong>[🪙 시련의 증표]</strong>를 모아 시작의 마을 광장 북서쪽 <strong>`✨ 아스텔`</strong> NPC에게서 직업별 최상위 전설 무기와 초월 영약으로 교환할 수 있습니다.</p>
+                    </div>
+                </div>
+
+                <!-- Section 4: 모험 & 콘텐츠 가이드 -->
+                <div>
+                    <div class="settings-section-title">🗺️ 모험 & 성장 공략 팁</div>
+                    <div class="tutorial-card">
+                        <h4>📜 퀘스트 & 파밍</h4>
+                        <p>• 마을 장로 NPC에게 말을 걸어 연계 퀘스트를 수주하세요. 완료 시 풍성한 골드, 경험치 및 레어 장비를 획득합니다.</p>
+                        <p>• 필드의 몬스터, 수풀, 보물상자를 공략하여 골드와 물약을 파밍할 수 있습니다.</p>
+                    </div>
+
+                    <div class="tutorial-card" style="margin-top: 8px;">
+                        <h4>⚒️ 대장간 강화 시스템 (+1 ~ +15)</h4>
+                        <p>• 마을 대장장이 NPC에게서 무기/갑옷을 강화하면 공격력과 체력이 비약적으로 상승하며 고유 무기 발광 이펙트가 깃듭니다.</p>
+                    </div>
+
+                    <div class="tutorial-card" style="margin-top: 8px;">
+                        <h4>📜 [마을 귀환 주문서] 사용법</h4>
+                        <p>• 각 대륙 상점에서 35G에 구매할 수 있으며, 위험한 던전/오지에서 사용 시 시작의 마을로 즉시 안전 귀환합니다.</p>
+                    </div>
+
+                    <div class="tutorial-card" style="margin-top: 8px;">
+                        <h4>🎲 [959 럭키 카지노 하우스]</h4>
+                        <p>• 시작의 마을 광장 `도박사 잭`과 주사위 하이-로우(2x~5x) 및 3-릴 슬롯머신(최대 50x 잭팟 + 전설 영약)을 즐길 수 있습니다.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-footer">
+                <span>단축키 <strong>[F]</strong> 또는 <strong>[ESC]</strong>로 닫을 수 있습니다.</span>
+                <button id="guideCloseBtnBottom" class="dialogue-close" onclick="game.toggleGuide()">확인 [F]</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Central Translucent Tactical Radar Overlay Map (Tab Key) -->
+    <div id="tabRadarModal" class="tab-radar-overlay hidden">
+        <canvas id="tabRadarCanvas" width="960" height="540"></canvas>
+        <div class="tab-radar-hud-bar">
+            <div class="tab-radar-zone-info">
+                <span class="radar-badge">📡 TACTICAL RADAR</span>
+                <span id="tabRadarZoneName" class="radar-zone-title">시작의 마을</span>
+                <span id="tabRadarCoords" class="radar-coords">(2100, 2100)</span>
+            </div>
+            <div class="tab-radar-legend">
+                <span><span class="legend-dot player"></span>내 위치</span>
+                <span><span class="legend-dot portal"></span>포탈</span>
+                <span><span class="legend-dot npc"></span>NPC</span>
+                <span><span class="legend-dot enemy"></span>적</span>
+                <span><span class="legend-dot boss"></span>보스</span>
+            </div>
+            <div class="tab-radar-hint">[Tab / ESC] 레이더 닫기</div>
+        </div>
+    </div>
+
+    <!-- Dialogue Box (NPC / Quest) -->
+    <div id="dialogueBox" class="hidden">
+        <div class="dialogue-header">
+            <div class="npc-avatar">🧙‍♂️</div>
+            <div id="dialogueSpeaker">마을 장로</div>
+            <button id="dialogueCloseBtn" class="dialogue-close">확인 [F/Enter]</button>
+        </div>
+        <div id="dialogueText">용사여, 마을에 오신 것을 환영하네!</div>
+    </div>
+
+    <!-- Top Boss Health Bar (Cinematic Boss Raid HUD) -->
+    <div id="bossHudBar" class="hidden">
+        <div class="boss-info-row">
+            <span id="bossNameLabel">💀 암흑 군주</span>
+            <span id="bossHpPercentLabel">100%</span>
+        </div>
+        <div class="boss-hp-track">
+            <div id="bossHpFill" class="boss-hp-fill" style="width: 100%;"></div>
+            <div id="bossHpGhost" class="boss-hp-ghost" style="width: 100%;"></div>
+        </div>
+    </div>
+
+    <!-- Minimap Radar Widget (PC Bottom-Left - 1.75x Enlarged) -->
+    <div id="minimapWidget">
+        <div class="minimap-header">
+            <span id="minimapZoneName">🌲 시작의 마을</span>
+            <span id="minimapCoords">1300, 1300</span>
+        </div>
+        <div class="minimap-frame">
+            <canvas id="minimapCanvas" width="240" height="240"></canvas>
+            <div class="minimap-compass-n">N</div>
+        </div>
+    </div>
+
+    <!-- Bottom Master HUD (PC Layout) -->
+        <!-- Floating Interactive Skill Tooltip Card (Hover/Tap) -->
+    <div id="skillTooltipCard" class="skill-tooltip-card hidden">
+        <div class="stt-header">
+            <span id="sttIcon" class="stt-icon">🌪️</span>
+            <div class="stt-name-group">
+                <div id="sttName" class="stt-name">회오리 참격</div>
+                <div id="sttKey" class="stt-key">[W] 키</div>
+            </div>
+            <span id="sttType" class="stt-type-badge">물리 광역</span>
+        </div>
+        <div class="stt-stats-row">
+            <span id="sttCost" class="stt-cost">💧 20 MP</span>
+            <span id="sttCd" class="stt-cd">⏱️ 4.0초</span>
+        </div>
+        <div id="sttDmg" class="stt-dmg-box">⚔️ 위력: 공격력의 320% 피해 (121 DMG)</div>
+        <div id="sttDesc" class="stt-desc">자신 주변 360도 반경의 모든 적을 베어내고 넉백을 입힙니다.</div>
+        <div id="sttTip" class="stt-tip">💡 팁: 적들에게 둘러싸였을 때 즉시 탈출할 수 있습니다.</div>
+    </div>
+
+    <div id="bottomMasterHud">
+        <div class="status-bar-deck">
+            <div class="deck-left">
+                <div id="levelText" class="level-badge">Lv. 1</div>
+                <div id="goldText" class="gold-badge">0 G</div>
+            </div>
+
+            <div class="deck-bars">
+                <div class="bar-unit">
+                    <span class="unit-label hp-label">HP</span>
+                    <div class="unit-track">
+                        <div id="hpBarFill" class="unit-fill hp-fill" style="width: 100%;"></div>
+                        <span id="hpText" class="unit-text">120 / 120</span>
+                    </div>
+                </div>
+
+                <div class="bar-unit">
+                    <span class="unit-label mp-label">MP</span>
+                    <div class="unit-track">
+                        <div id="mpBarFill" class="unit-fill mp-fill" style="width: 100%;"></div>
+                        <span id="mpText" class="unit-text">100 / 100</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="exp-mini-track">
+            <div id="expBarFill" class="exp-mini-fill" style="width: 0%;"></div>
+        </div>
+
+        <!-- Hotbar Row (9-Skill Modular Hotbar) -->
+        <div class="hotbar-container">
+            <!-- 9 Modular Skill Slots: Q, W, E, A, S, D, Z, X, C -->
+            <div id="slot_Q" class="skill-slot" title="[Q] 스킬" onclick="game.openSkillBookToSlot('Q')">
+                <span class="key-badge">Q</span>
+                <span class="skill-icon" id="icon_Q">⚡</span>
+                <span class="skill-name-tag" id="tag_Q">궁극기</span>
+                <div id="cd_Q" class="cd-overlay"></div>
+            </div>
+            <div id="slot_W" class="skill-slot" title="[W] 스킬" onclick="game.openSkillBookToSlot('W')">
+                <span class="key-badge">W</span>
+                <span class="skill-icon" id="icon_W">🌪️</span>
+                <span class="skill-name-tag" id="tag_W">회오리</span>
+                <div id="cd_W" class="cd-overlay"></div>
+            </div>
+            <div id="slot_E" class="skill-slot" title="[E] 스킬" onclick="game.openSkillBookToSlot('E')">
+                <span class="key-badge">E</span>
+                <span class="skill-icon" id="icon_E">🗡️</span>
+                <span class="skill-name-tag" id="tag_E">검기</span>
+                <div id="cd_E" class="cd-overlay"></div>
+            </div>
+
+            <div class="hotbar-divider"></div>
+
+            <div id="slot_A" class="skill-slot attack-main" title="[A] 스킬 / 기본공격" onclick="game.openSkillBookToSlot('A')">
+                <span class="key-badge">A</span>
+                <span class="skill-icon" id="icon_A">⚔️</span>
+                <span class="skill-name-tag" id="tag_A">평타</span>
+                <div id="cd_A" class="cd-overlay"></div>
+            </div>
+            <div id="slot_S" class="skill-slot" title="[S] 스킬" onclick="game.openSkillBookToSlot('S')">
+                <span class="key-badge">S</span>
+                <span class="skill-icon" id="icon_S">🛡️</span>
+                <span class="skill-name-tag" id="tag_S">패링</span>
+                <div id="cd_S" class="cd-overlay"></div>
+            </div>
+            <div id="slot_D" class="skill-slot" title="[D] 스킬" onclick="game.openSkillBookToSlot('D')">
+                <span class="key-badge">D</span>
+                <span class="skill-icon" id="icon_D">💥</span>
+                <span class="skill-name-tag" id="tag_D">강타</span>
+                <div id="cd_D" class="cd-overlay"></div>
+            </div>
+
+            <div class="hotbar-divider"></div>
+
+            <div id="slot_Z" class="skill-slot" title="[Z] 스킬" onclick="game.openSkillBookToSlot('Z')">
+                <span class="key-badge">Z</span>
+                <span class="skill-icon" id="icon_Z">❄️</span>
+                <span class="skill-name-tag" id="tag_Z">빙결</span>
+                <div id="cd_Z" class="cd-overlay"></div>
+            </div>
+            <div id="slot_X" class="skill-slot" title="[X] 스킬" onclick="game.openSkillBookToSlot('X')">
+                <span class="key-badge">X</span>
+                <span class="skill-icon" id="icon_X">🔥</span>
+                <span class="skill-name-tag" id="tag_X">화염</span>
+                <div id="cd_X" class="cd-overlay"></div>
+            </div>
+            <div id="slot_C" class="skill-slot" title="[C] 스킬" onclick="game.openSkillBookToSlot('C')">
+                <span class="key-badge">C</span>
+                <span class="skill-icon" id="icon_C">✨</span>
+                <span class="skill-name-tag" id="tag_C">가호</span>
+                <div id="cd_C" class="cd-overlay"></div>
+            </div>
+
+            <div class="hotbar-divider"></div>
+
+            <div id="slot_Space" class="skill-slot dodge-main" title="회피 / 대시 (Space 또는 방향키 더블탭)">
+                <span class="key-badge">Space</span>
+                <span class="skill-icon">💨</span>
+                <span class="skill-name-tag">대시</span>
+            </div>
+
+            <div class="hotbar-divider"></div>
+
+            <div class="skill-slot potion-slot" title="체력 물약 (1)">
+                <span class="key-badge">1</span>
+                <span class="skill-icon">🧪</span>
+                <span id="potionHpCount" class="item-count">3</span>
+            </div>
+            <div class="skill-slot potion-slot" title="마나 물약 (2)">
+                <span class="key-badge">2</span>
+                <span class="skill-icon">💧</span>
+                <span id="potionMpCount" class="item-count">3</span>
+            </div>
+            <div class="skill-slot potion-slot" title="강화 물약 (3)">
+                <span class="key-badge">3</span>
+                <span class="skill-icon">🔥</span>
+                <span id="potionBuffCount" class="item-count">2</span>
+            </div>
+
+            <div class="hotbar-divider"></div>
+
+            <div class="skill-slot interact-slot" title="상호작용 / 대화 / 상점 / 닫기 (F)">
+                <span class="key-badge">F</span>
+                <span class="skill-icon">✋</span>
+                <span class="skill-name-tag">상호작용</span>
+            </div>
+        </div>
+
+        <div class="key-guide-tagline">
+            <span>방향키</span> 이동 &nbsp;•&nbsp; <span>Q W E A S D Z X C</span> 9개 스킬 &nbsp;•&nbsp; <span>Space / 더블탭</span> 대시 &nbsp;•&nbsp; <span>K</span> 스킬북 &nbsp;•&nbsp; <span>F</span> 상호작용 &nbsp;•&nbsp; <span>I</span> 가방 &nbsp;•&nbsp; <span>P</span> 설정
+        </div>
+    </div>
+
+    <!-- Dynamic Floating Virtual Joystick (Left Hand) -->
+    <div id="joystickBase" class="floating-joystick">
+        <div id="joystickStick" class="joystick-knob"></div>
+    </div>
+
+    <!-- Dedicated Mobile Action Touchpad (Right Hand) -->
+    <div id="mobileActionDeck">
+        <div class="mobile-potions-row">
+            <div id="touchPotionHp" class="touch-pot-btn">🧪 <span id="mPotHpCount">3</span></div>
+            <div id="touchPotionMp" class="touch-pot-btn">💧 <span id="mPotMpCount">3</span></div>
+            <div id="touchPotionBuff" class="touch-pot-btn">🔥 <span id="mPotBuffCount">2</span></div>
+        </div>
+
+        <div class="mobile-action-cluster">
+            <div id="touchBtnW" class="touch-action-btn skill-w" title="회오리 참격">🌪️</div>
+            <div id="touchBtnE" class="touch-action-btn skill-e" title="검기 방출">🗡️</div>
+            <div id="touchBtnS" class="touch-action-btn skill-s" title="방패 패링">🛡️</div>
+            <div id="touchBtnD" class="touch-action-btn skill-d" title="대지 강타">💥</div>
+            <div id="touchBtnQ" class="touch-action-btn skill-q" title="검 폭풍">⚡</div>
+            <div id="touchBtnSpace" class="touch-action-btn dodge-btn" title="대시">💨</div>
+            <div id="touchBtnA" class="touch-action-btn attack-btn" title="공격 / 상호작용">⚔️</div>
+        </div>
+    </div>
+
+    <!-- Orientation Advisory Overlay -->
+    <div id="portraitAdvisory" class="hidden portrait-overlay">
+        <div class="advisory-card">
+            <span style="font-size: 38px;">📱 ➡️ 🔄</span>
+            <h3>가로 모드 권장</h3>
+            <p>스마트폰을 가로로 돌리시면 넓은 시야와 쾌적한 조작으로 플레이하실 수 있습니다.</p>
+        </div>
+    </div>
+
+    <!-- Real-Time Multiplayer Party Chat System -->
+    <div id="hudChatContainer" class="hud-chat-container">
+        <div id="hudChatLogs" class="hud-chat-logs"></div>
+        <div id="hudChatInputContainer" class="hud-chat-input-container hidden">
+            <span class="chat-prompt">💬</span>
+            <input type="text" id="hudChatInput" class="hud-chat-input" placeholder="메시지 입력 후 [Enter] (취소: [Esc])" maxlength="80">
+            <button id="hudChatSendBtn" class="hud-chat-send-btn" onclick="if(window.game && window.game.chatSystem) window.game.chatSystem.sendChatMessage();">전송</button>
+        </div>
+    </div>
+
+    <!-- Network / Scripts -->
+    <script src="/socket.io/socket.io.js" onerror="console.log('Socket.io offline fallback')"></script>
+    <script src="data/zones.js"></script>
+    <script src="data/items.js"></script>
+    <script src="data/skills.js"></script>
+    <script src="data/quests.js"></script>
+    <script src="renderers/textures.js"></script>
+    <script src="renderers/monsters.js"></script>
+    <script src="renderers/bosses.js"></script>
+    <script src="systems/UISystem.js"></script>
+    <script src="systems/QuestSystem.js"></script>
+    <script src="systems/CasinoSystem.js"></script>
+    <script src="systems/InventorySystem.js"></script>
+    <script src="systems/ShopSystem.js"></script>
+    <script src="systems/NetworkSystem.js"></script>
+    <script src="systems/ChatSystem.js"></script>
+    <script src="entities/Projectile.js"></script>
+    <script src="entities/Player.js"></script>
+    <script src="entities/RemotePlayer.js"></script>
+    <script src="entities/Enemy.js"></script>
+    <script src="entities/Prop.js"></script>
+    <script src="engine.js"></script>
+    <script src="audio.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

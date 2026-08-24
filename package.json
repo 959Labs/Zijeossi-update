@@ -1,0 +1,25 @@
+{
+  "name": "zijeossi",
+  "version": "3.0.0",
+  "description": "> **\"세계는 구하겠지만... 일단 5분만 더 누워있을게요.\"**  \r > 24개 전 대륙과 50층 시련의 탑을 누비며 귀찮은 몬스터들을 소탕하는 하드코어 백수 액션 RPG!",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "rpg",
+    "multiplayer",
+    "co-op",
+    "game",
+    "html5-canvas",
+    "socket-io"
+  ],
+  "author": "959 Labs",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.2.1",
+    "socket.io": "^4.8.3"
+  }
+}
