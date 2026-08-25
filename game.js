@@ -2,13 +2,19 @@ const CURRENT_CLIENT_VERSION = '3.0.0';
 window.CURRENT_CLIENT_VERSION = CURRENT_CLIENT_VERSION;
 const UPDATE_MANIFEST_URLS = [
     'https://raw.githubusercontent.com/959Labs/Zijeossi-update/main/version.json',
-    'https://raw.githubusercontent.com/959Labs/Zijeossi-update/refs/heads/main/version.json',
-    'https://cdn.jsdelivr.net/gh/959Labs/Zijeossi-update@main/version.json'
+    'https://raw.githubusercontent.com/959Labs/Zijeossi/main/version.json',
+    'https://raw.githubusercontent.com/jsj-959/Zijeossi/main/version.json',
+    'https://raw.githubusercontent.com/jsj-959/Zijeossi/master/version.json',
+    'https://cdn.jsdelivr.net/gh/959Labs/Zijeossi@main/version.json',
+    'https://cdn.jsdelivr.net/gh/jsj-959/Zijeossi@main/version.json'
 ];
 const UPDATE_SCRIPT_URLS = [
     'https://raw.githubusercontent.com/959Labs/Zijeossi-update/main/game.js',
-    'https://raw.githubusercontent.com/959Labs/Zijeossi-update/refs/heads/main/game.js',
-    'https://cdn.jsdelivr.net/gh/959Labs/Zijeossi-update@main/game.js'
+    'https://raw.githubusercontent.com/959Labs/Zijeossi/main/game.js',
+    'https://raw.githubusercontent.com/jsj-959/Zijeossi/main/game.js',
+    'https://raw.githubusercontent.com/jsj-959/Zijeossi/master/game.js',
+    'https://cdn.jsdelivr.net/gh/959Labs/Zijeossi@main/game.js',
+    'https://cdn.jsdelivr.net/gh/jsj-959/Zijeossi@main/game.js'
 ];
 
 function isNewerVersion(remote, local) {
