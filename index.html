@@ -36,36 +36,46 @@
             </div>
 
             <!-- 3D Fiery Stamped Title -->
-            <div class="stamped-title-box">
-                <div class="stamped-chars-row">
+            <div class="stamped-title-box" id="stampedTitleBox">
+                <div class="stamped-chars-row" id="stampedCharsRow">
                     <span id="stampChar1" class="stamp-char">지</span>
                     <span id="stampChar2" class="stamp-char">저</span>
                     <span id="stampChar3" class="stamp-char">씨</span>
                 </div>
+                <div class="en-title-container" id="enTitleContainer" style="display: none;">
+                    <div class="en-title-line1">Uncle Bob's</div>
+                    <div class="en-title-line2">Lazy Awakening</div>
+                </div>
                 <div id="stampSubtitle" class="stamp-subtitle">&lt; 지저씨 : 각성했지만 게으르고 싶어 &gt;</div>
+            </div>
+
+            <!-- Title Quick Language Switcher -->
+            <div class="title-lang-switcher" style="display: flex; gap: 8px; justify-content: center; margin-bottom: 12px; z-index: 10;">
+                <button class="lang-select-btn" id="titleBtnKo" onclick="setLanguage('ko')" style="padding: 6px 14px; font-size: 12px;">🇰🇷 한국어</button>
+                <button class="lang-select-btn" id="titleBtnEn" onclick="setLanguage('en')" style="padding: 6px 14px; font-size: 12px;">🇺🇸 English</button>
             </div>
 
             <!-- Main Menu Buttons with Direct In-Line Click Handlers -->
             <div id="introMenuContainer" class="intro-menu-container">
                 <button id="introBtnContinue" class="intro-menu-btn active" data-index="0" onclick="game.startAdventure(true, false)">
                     <span class="btn-arrow">▶</span>
-                    <span class="btn-label" id="introBtnContinueLabel">💾 싱글플레이 이어하기 (Continue)</span>
+                    <span class="btn-label" id="introBtnContinueLabel" data-i18n="menu.continue">💾 싱글플레이 이어하기 (Continue)</span>
                 </button>
                 <button id="introBtnNewGame" class="intro-menu-btn" data-index="1" onclick="game.startAdventure(false, false)">
                     <span class="btn-arrow">▶</span>
-                    <span class="btn-label">⚔️ 싱글플레이 새로 시작 (New Game)</span>
+                    <span class="btn-label" data-i18n="menu.new_game">⚔️ 싱글플레이 새로 시작 (New Game)</span>
                 </button>
                 <button id="introBtnMultiplayer" class="intro-menu-btn highlight-multi-menu" data-index="2" onclick="game.openMultiplayerModal()">
                     <span class="btn-arrow">▶</span>
-                    <span class="btn-label">🌐 코옵 멀티플레이 (Co-op Multiplayer) <span class="hot-badge">HOT</span></span>
+                    <span class="btn-label" data-i18n="menu.multiplayer">🌐 코옵 멀티플레이 (Co-op Multiplayer) <span class="hot-badge">HOT</span></span>
                 </button>
                 <button id="introBtnSettings" class="intro-menu-btn" data-index="3" onclick="game.toggleSettings()">
                     <span class="btn-arrow">▶</span>
-                    <span class="btn-label">⚙️ 게임 가이드 & 환경설정 [P]</span>
+                    <span class="btn-label" data-i18n="menu.settings">⚙️ 게임 가이드 & 환경설정 [P]</span>
                 </button>
                 <button id="introBtnQuit" class="intro-menu-btn" data-index="4" onclick="game.quitGame()">
                     <span class="btn-arrow">▶</span>
-                    <span class="btn-label">🚪 게임 완전 종료 (Quit Game)</span>
+                    <span class="btn-label" data-i18n="menu.quit">🚪 게임 완전 종료 (Quit Game)</span>
                 </button>
             </div>
         </div>
@@ -127,35 +137,35 @@
     <!-- Top Right Controls (Mobile: Icon-Only Compact Mode / PC: Full Label Mode) -->
     <div id="hudTopRight">
         <div id="autoSaveIndicator" class="auto-save-badge hidden">💾 저장됨</div>
-                <button id="btnPause" class="hud-btn highlight-pause" title="일시정지 [ESC]">
-            <span class="btn-icon">⏸️</span><span class="btn-text"> 일시정지 [ESC]</span>
+        <button id="btnPause" class="hud-btn highlight-pause" data-i18n-title="hud.pause" title="일시정지 [ESC]">
+            <span class="btn-icon">⏸️</span><span class="btn-text" data-i18n="hud.pause"> 일시정지 [ESC]</span>
         </button>
-        <button id="btnQuit" class="hud-btn highlight-quit desktop-only" title="게임 종료">
-            <span class="btn-icon">🚪</span><span class="btn-text"> 종료</span>
+        <button id="btnQuit" class="hud-btn highlight-quit desktop-only" data-i18n-title="hud.quit" title="게임 종료">
+            <span class="btn-icon">🚪</span><span class="btn-text" data-i18n="hud.quit"> 종료</span>
         </button>
-        <button id="btnWorldMap" class="hud-btn highlight-gold" title="전체 월드맵 [M]">
-            <span class="btn-icon">🗺️</span><span class="btn-text"> 지도 [M]</span>
+        <button id="btnWorldMap" class="hud-btn highlight-gold" data-i18n-title="hud.map" title="전체 월드맵 [M]">
+            <span class="btn-icon">🗺️</span><span class="btn-text" data-i18n="hud.map"> 지도 [M]</span>
         </button>
-        <button id="btnSkillBook" class="hud-btn highlight-gold" title="스킬북 및 9슬롯 스킬 장착 [K]">
-            <span class="btn-icon">⚡</span><span class="btn-text"> 스킬북 [K]</span>
+        <button id="btnSkillBook" class="hud-btn highlight-gold" data-i18n-title="hud.skills" title="스킬북 및 9슬롯 스킬 장착 [K]">
+            <span class="btn-icon">⚡</span><span class="btn-text" data-i18n="hud.skills"> 스킬북 [K]</span>
         </button>
-        <button id="btnInventory" class="hud-btn highlight-gold" title="가방 / 인벤토리 [I]">
-            <span class="btn-icon">🎒</span><span class="btn-text"> 가방 [I]</span>
+        <button id="btnInventory" class="hud-btn highlight-gold" data-i18n-title="hud.inventory" title="가방 / 인벤토리 [I]">
+            <span class="btn-icon">🎒</span><span class="btn-text" data-i18n="hud.inventory"> 가방 [I]</span>
         </button>
-        <button id="btnSettings" class="hud-btn highlight" title="환경설정 및 게임 가이드 [P]">
-            <span class="btn-icon">⚙️</span><span class="btn-text"> 설정 [P]</span>
+        <button id="btnSettings" class="hud-btn highlight" data-i18n-title="hud.settings" title="환경설정 및 게임 가이드 [P]">
+            <span class="btn-icon">⚙️</span><span class="btn-text" data-i18n="hud.settings"> 설정 [P]</span>
         </button>
-        <button id="btnSave" class="hud-btn" title="게임 저장">
-            <span class="btn-icon">💾</span><span class="btn-text"> 저장</span>
+        <button id="btnSave" class="hud-btn" data-i18n-title="hud.save" title="게임 저장">
+            <span class="btn-icon">💾</span><span class="btn-text" data-i18n="hud.save"> 저장</span>
         </button>
-        <button id="btnFullscreen" class="hud-btn" title="전체화면">
-            <span class="btn-icon">⛶</span><span class="btn-text"> 전체화면</span>
+        <button id="btnFullscreen" class="hud-btn" data-i18n-title="hud.fullscreen" title="전체화면">
+            <span class="btn-icon">⛶</span><span class="btn-text" data-i18n="hud.fullscreen"> 전체화면</span>
         </button>
-        <button id="btnExport" class="hud-btn desktop-only" title="세이브 코드 복사">
-            <span class="btn-icon">📋</span><span class="btn-text"> 복사</span>
+        <button id="btnExport" class="hud-btn desktop-only" data-i18n-title="hud.export" title="세이브 코드 복사">
+            <span class="btn-icon">📋</span><span class="btn-text" data-i18n="hud.export"> 복사</span>
         </button>
-        <button id="btnImport" class="hud-btn desktop-only" title="동기화">
-            <span class="btn-icon">📥</span><span class="btn-text"> 동기화</span>
+        <button id="btnImport" class="hud-btn desktop-only" data-i18n-title="hud.import" title="동기화">
+            <span class="btn-icon">📥</span><span class="btn-text" data-i18n="hud.import"> 동기화</span>
         </button>
     </div>
 
@@ -558,39 +568,38 @@
     <div id="pauseModal" class="hidden modal-backdrop">
         <div class="pause-card">
             <div class="pause-header">
-                <div class="pause-badge">⏸️ GAME PAUSED</div>
-                <h2>일시정지</h2>
+                <div class="pause-badge" data-i18n="pause.badge">⏸️ GAME PAUSED</div>
+                <h2 data-i18n="pause.title">일시정지</h2>
                 <div id="pauseSummaryText" class="pause-summary">Lv.1 · 🌲 평화로운 시작의 마을 · 0 G</div>
             </div>
 
             <div class="pause-menu-list">
                 <button id="pauseBtnResume" class="pause-menu-btn focused" data-index="0" onclick="game.togglePause()">
                     <span class="p-arrow">▶</span>
-                    <span class="p-label">▶️ 게임 계속하기 (Resume) [ESC]</span>
+                    <span class="p-label" data-i18n="pause.resume">▶️ 게임 계속하기 (Resume) [ESC]</span>
                 </button>
                 <button id="pauseBtnSkills" class="pause-menu-btn" data-index="1" onclick="game.togglePause(); game.toggleSkillBook();">
                     <span class="p-arrow">▶</span>
-                    <span class="p-label">⚡ 스킬북 & 9슬롯 세팅 [K]</span>
+                    <span class="p-label" data-i18n="pause.skills">⚡ 스킬북 & 9슬롯 세팅 [K]</span>
                 </button>
                 <button id="pauseBtnGuide" class="pause-menu-btn" data-index="2" onclick="game.togglePause(); game.toggleGuide();">
                     <span class="p-arrow">▶</span>
-                    <span class="p-label">📖 모험 & 조작 가이드 (Guide)</span>
+                    <span class="p-label" data-i18n="pause.guide">📖 모험 & 조작 가이드 (Guide)</span>
                 </button>
                 <button id="pauseBtnSave" class="pause-menu-btn" data-index="3" onclick="game.saveGame(); game.showNotification('💾 게임이 안전하게 저장되었습니다!');">
                     <span class="p-arrow">▶</span>
-                    <span class="p-label">💾 게임 저장하기 (Quick Save)</span>
-                </button>
+                    <span class="p-label" data-i18n="pause.save">💾 게임 저장하기 (Quick Save)</span>
                 <button id="pauseBtnSettings" class="pause-menu-btn" data-index="4" onclick="game.togglePause(); game.toggleSettings();">
                     <span class="p-arrow">▶</span>
-                    <span class="p-label">⚙️ 환경설정 (Settings) [P]</span>
+                    <span class="p-label" data-i18n="pause.settings">⚙️ 환경설정 (Settings) [P]</span>
                 </button>
                 <button id="pauseBtnTitle" class="pause-menu-btn" data-index="5" onclick="game.returnToTitle()">
                     <span class="p-arrow">▶</span>
-                    <span class="p-label">🏠 타이틀 화면으로 나가기 (Main Menu)</span>
+                    <span class="p-label" data-i18n="pause.title_screen">🏠 타이틀 화면으로 나가기 (Main Menu)</span>
                 </button>
                 <button id="pauseBtnQuit" class="pause-menu-btn quit-btn" data-index="6" onclick="game.quitGame()">
                     <span class="p-arrow">▶</span>
-                    <span class="p-label">🚪 게임 완전 종료 (Quit Game)</span>
+                    <span class="p-label" data-i18n="pause.quit">🚪 게임 완전 종료 (Quit Game)</span>
                 </button>
             </div>
             
@@ -647,22 +656,33 @@
     <div id="settingsModal" class="hidden modal-backdrop">
         <div class="settings-card">
             <div class="modal-header">
-                <h2>⚙️ 환경설정 (Settings)</h2>
-                <button id="settingsCloseBtn" class="dialogue-close" onclick="game.closeSettings()">닫기 [P/F/ESC]</button>
+                <h2 data-i18n="settings.title">⚙️ 환경설정 (Settings)</h2>
+                <button id="settingsCloseBtn" class="dialogue-close" data-i18n="settings.close_btn" onclick="game.closeSettings()">닫기 [P/F/ESC]</button>
             </div>
             
             <div class="settings-scroll-body">
+                <!-- Section 0: 언어 설정 (Language) -->
+                <div>
+                    <div class="settings-section-title" data-i18n="settings.lang_title">🌐 언어 설정 (Language)</div>
+                    <div class="tutorial-card" style="gap: 8px;">
+                        <div style="display: flex; gap: 10px; justify-content: center;">
+                            <button id="btnLangKo" class="lang-select-btn" onclick="setLanguage('ko')">🇰🇷 한국어</button>
+                            <button id="btnLangEn" class="lang-select-btn" onclick="setLanguage('en')">🇺🇸 English</button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Section 1: 시스템 설정 -->
                 <div>
-                    <div class="settings-section-title">🔊 사운드 설정</div>
+                    <div class="settings-section-title" data-i18n="settings.sound_title">🔊 사운드 설정</div>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         <div class="setting-item">
-                            <label>배경음악 음량 (BGM)</label>
+                            <label data-i18n="settings.bgm">배경음악 음량 (BGM)</label>
                             <input type="range" id="settingBgm" min="0" max="100" value="25">
                         </div>
 
                         <div class="setting-item">
-                            <label>효과음 음량 (SFX)</label>
+                            <label data-i18n="settings.sfx">효과음 음량 (SFX)</label>
                             <input type="range" id="settingSfx" min="0" max="100" value="60">
                         </div>
                     </div>
@@ -670,10 +690,10 @@
 
                 <!-- Section 2: 편의 기능 & 배달앱 자동 물약 (Auto-Potion) -->
                 <div>
-                    <div class="settings-section-title">🛵 편의 기능 & 배달앱 자동 물약 (Auto-Potion)</div>
+                    <div class="settings-section-title" data-i18n="settings.auto_pot_title">🛵 편의 기능 & 배달앱 자동 물약 (Auto-Potion)</div>
                     <div class="tutorial-card" style="gap: 8px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                            <span style="font-weight: 800; font-size: 13px; color: #f8fafc;">🛵 위기 탈출 자동 물약 결제:</span>
+                            <span style="font-weight: 800; font-size: 13px; color: #f8fafc;" data-i18n="settings.auto_pot_label">🛵 위기 탈출 자동 물약 결제:</span>
                             <div class="auto-potion-btn-group" id="autoPotionBtnGroup">
                                 <button class="auto-potion-btn" data-thresh="0" onclick="game.setAutoPotionThreshold(0)">OFF</button>
                                 <button class="auto-potion-btn" data-thresh="0.2" onclick="game.setAutoPotionThreshold(0.2)">20%</button>
@@ -682,7 +702,7 @@
                                 <button class="auto-potion-btn" data-thresh="0.5" onclick="game.setAutoPotionThreshold(0.5)">50%</button>
                             </div>
                         </div>
-                        <p style="font-size: 11px; color: #94a3b8; margin-top: 2px;">
+                        <p style="font-size: 11px; color: #94a3b8; margin-top: 2px;" data-i18n="settings.auto_pot_desc">
                             • 전투 중 체력이 설정 비율 이하로 떨어지면 가방의 HP 물약을 <strong>자동 소비("띵동! 배달 완료!")</strong>하여 위기에서 탈출합니다.
                         </p>
                     </div>
@@ -690,10 +710,10 @@
 
                 <!-- Section 3: 조작 및 전투 옵션 -->
                 <div>
-                    <div class="settings-section-title">⚔️ 조작 및 전투 효과</div>
+                    <div class="settings-section-title" data-i18n="settings.controls_title">⚔️ 조작 및 전투 효과</div>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         <div class="setting-item">
-                            <label>회피(대시) 조작 방식</label>
+                            <label data-i18n="settings.dodge_mode">회피(대시) 조작 방식</label>
                             <select id="settingDodgeMode" style="background: #0f172a; border: 1.5px solid #334155; border-radius: 8px; padding: 6px 10px; color: #facc15; font-weight: 800; font-size: 12.5px; outline: none; cursor: pointer;">
                                 <option value="both">Space 키 + 방향키 더블 탭 둘 다 허용 (기본 권장)</option>
                                 <option value="space_only">Space 키만 사용</option>
@@ -702,12 +722,12 @@
                         </div>
 
                         <div class="setting-item-toggle">
-                            <label>화면 흔들림 타격 효과 (Screen Shake)</label>
+                            <label data-i18n="settings.screen_shake">화면 흔들림 타격 효과 (Screen Shake)</label>
                             <input type="checkbox" id="settingShake" checked>
                         </div>
 
                         <div class="setting-item-toggle">
-                            <label>스마트 몬스터 자동 타겟팅 (Auto Aim)</label>
+                            <label data-i18n="settings.auto_aim">스마트 몬스터 자동 타겟팅 (Auto Aim)</label>
                             <input type="checkbox" id="settingAim" checked>
                         </div>
                     </div>
@@ -715,10 +735,10 @@
 
                 <!-- Section 4: 시크릿 코드 / 쿠폰 입력 -->
                 <div>
-                    <div class="settings-section-title">🎁 시크릿 코드 & 쿠폰 입력 (Secret Code)</div>
+                    <div class="settings-section-title" data-i18n="settings.secret_code_title">🎁 시크릿 코드 & 쿠폰 입력 (Secret Code)</div>
                     <div class="tutorial-card" style="gap: 8px;">
                         <div style="display: flex; gap: 8px; align-items: center;">
-                            <input type="text" id="devCheatInput" placeholder="시크릿 코드 입력" 
+                            <input type="text" id="devCheatInput" placeholder="시크릿 코드 입력" data-i18n-placeholder="settings.secret_code_placeholder"
                                 style="flex: 1; background: #0f172a; border: 1.5px solid #f59e0b; border-radius: 8px; padding: 8px 12px; color: #facc15; font-weight: 800; font-size: 13px; outline: none;"
                                 onkeydown="if(event.key==='Enter') { game.applySecretCode(this.value); this.value=''; }"
                             >
@@ -1160,6 +1180,7 @@
     </div>
 
     <!-- Network / Scripts -->
+    <script src="i18n.js"></script>
     <script src="/socket.io/socket.io.js" onerror="console.log('Socket.io offline fallback')"></script>
     <script src="data/zones.js"></script>
     <script src="data/items.js"></script>

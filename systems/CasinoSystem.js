@@ -80,10 +80,11 @@ class CasinoSystem {
 
     playHighLowDice(choice) {
         if (this.casinoRolling) return;
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         const bet = this.casinoBet || 20;
         if (this.game.player.gold < bet) {
             sounds.playHit();
-            this.game.showNotification('골드가 부족합니다!');
+            this.game.showNotification(isEn ? '⚠️ Not enough gold to place bet!' : '골드가 부족합니다!');
             return;
         }
 
@@ -100,7 +101,7 @@ class CasinoSystem {
 
         if (cube1) cube1.classList.add('rolling');
         if (cube2) cube2.classList.add('rolling');
-        if (banner) banner.innerText = '🎲 주사위를 힘차게 굴리는 중...!';
+        if (banner) banner.innerText = isEn ? '🎲 Rolling the lucky dice...!' : '🎲 주사위를 힘차게 굴리는 중...!';
 
         const diceFaces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
 
@@ -115,7 +116,7 @@ class CasinoSystem {
 
             if (cube1) cube1.innerText = diceFaces[d1 - 1];
             if (cube2) cube2.innerText = diceFaces[d2 - 1];
-            if (sumText) sumText.innerText = `주사위 합: ${sum} (${d1} + ${d2})`;
+            if (sumText) sumText.innerText = isEn ? `Dice Sum: ${sum} (${d1} + ${d2})` : `주사위 합: ${sum} (${d1} + ${d2})`;
 
             let won = false;
             let mult = 0;
@@ -133,11 +134,11 @@ class CasinoSystem {
                 this.game.player.gold += prize;
                 sounds.playJackpot();
                 this.game.particles.spawn(this.game.player.x, this.game.player.y, '#facc15', 30, 140, 0.8, 6);
-                if (banner) banner.innerHTML = `🎉 <strong style="color:#4ade80;">축하합니다! ${mult}배 당첨!</strong> (+${prize} G 획득)`;
-                this.game.showNotification(`🎲 [도박 당첨] 주사위 합 ${sum}! +${prize} G 획득!`);
+                if (banner) banner.innerHTML = isEn ? `🎉 <strong style="color:#4ade80;">Congratulations! ${mult}x Payout!</strong> (+${prize} G)` : `🎉 <strong style="color:#4ade80;">축하합니다! ${mult}배 당첨!</strong> (+${prize} G 획득)`;
+                this.game.showNotification(isEn ? `🎲 [Dice Win] Sum ${sum}! +${prize} G!` : `🎲 [도박 당첨] 주사위 합 ${sum}! +${prize} G 획득!`);
             } else {
                 sounds.playHit();
-                if (banner) banner.innerHTML = `💀 <strong style="color:#ef4444;">아쉽군요!</strong> 주사위 합은 [${sum}]였습니다.`;
+                if (banner) banner.innerHTML = isEn ? `💀 <strong style="color:#ef4444;">Unlucky!</strong> Dice sum was [${sum}].` : `💀 <strong style="color:#ef4444;">아쉽군요!</strong> 주사위 합은 [${sum}]였습니다.`;
             }
 
             this.updateCasinoUI();
@@ -148,10 +149,11 @@ class CasinoSystem {
 
     playSlotMachine() {
         if (this.casinoRolling) return;
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         const bet = this.casinoBet || 20;
         if (this.game.player.gold < bet) {
             sounds.playHit();
-            this.game.showNotification('골드가 부족합니다!');
+            this.game.showNotification(isEn ? '⚠️ Not enough gold to place bet!' : '골드가 부족합니다!');
             return;
         }
 
@@ -168,7 +170,7 @@ class CasinoSystem {
         if (reel1) reel1.classList.add('spinning');
         if (reel2) reel2.classList.add('spinning');
         if (reel3) reel3.classList.add('spinning');
-        if (banner) banner.innerText = '🎰 슬롯 릴이 회전합니다...! 두근두근!';
+        if (banner) banner.innerText = isEn ? '🎰 Spinning the reels... Good luck!' : '🎰 슬롯 릴이 회전합니다...! 두근두근!';
 
         sounds.playSlotTick();
 
@@ -192,14 +194,14 @@ class CasinoSystem {
             let desc = '';
 
             if (s1 === s2 && s2 === s3) {
-                if (s1 === '👑') { prize = bet * 50; desc = '👑 [초대박 잭팟] 50배 당첨 + 엘릭서 보너스!'; this.game.player.addItemToInventory('potion_elixir', 1); }
-                else if (s1 === '7️⃣') { prize = bet * 25; desc = '7️⃣ [럭키 세븐 잭팟] 25배 당첨!'; }
-                else if (s1 === '💎') { prize = bet * 10; desc = '💎 [보석 트리플] 10배 당첨!'; }
-                else if (s1 === '🔔') { prize = bet * 5; desc = '🔔 [황금 종 트리플] 5배 당첨!'; }
-                else if (s1 === '🍒') { prize = bet * 3; desc = '🍒 [체리 트리플] 3배 당첨!'; }
+                if (s1 === '👑') { prize = bet * 50; desc = isEn ? '👑 [GRAND JACKPOT] 50x Payout + Elixir Bonus!' : '👑 [초대박 잭팟] 50배 당첨 + 엘릭서 보너스!'; this.game.player.addItemToInventory('potion_elixir', 1); }
+                else if (s1 === '7️⃣') { prize = bet * 25; desc = isEn ? '7️⃣ [LUCKY 7 JACKPOT] 25x Payout!' : '7️⃣ [럭키 세븐 잭팟] 25배 당첨!'; }
+                else if (s1 === '💎') { prize = bet * 10; desc = isEn ? '💎 [TRIPLE DIAMONDS] 10x Payout!' : '💎 [보석 트리플] 10배 당첨!'; }
+                else if (s1 === '🔔') { prize = bet * 5; desc = isEn ? '🔔 [TRIPLE BELLS] 5x Payout!' : '🔔 [황금 종 트리플] 5배 당첨!'; }
+                else if (s1 === '🍒') { prize = bet * 3; desc = isEn ? '🍒 [TRIPLE CHERRIES] 3x Payout!' : '🍒 [체리 트리플] 3배 당첨!'; }
             } else if (s1 === s2 || s2 === s3 || s1 === s3) {
                 prize = Math.round(bet * 1.0);
-                desc = '✨ [2개 일치] 본전 보너스 (1.0배 환급)!';
+                desc = isEn ? '✨ [2 MATCHES] Push Bonus (1.0x Refund)!' : '✨ [2개 일치] 본전 보너스 (1.0배 환급)!';
             }
 
             if (prize > 0) {
@@ -207,10 +209,10 @@ class CasinoSystem {
                 sounds.playJackpot();
                 this.game.particles.spawn(this.game.player.x, this.game.player.y, '#facc15', 25, 120, 0.7, 5);
                 if (banner) banner.innerHTML = `🎉 <strong style="color:#4ade80;">${desc}</strong> (+${prize} G)`;
-                this.game.showNotification(`🎰 [슬롯 당첨] ${desc} (+${prize} G)`);
+                this.game.showNotification(isEn ? `🎰 [Slot Win] ${desc} (+${prize} G)` : `🎰 [슬롯 당첨] ${desc} (+${prize} G)`);
             } else {
                 sounds.playHit();
-                if (banner) banner.innerHTML = `💀 <strong style="color:#94a3b8;">꽝! 다음 기회에...</strong>`;
+                if (banner) banner.innerHTML = isEn ? `💀 <strong style="color:#94a3b8;">No win! Better luck next spin...</strong>` : `💀 <strong style="color:#94a3b8;">꽝! 다음 기회에...</strong>`;
             }
 
             this.updateCasinoUI();

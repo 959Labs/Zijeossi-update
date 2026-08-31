@@ -1,20 +1,22 @@
 const CURRENT_CLIENT_VERSION = '3.0.0';
 window.CURRENT_CLIENT_VERSION = CURRENT_CLIENT_VERSION;
 const UPDATE_MANIFEST_URLS = [
+    'https://raw.githubusercontent.com/959Labs/Zijeossi-update/master/version.json',
     'https://raw.githubusercontent.com/959Labs/Zijeossi-update/main/version.json',
     'https://raw.githubusercontent.com/959Labs/Zijeossi/main/version.json',
     'https://raw.githubusercontent.com/jsj-959/Zijeossi/main/version.json',
     'https://raw.githubusercontent.com/jsj-959/Zijeossi/master/version.json',
-    'https://cdn.jsdelivr.net/gh/959Labs/Zijeossi@main/version.json',
-    'https://cdn.jsdelivr.net/gh/jsj-959/Zijeossi@main/version.json'
+    'https://cdn.jsdelivr.net/gh/959Labs/Zijeossi-update@master/version.json',
+    'https://cdn.jsdelivr.net/gh/959Labs/Zijeossi@main/version.json'
 ];
 const UPDATE_SCRIPT_URLS = [
+    'https://raw.githubusercontent.com/959Labs/Zijeossi-update/master/game.js',
     'https://raw.githubusercontent.com/959Labs/Zijeossi-update/main/game.js',
     'https://raw.githubusercontent.com/959Labs/Zijeossi/main/game.js',
     'https://raw.githubusercontent.com/jsj-959/Zijeossi/main/game.js',
     'https://raw.githubusercontent.com/jsj-959/Zijeossi/master/game.js',
-    'https://cdn.jsdelivr.net/gh/959Labs/Zijeossi@main/game.js',
-    'https://cdn.jsdelivr.net/gh/jsj-959/Zijeossi@main/game.js'
+    'https://cdn.jsdelivr.net/gh/959Labs/Zijeossi-update@master/game.js',
+    'https://cdn.jsdelivr.net/gh/959Labs/Zijeossi@main/game.js'
 ];
 
 function isNewerVersion(remote, local) {
@@ -327,8 +329,8 @@ class Game {
         const subEl = document.getElementById('zoneSubText');
         const zConf = ZONE_CONFIG[newZone];
 
-        if (titleEl) titleEl.innerText = zConf.name;
-        if (subEl) subEl.innerText = zConf.sub;
+        if (titleEl) titleEl.innerText = typeof tData === 'function' ? tData(zConf, 'name') : zConf.name;
+        if (subEl) subEl.innerText = typeof tData === 'function' ? tData(zConf, 'sub') : zConf.sub;
 
         if (!showAnimation) {
             this.currentZone = newZone;
@@ -1269,57 +1271,73 @@ class Game {
         });
 
         // 2. Render Active 2nd Awakening Passive Banner (Lv 50 Requirement)
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         const passiveBox = document.getElementById('activeAwakeningPassiveBox');
         if (passiveBox) {
             const wType = this.player.getWeaponType();
             const isAwakened = (this.player.level >= 50);
 
             if (!isAwakened) {
+                const tagText = isEn ? '🔒 2nd Awakening Locked' : '🔒 2차 각성 미달성';
+                const titleText = isEn
+                    ? `"How can you sleep at that level?" (Current Lv ${this.player.level} / Req Lv 50)`
+                    : `"그 레벨에 잠이 오늬?" (현재 Lv <strong>${this.player.level}</strong> / 필요 Lv <strong>50</strong>)`;
+                const descText = isEn
+                    ? '• Reach Lv 50 to unlock class-exclusive 2nd Awakening passives and ultimate skills!'
+                    : '• Lv 50 달성 시 직업별 2차 각성 패시브와 전용 궁극기가 정식 해금됩니다!';
                 passiveBox.innerHTML = `
                     <div class="awakening-passive-header">
-                        <span class="awakening-passive-tag" style="background: #475569;">🔒 2차 각성 미달성</span>
-                        <span class="awakening-passive-title" style="color: #fca5a5;">"그 레벨에 잠이 오늬?" (현재 Lv <strong>${this.player.level}</strong> / 필요 Lv <strong>50</strong>)</span>
+                        <span class="awakening-passive-tag" style="background: #475569;">${tagText}</span>
+                        <span class="awakening-passive-title" style="color: #fca5a5;">${titleText}</span>
                     </div>
                     <div class="awakening-passive-desc" style="color: #cbd5e1;">
-                        • Lv 50 달성 시 직업별 2차 각성 패시브와 전용 궁극기가 정식 해금됩니다!
+                        ${descText}
                     </div>
                 `;
             } else {
                 if (wType === 'sword') {
+                    const tag = isEn ? `⚔️ 2nd Awakening [Unstoppable Sloth Will] (Lv ${this.player.level} Active)` : `⚔️ 2차 각성 패시브 [불굴의 백수 투기] (Lv ${this.player.level} 활성)`;
+                    const desc = isEn
+                        ? '• When HP drops below 30%, gain <strong>+20% Attack Power</strong> and <strong>25% permanent Damage Reduction</strong>'
+                        : '• 체력이 30% 이하로 떨어지면 <strong>공격력 +20% 증가</strong> 및 <strong>받는 피해 25% 영구 감소</strong>';
                     passiveBox.innerHTML = `
                         <div class="awakening-passive-header">
-                            <span class="awakening-passive-tag" style="background: #dc2626;">⚔️ 2차 각성 패시브 [불굴의 백수 투기] (Lv ${this.player.level} 활성)</span>
+                            <span class="awakening-passive-tag" style="background: #dc2626;">${tag}</span>
                         </div>
-                        <div class="awakening-passive-desc">
-                            • 체력이 30% 이하로 떨어지면 <strong>공격력 +20% 증가</strong> 및 <strong>받는 피해 25% 영구 감소</strong>
-                        </div>
+                        <div class="awakening-passive-desc">${desc}</div>
                     `;
                 } else if (wType === 'bow') {
+                    const tag = isEn ? `🏹 2nd Awakening [Homebody Eagle Eye] (Lv ${this.player.level} Active)` : `🏹 2차 각성 패시브 [방구석 매의 눈] (Lv ${this.player.level} 활성)`;
+                    const desc = isEn
+                        ? '• Base <strong>+30% Crit Chance</strong> & attacks beyond 250px deal <strong>+30% Amplified Damage</strong>'
+                        : '• 기본 <strong>치명타율 +30% 증가</strong> & 사거리 250px 밖의 적 타격 시 <strong>피해 +30% 증폭</strong>';
                     passiveBox.innerHTML = `
                         <div class="awakening-passive-header">
-                            <span class="awakening-passive-tag" style="background: #059669;">🏹 2차 각성 패시브 [방구석 매의 눈] (Lv ${this.player.level} 활성)</span>
+                            <span class="awakening-passive-tag" style="background: #059669;">${tag}</span>
                         </div>
-                        <div class="awakening-passive-desc">
-                            • 기본 <strong>치명타율 +30% 증가</strong> & 사거리 250px 밖의 적 타격 시 <strong>피해 +30% 증폭</strong>
-                        </div>
+                        <div class="awakening-passive-desc">${desc}</div>
                     `;
                 } else if (wType === 'staff') {
+                    const tag = isEn ? `🪄 2nd Awakening [Infinite Mana Furnace] (Lv ${this.player.level} Active)` : `🪄 2차 각성 패시브 [무한의 마력로] (Lv ${this.player.level} 활성)`;
+                    const desc = isEn
+                        ? '• Mana regen <strong>+100% (24 MP/s)</strong> & skills have <strong>20% chance to immediately reset cooldowns</strong>'
+                        : '• 마나 자연 재생 속도 <strong>+100% 증가 (24 MP/s)</strong> & 스킬 사용 시 <strong>20% 확률로 쿨다운 즉시 초기화</strong>';
                     passiveBox.innerHTML = `
                         <div class="awakening-passive-header">
-                            <span class="awakening-passive-tag" style="background: #7e22ce;">🪄 2차 각성 패시브 [무한의 마력로] (Lv ${this.player.level} 활성)</span>
+                            <span class="awakening-passive-tag" style="background: #7e22ce;">${tag}</span>
                         </div>
-                        <div class="awakening-passive-desc">
-                            • 마나 자연 재생 속도 <strong>+100% 증가 (24 MP/s)</strong> & 스킬 사용 시 <strong>20% 확률로 쿨다운 즉시 초기화</strong>
-                        </div>
+                        <div class="awakening-passive-desc">${desc}</div>
                     `;
                 } else if (wType === 'dagger') {
+                    const tag = isEn ? `🗡️ 2nd Awakening [Lethal Assassin Instinct] (Lv ${this.player.level} Active)` : `🗡️ 2차 각성 패시브 [치명적 암살 본능] (Lv ${this.player.level} 활성)`;
+                    const desc = isEn
+                        ? '• Crit Damage <strong>+100% (3.0x multiplier)</strong> & killing an enemy grants <strong>2s instant stealth + 100 Speed</strong>'
+                        : '• 치명타 피해량 <strong>+100% 증가 (3.0배)</strong> & 적 처치 시 <strong>2초간 즉시 은신 + 이속 +100</strong>';
                     passiveBox.innerHTML = `
                         <div class="awakening-passive-header">
-                            <span class="awakening-passive-tag" style="background: #ca8a04;">🗡️ 2차 각성 패시브 [치명적 암살 본능] (Lv ${this.player.level} 활성)</span>
+                            <span class="awakening-passive-tag" style="background: #ca8a04;">${tag}</span>
                         </div>
-                        <div class="awakening-passive-desc">
-                            • 치명타 피해량 <strong>+100% 증가 (3.0배)</strong> & 적 처치 시 <strong>2초간 즉시 은신 + 이속 +100</strong>
-                        </div>
+                        <div class="awakening-passive-desc">${desc}</div>
                     `;
                 }
             }
@@ -1328,7 +1346,7 @@ class Game {
         // 3. Update Title Count
         const titleEl = document.getElementById('skillLibraryTitle');
         if (titleEl) {
-            titleEl.innerText = `📖 보유 스킬 라이브러리 (총 ${Object.keys(SKILL_DB).length}종)`;
+            titleEl.innerText = isEn ? `📖 Skill Codex (${Object.keys(SKILL_DB).length} Skills)` : `📖 보유 스킬 라이브러리 (총 ${Object.keys(SKILL_DB).length}종)`;
         }
 
         const slotKeys = ['Q', 'W', 'E', 'A', 'S', 'D', 'Z', 'X', 'C'];
@@ -1342,28 +1360,29 @@ class Game {
 
             if (skill) {
                 activeCount++;
+                const sName = typeof tData === 'function' ? tData(skill, 'name') : skill.name;
                 return `
-                    <div class="skill-slot-box equipped ${isTarget ? 'target-highlight' : ''}" onclick="window.game.unequipSkillFromSlot('${k}')" title="[${k}] ${skill.name} (클릭 시 해제)">
+                    <div class="skill-slot-box equipped ${isTarget ? 'target-highlight' : ''}" onclick="window.game.unequipSkillFromSlot('${k}')" title="[${k}] ${sName} (${isEn ? 'Click to unequip' : '클릭 시 해제'})">
                         <span class="key-tag">${k}</span>
                         <span class="slot-icon">${skill.icon}</span>
-                        <span class="slot-name">${skill.name}</span>
+                        <span class="slot-name">${sName}</span>
                         <span class="slot-cost">💧 ${skill.mpCost} MP</span>
                     </div>
                 `;
             } else {
                 return `
-                    <div class="skill-slot-box empty ${isTarget ? 'target-highlight' : ''}" onclick="window.game.openSkillBookToSlot('${k}')" title="[${k}] 빈 슬롯">
+                    <div class="skill-slot-box empty ${isTarget ? 'target-highlight' : ''}" onclick="window.game.openSkillBookToSlot('${k}')" title="[${k}] ${isEn ? 'Empty Slot' : '빈 슬롯'}">
                         <span class="key-tag">${k}</span>
                         <span class="slot-icon" style="font-size: 22px; opacity: 0.45;">➕</span>
-                        <span class="slot-name" style="color: #64748b;">(비어있음)</span>
-                        <span class="slot-empty-label">미장착</span>
+                        <span class="slot-name" style="color: #64748b;">(${isEn ? 'Empty' : '비어있음'})</span>
+                        <span class="slot-empty-label">${isEn ? 'None' : '미장착'}</span>
                     </div>
                 `;
             }
         }).join('');
 
         if (countBadge) {
-            countBadge.innerText = `${activeCount} / 9 슬롯 활성화`;
+            countBadge.innerText = isEn ? `${activeCount} / 9 Active Slots` : `${activeCount} / 9 슬롯 활성화`;
         }
 
         let allSkills = Object.values(SKILL_DB);
@@ -1388,11 +1407,15 @@ class Game {
             const isEquipped = !!equippedSlot;
             const isFocused = (idx === this.skillBookSelectedIndex);
             const isWaitingThis = (this.skillBookWaitingKeyForSkillId === skill.id);
+            const sName = typeof tData === 'function' ? tData(skill, 'name') : skill.name;
+            const sDesc = typeof tData === 'function' ? tData(skill, 'desc') : skill.desc;
+            const sDmg = typeof tData === 'function' ? tData(skill, 'dmgDesc') : skill.dmgDesc;
+            const sTypeName = typeof tData === 'function' ? tData(skill, 'typeName') : skill.typeName;
 
             const assignButtons = slotKeys.map(k => {
                 const isHere = (equippedSlot === k);
                 return `
-                    <button class="assign-key-btn ${isHere ? 'equipped-here' : ''}" onclick="window.game.equipSkillToSlot('${skill.id}', '${k}')" title="[${k}] 키에 장착">
+                    <button class="assign-key-btn ${isHere ? 'equipped-here' : ''}" onclick="window.game.equipSkillToSlot('${skill.id}', '${k}')" title="[${k}] ${isEn ? 'Equip' : '장착'}">
                         ${isHere ? `✅ [${k}]` : k}
                     </button>
                 `;
@@ -1405,28 +1428,28 @@ class Game {
                         <span class="skill-lib-icon">${skill.icon}</span>
                         <div class="skill-lib-title-box">
                             <div class="skill-lib-name">
-                                <span>${skill.name}</span>
-                                <span class="skill-type-tag ${skill.type}">${skill.typeName}</span>
-                                ${isEquipped ? `<span style="font-size: 11.5px; color: #10b981; font-weight: 800;">[${equippedSlot} 키 장착중]</span>` : ''}
-                                ${skill.type === 'ultimate' && skill.id !== 'skill_time_stop' && this.player.level < 50 ? `<span style="font-size: 10px; color: #f87171; background: rgba(239,68,68,0.2); border: 1px solid #ef4444; border-radius: 4px; padding: 1px 5px; font-weight: 800;">🔒 Lv 50 필요 ("그 레벨에 잠이 오늬?")</span>` : ''}
+                                <span>${sName}</span>
+                                <span class="skill-type-tag ${skill.type}">${sTypeName}</span>
+                                ${isEquipped ? `<span style="font-size: 11.5px; color: #10b981; font-weight: 800;">[${equippedSlot} ${isEn ? 'Equipped' : '키 장착중'}]</span>` : ''}
+                                ${skill.type === 'ultimate' && skill.id !== 'skill_time_stop' && this.player.level < 50 ? `<span style="font-size: 10px; color: #f87171; background: rgba(239,68,68,0.2); border: 1px solid #ef4444; border-radius: 4px; padding: 1px 5px; font-weight: 800;">🔒 ${isEn ? 'Requires Lv 50' : 'Lv 50 필요'}</span>` : ''}
                             </div>
                             <div class="skill-lib-meta">
                                 <span>💧 ${skill.mpCost} MP</span>
-                                <span>⏱️ 쿨타임 ${skill.cd}초</span>
+                                <span>⏱️ ${isEn ? `CD ${skill.cd}s` : `쿨타임 ${skill.cd}초`}</span>
                             </div>
                         </div>
                     </div>
                     <div class="skill-lib-desc">
-                        ${skill.desc}<br>
-                        <strong style="color: #fde047;">⚔️ 위력:</strong> ${skill.dmgDesc}
+                        ${sDesc}<br>
+                        <strong style="color: #fde047;">⚔️ ${isEn ? 'Power:' : '위력:'}</strong> ${sDmg}
                     </div>
                     ${isWaitingThis ? `
                         <div style="background: rgba(245, 158, 11, 0.25); border: 1.5px solid #f59e0b; border-radius: 8px; padding: 6px 12px; font-size: 12.5px; font-weight: 800; color: #facc15; animation: fullBagPulse 0.8s infinite alternate;">
-                            ⚡ 장착할 키 (Q, W, E, A, S, D, Z, X, C) 중 하나를 키보드로 누르세요! [ESC 취소]
+                            ⚡ ${isEn ? 'Press a key (Q, W, E, A, S, D, Z, X, C) to assign slot! [ESC Cancel]' : '장착할 키 (Q, W, E, A, S, D, Z, X, C) 중 하나를 키보드로 누르세요! [ESC 취소]'}
                         </div>
                     ` : `
                         <div class="assign-panel">
-                            <span class="assign-label">⚡ 슬롯 배치:</span>
+                            <span class="assign-label">⚡ ${isEn ? 'Assign Slot:' : '슬롯 배치:'}</span>
                             <div class="assign-keys-row">
                                 ${assignButtons}
                             </div>
@@ -1506,7 +1529,8 @@ class Game {
                 modal.classList.remove('hidden');
                 const summaryEl = document.getElementById('pauseSummaryText');
                 if (summaryEl) {
-                    const zoneName = ZONE_CONFIG[this.currentZone]?.name || '마을';
+                    const zConf = ZONE_CONFIG[this.currentZone];
+                    const zoneName = zConf ? (typeof tData === 'function' ? tData(zConf, 'name') : zConf.name) : 'Village';
                     summaryEl.innerText = `Lv.${this.player.level} · ${zoneName} · 🪙 ${this.player.gold.toLocaleString()} G`;
                 }
                 this.setPauseMenuIndex(0);
@@ -4170,6 +4194,9 @@ class Game {
 let game = null;
 
 function initGame() {
+    if (typeof initI18n === 'function') {
+        initI18n();
+    }
     if (!game) {
         try {
             game = new Game();

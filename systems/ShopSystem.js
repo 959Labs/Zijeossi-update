@@ -179,14 +179,15 @@ class ShopSystem {
         const sg = document.getElementById('shopGold');
         if (sg) sg.innerText = `${this.game.player.gold} G`;
 
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         const titleEl = document.getElementById('shopModalTitle');
         if (titleEl) {
-            if (this.game.currentZone === 'village') titleEl.innerText = '🌲 [시작의 마을 상점] 약초 & 나태 잠옷';
-            else if (this.game.currentZone === 'oasis_town') titleEl.innerText = '🏜️ [사막 오아시스 상점] 모래바람 시미터 & 선인장 즙';
-            else if (this.game.currentZone === 'frost_camp') titleEl.innerText = '❄️ [설원 전진기지 주막] 방한 장비 & 특제 핫초코';
-            else if (this.game.currentZone === 'citadel_sanctuary') titleEl.innerText = '🏰 [기사단 비밀 은신처] 은빛 성검 & 성수 엘릭서';
-            else if (this.game.currentZone === 'sky_haven') titleEl.innerText = '⚡ [천공의 구름 안식처] 대천사 광휘창 & 베개 반지';
-            else titleEl.innerText = '🛒 방랑 상인의 만물상';
+            if (this.game.currentZone === 'village') titleEl.innerText = isEn ? '🌲 [Starting Village] Herbs & Sloth Wear' : '🌲 [시작의 마을 상점] 약초 & 나태 잠옷';
+            else if (this.game.currentZone === 'oasis_town') titleEl.innerText = isEn ? '🏜️ [Oasis Outpost] Scimitars & Cactus Juice' : '🏜️ [사막 오아시스 상점] 모래바람 시미터 & 선인장 즙';
+            else if (this.game.currentZone === 'frost_camp') titleEl.innerText = isEn ? '❄️ [Glacial Tavern] Parkas & Hot Cocoa' : '❄️ [설원 전진기지 주막] 방한 장비 & 특제 핫초코';
+            else if (this.game.currentZone === 'citadel_sanctuary') titleEl.innerText = isEn ? '🏰 [Crusader Sanctuary] Holy Blades & Water' : '🏰 [기사단 비밀 은신처] 은빛 성검 & 성수 엘릭서';
+            else if (this.game.currentZone === 'sky_haven') titleEl.innerText = isEn ? '⚡ [Celestial Haven] Archangel Lance & Pillow' : '⚡ [천공의 구름 안식처] 대천사 광휘창 & 베개 반지';
+            else titleEl.innerText = isEn ? "🛒 Traveling Merchant's Outpost" : '🛒 방랑 상인의 만물상';
         }
 
         const bagSpaceEl = document.getElementById('shopBagSpace');
@@ -195,10 +196,10 @@ class ShopSystem {
         if (bagSpaceEl) {
             if (currentCount >= 20) {
                 bagSpaceEl.classList.add('full');
-                bagSpaceEl.innerHTML = `⚠️ 가방 가득 참 (20 / 20)`;
+                bagSpaceEl.innerHTML = isEn ? `⚠️ Bag Full (20 / 20)` : `⚠️ 가방 가득 참 (20 / 20)`;
             } else {
                 bagSpaceEl.classList.remove('full');
-                bagSpaceEl.innerHTML = `🎒 가방: <strong id="shopBagCount">${currentCount} / 20</strong>`;
+                bagSpaceEl.innerHTML = isEn ? `🎒 Bag: <strong id="shopBagCount">${currentCount} / 20</strong>` : `🎒 가방: <strong id="shopBagCount">${currentCount} / 20</strong>`;
             }
         }
 
@@ -225,6 +226,10 @@ class ShopSystem {
                     const item = ITEM_DB[w.id];
                     if (!item) return;
                     const isFocused = index === this.shopSelectedIndex;
+                    const iName = typeof tData === 'function' ? tData(item, 'name') : item.name;
+                    const iDesc = typeof tData === 'function' ? tData(item, 'desc') : item.desc;
+                    const buyBtnText = isEn ? `Buy (${w.price} G)` : `${w.price} G 구매`;
+
                     const div = document.createElement('div');
                     div.className = `shop-item-card ${item.rarity} ${isFocused ? 'keyboard-focused' : ''}`;
                     div.innerHTML = `
@@ -232,11 +237,11 @@ class ShopSystem {
                             <span class="focus-arrow ${isFocused ? 'active' : ''}">${isFocused ? '▶' : '&nbsp;'}</span>
                             <span class="shop-icon">${item.icon}</span>
                             <div>
-                                <div class="shop-name">${item.name}</div>
-                                <div class="shop-desc">${item.desc}</div>
+                                <div class="shop-name">${iName}</div>
+                                <div class="shop-desc">${iDesc}</div>
                             </div>
                         </div>
-                        <button class="shop-buy-btn" onclick="game.buyItem('${w.id}', ${w.price})">${w.price} G 구매</button>
+                        <button class="shop-buy-btn" onclick="game.buyItem('${w.id}', ${w.price})">${buyBtnText}</button>
                     `;
                     buyList.appendChild(div);
 
@@ -302,16 +307,17 @@ class ShopSystem {
     }
 
     buyItem(itemId, price) {
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         if (this.game.player.gold < price) {
             sounds.playHit();
-            this.game.showNotification('골드가 부족합니다!');
+            this.game.showNotification(isEn ? '⚠️ Not enough gold!' : '⚠️ 골드가 부족합니다!');
             return;
         }
 
         const added = this.game.player.addItemToInventory(itemId, 1);
         if (!added) {
             sounds.playHit();
-            this.game.showNotification('⚠️ 가방이 가득 찼습니다! (최대 20칸)');
+            this.game.showNotification(isEn ? '⚠️ Backpack is full! (Max 20 slots)' : '⚠️ 가방이 가득 찼습니다! (최대 20칸)');
             this.updateShopUI();
             return;
         }
@@ -320,10 +326,13 @@ class ShopSystem {
         sounds.playCoin();
         this.updateShopUI();
         this.game.updateInventoryUI();
-        this.game.showNotification(`${ITEM_DB[itemId].name}을(를) 구매했습니다!`);
+        const it = ITEM_DB[itemId];
+        const itName = it ? (typeof tData === 'function' ? tData(it, 'name') : it.name) : itemId;
+        this.game.showNotification(isEn ? `🎉 Purchased [${itName}]! (-${price} G)` : `🎉 ${itName}을(를) 구매했습니다! (-${price} G)`);
     }
 
     sellItem(inventoryIndex) {
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         const slotItem = this.game.player.inventory[inventoryIndex];
         if (!slotItem) return;
 
@@ -343,7 +352,8 @@ class ShopSystem {
 
         this.updateShopUI();
         this.game.updateInventoryUI();
-        this.game.showNotification(`[판매 완료] ${item.name}을(를) 판매하여 +${sellVal} G를 획득했습니다!`);
+        const itName = typeof tData === 'function' ? tData(item, 'name') : item.name;
+        this.game.showNotification(isEn ? `💰 Sold [${itName}] for +${sellVal} G!` : `[판매 완료] ${itName}을(를) 판매하여 +${sellVal} G를 획득했습니다!`);
     }
 
     toggleTrialShop() {
@@ -361,9 +371,10 @@ class ShopSystem {
     }
 
     updateTrialShopUI() {
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         const coinsEl = document.getElementById('trialShopCoins');
         const bagCountEl = document.getElementById('trialShopBagCount');
-        if (coinsEl) coinsEl.innerText = `${this.game.trialCoins || 0} 개`;
+        if (coinsEl) coinsEl.innerText = `${this.game.trialCoins || 0} ${isEn ? 'pcs' : '개'}`;
         if (bagCountEl) bagCountEl.innerText = `${this.game.player.getInventoryCount()} / 20`;
 
         const list = document.getElementById('trialShopItemList');
@@ -375,6 +386,9 @@ class ShopSystem {
             if (!item) return;
             const canAfford = (this.game.trialCoins || 0) >= ware.price;
             const isFocused = (idx === (this.trialShopSelectedIndex || 0));
+            const iName = typeof tData === 'function' ? tData(item, 'name') : item.name;
+            const iDesc = typeof tData === 'function' ? tData(item, 'desc') : item.desc;
+            const btnText = isEn ? `🪙 Exchange (${ware.price})` : `🪙 ${ware.price}개 교환`;
 
             const card = document.createElement('div');
             card.className = `shop-item-card ${item.rarity} ${isFocused ? 'keyboard-focused' : ''}`;
@@ -383,13 +397,13 @@ class ShopSystem {
                     <span class="focus-arrow ${isFocused ? 'active' : ''}">${isFocused ? '▶' : '&nbsp;'}</span>
                     <span class="shop-item-icon">${item.icon}</span>
                     <div class="shop-item-info">
-                        <div class="shop-item-name">${item.name}</div>
-                        <div class="shop-item-desc">${item.desc}</div>
+                        <div class="shop-item-name">${iName}</div>
+                        <div class="shop-item-desc">${iDesc}</div>
                     </div>
                 </div>
                 <div class="shop-card-right">
                     <button class="shop-buy-btn ${canAfford ? '' : 'disabled'}" style="background: linear-gradient(135deg, #0284c7, #0369a1); border-color: #38bdf8; box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);">
-                        🪙 ${ware.price}개 교환
+                        ${btnText}
                     </button>
                 </div>
             `;
@@ -404,12 +418,13 @@ class ShopSystem {
     }
 
     buyTrialItem(itemId, price) {
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         if ((this.game.trialCoins || 0) < price) {
-            this.game.showNotification('⚠️ 시련의 증표가 부족합니다! 시련의 탑을 더 등반하세요.');
+            this.game.showNotification(isEn ? '⚠️ Not enough Trial Badges! Climb the Tower of Trial for more.' : '⚠️ 시련의 증표가 부족합니다! 시련의 탑을 더 등반하세요.');
             return;
         }
         if (!this.game.player.hasInventorySpace()) {
-            this.game.showNotification('⚠️ 가방(인벤토리)이 가득 찼습니다!');
+            this.game.showNotification(isEn ? '⚠️ Backpack is full! (Max 20 slots)' : '⚠️ 가방(인벤토리)이 가득 찼습니다!');
             return;
         }
 
@@ -420,7 +435,8 @@ class ShopSystem {
         this.updateTrialShopUI();
         this.game.updateInventoryUI();
         const it = ITEM_DB[itemId];
-        this.game.showNotification(`✨ [시련 보물 교환 완료] ${it ? it.name : itemId}을(를) 획득했습니다!`);
+        const itName = it ? (typeof tData === 'function' ? tData(it, 'name') : it.name) : itemId;
+        this.game.showNotification(isEn ? `✨ Successfully exchanged [${itName}]! (-${price} Trial Badges)` : `✨ [시련 보물 교환 완료] ${itName}을(를) 획득했습니다!`);
     }
 
     handleInput(inp) {

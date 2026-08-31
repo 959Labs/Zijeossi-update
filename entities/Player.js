@@ -542,11 +542,12 @@ class Player {
     }
 
     getClassInfo() {
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         const wt = this.getWeaponType();
-        if (wt === 'bow') return { id: 'archer', name: '🏹 방구석 궁수 (Archer)', css: 'class-archer', desc: '초장거리 관통 화살 연사' };
-        if (wt === 'staff') return { id: 'mage', name: '🪄 누워있는 대마법사 (Mage)', css: 'class-mage', desc: '3갈래 유도 비전 탄환 폭격' };
-        if (wt === 'dagger') return { id: 'rogue', name: '🗡️ 드러누운 암살자 (Rogue)', css: 'class-rogue', desc: '초고속 5연타 단검 난무' };
-        return { id: 'warrior', name: '⚔️ 게으른 검사 (Warrior)', css: 'class-warrior', desc: '묵직한 3단 베기 콤보' };
+        if (wt === 'bow') return { id: 'archer', name: isEn ? '🏹 Homebody Archer' : '🏹 방구석 궁수', css: 'class-archer', desc: isEn ? 'Rapid 3-arrow long-range barrage' : '초장거리 관통 화살 연사' };
+        if (wt === 'staff') return { id: 'mage', name: isEn ? '🪄 Bedridden Archmage' : '🪄 누워있는 대마법사', css: 'class-mage', desc: isEn ? '3-way homing arcane missile storm' : '3갈래 유도 비전 탄환 폭격' };
+        if (wt === 'dagger') return { id: 'rogue', name: isEn ? '🗡️ Slothful Rogue' : '🗡️ 드러누운 암살자', css: 'class-rogue', desc: isEn ? 'Ultra-fast 5-hit phantom dual daggers' : '초고속 5연타 단검 난무' };
+        return { id: 'warrior', name: isEn ? "⚔️ Lazy Warrior (Uncle Bob)" : '⚔️ 게으른 검사', css: 'class-warrior', desc: isEn ? 'Heavy 3-hit melee sword slash combo' : '묵직한 3단 베기 콤보' };
     }
 
     performNormalAttack(game) {

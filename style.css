@@ -246,6 +246,74 @@ body, html {
     100% { opacity: 1; transform: translateY(0) scale(1); letter-spacing: 3px; }
 }
 
+/* English Mode Title Styling */
+.en-title-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 4px;
+    margin: 4px 0 10px 0;
+}
+
+.en-title-line1 {
+    font-size: clamp(38px, 7.5vw, 64px);
+    font-weight: 900;
+    letter-spacing: 5px;
+    background: linear-gradient(180deg, #ffffff 10%, #fef08a 45%, #f59e0b 85%, #b45309 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 28px rgba(245, 158, 11, 0.9)) drop-shadow(0 8px 16px rgba(0, 0, 0, 1));
+    text-transform: uppercase;
+    animation: stampSlam 0.35s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+}
+
+.en-title-line2 {
+    font-size: clamp(48px, 9.8vw, 84px);
+    font-weight: 900;
+    letter-spacing: 6px;
+    background: linear-gradient(180deg, #ffffff 10%, #fed7aa 35%, #f97316 70%, #dc2626 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 36px rgba(249, 115, 22, 0.95)) drop-shadow(0 14px 24px rgba(0, 0, 0, 1));
+    text-transform: uppercase;
+    animation: stampSlam 0.45s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+}
+
+/* Language Switcher Buttons */
+.lang-select-btn {
+    flex: 1;
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 2px solid #334155;
+    background: #0f172a;
+    color: #cbd5e1;
+    font-size: 13.5px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.lang-select-btn:hover {
+    border-color: #38bdf8;
+    background: #1e293b;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(56, 189, 248, 0.25);
+}
+
+.lang-select-btn.active {
+    border-color: #facc15;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(217, 119, 6, 0.15));
+    color: #fef08a;
+    box-shadow: 0 0 16px rgba(250, 204, 21, 0.35);
+}
+
 /* Main Menu Buttons Container - Enlarged Buttons */
 .intro-menu-container {
     display: flex;
