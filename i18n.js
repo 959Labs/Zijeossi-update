@@ -266,6 +266,19 @@ const I18N_DICTIONARY = {
         "multi.join_start": "⚔️ 방 입장 & 파티 참가",
         "multi.back_btn": "← 메인 메뉴로 돌아가기",
 
+        // Radar
+        "radar.my_loc": "내 위치",
+        "radar.portal": "포탈",
+        "radar.npc": "NPC",
+        "radar.enemy": "적",
+        "radar.boss": "보스",
+        "radar.close_hint": "[Tab / ESC] 레이더 닫기",
+
+        // Dialogue
+        "dialogue.default_speaker": "마을 장로",
+        "dialogue.confirm_btn": "확인 [F/Enter]",
+        "dialogue.default_welcome": "용사여, 마을에 오신 것을 환영하네!",
+
         // In-game Toasts & Alerts
         "toast.saved": "💾 게임이 저장되었습니다!",
         "toast.auto_delivery": "🛵 띵동! [배달앱 특급 물약] 자동 배달 완료! (체력 회복)",
@@ -538,6 +551,19 @@ const I18N_DICTIONARY = {
         "multi.join_start": "⚔️ Join Room & Party Up",
         "multi.back_btn": "← Return to Main Menu",
 
+        // Radar
+        "radar.my_loc": "My Location",
+        "radar.portal": "Portal",
+        "radar.npc": "NPC",
+        "radar.enemy": "Enemy",
+        "radar.boss": "Boss",
+        "radar.close_hint": "[Tab / ESC] Close Radar",
+
+        // Dialogue
+        "dialogue.default_speaker": "Village Elder",
+        "dialogue.confirm_btn": "Confirm [F/Enter]",
+        "dialogue.default_welcome": "Welcome to the village, awakened hero!",
+
         // In-game Toasts & Alerts
         "toast.saved": "💾 Game saved successfully!",
         "toast.auto_delivery": "🛵 Ding-Dong! [Emergency Potion Delivery] arrived! (HP restored)",
@@ -599,6 +625,7 @@ function setLanguage(lang) {
         if (window.game.updateForgeUI) window.game.updateForgeUI();
         if (window.game.updateCasinoUI) window.game.updateCasinoUI();
         if (window.game.renderWorldMap) window.game.renderWorldMap();
+        if (window.game.updateGuideUI) window.game.updateGuideUI();
     }
 }
 
@@ -649,18 +676,21 @@ function updateAllDOMTranslations() {
         }
     });
 
-    // 4. Update Language Switcher active styles in Settings
-    const btnKo = document.getElementById('langBtnKo');
-    const btnEn = document.getElementById('langBtnEn');
-    if (btnKo && btnEn) {
-        if (currentLanguage === 'ko') {
-            btnKo.classList.add('active');
-            btnEn.classList.remove('active');
-        } else {
-            btnKo.classList.remove('active');
-            btnEn.classList.add('active');
+    // 4. Update Language Switcher active styles in Title Screen and Settings
+    ['titleBtnKo', 'btnLangKo', 'langBtnKo'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            if (currentLanguage === 'ko') el.classList.add('active');
+            else el.classList.remove('active');
         }
-    }
+    });
+    ['titleBtnEn', 'btnLangEn', 'langBtnEn'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            if (currentLanguage === 'en') el.classList.add('active');
+            else el.classList.remove('active');
+        }
+    });
 
     // 5. Update Stamped Title Display
     updateTitleScreenDisplay();

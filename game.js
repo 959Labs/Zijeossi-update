@@ -1581,10 +1581,165 @@ class Game {
         this.isGuideOpen = !this.isGuideOpen;
         const modal = document.getElementById('guideModal');
         if (modal) {
-            if (this.isGuideOpen) modal.classList.remove('hidden');
-            else modal.classList.add('hidden');
+            if (this.isGuideOpen) {
+                this.updateGuideUI();
+                modal.classList.remove('hidden');
+                modal.style.display = 'flex';
+            } else {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+            }
         }
         sounds.playInteract();
+    }
+
+    updateGuideUI() {
+        const modal = document.getElementById('guideModal');
+        if (!modal) return;
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+        const headerEl = modal.querySelector('.modal-header h2');
+        if (headerEl) headerEl.innerText = isEn ? '📖 Adventure & Controls Guide' : '📖 모험 & 조작 가이드 (Game Guide)';
+        const closeBtn = modal.querySelector('#guideCloseBtn');
+        if (closeBtn) closeBtn.innerText = isEn ? 'Close [F/ESC]' : '닫기 [F/ESC]';
+        const bottomBtn = modal.querySelector('#guideCloseBtnBottom');
+        if (bottomBtn) bottomBtn.innerText = isEn ? 'Confirm [F]' : '확인 [F]';
+        const footerSpan = modal.querySelector('.settings-footer span');
+        if (footerSpan) footerSpan.innerHTML = isEn ? 'Hotkeys: <strong>[F]</strong> or <strong>[ESC]</strong> to close.' : '단축키 <strong>[F]</strong> 또는 <strong>[ESC]</strong>로 닫을 수 있습니다.';
+
+        const body = modal.querySelector('.settings-scroll-body');
+        if (!body) return;
+
+        if (isEn) {
+            body.innerHTML = `
+                <!-- Section 1: All Keyboard Controls -->
+                <div>
+                    <div class="settings-section-title">⌨️ Complete Keyboard Controls (No-Mouse)</div>
+                    <div class="tutorial-card">
+                        <div class="key-guide-table">
+                            <div><span class="key-pill">W A S D</span> / <span class="key-pill">Arrow Keys</span></div>
+                            <div>8-Way Free Character Movement</div>
+
+                            <div><span class="key-pill">Enter</span> / <span class="key-pill">J</span></div>
+                            <div>Basic Attack (3-Hit Combo, 1.65x Finisher)</div>
+
+                            <div><span class="key-pill">Space</span> / <span class="key-pill">Double-Tap</span></div>
+                            <div>Invincible Rolling Dash (Penetrates Boss Bullet Hell)</div>
+
+                            <div><span class="key-pill">Q W E A S D Z X C</span></div>
+                            <div>9 Custom Equipped Skills (Instant Cast)</div>
+
+                            <div><span class="key-pill">1</span> <span class="key-pill">2</span> <span class="key-pill">3</span></div>
+                            <div>Quick Potion Slots (1: HP, 2: MP, 3: ATK Buff)</div>
+
+                            <div><span class="key-pill">K</span></div>
+                            <div><strong>Skill Codex (Customize 9 Skill Slots)</strong></div>
+
+                            <div><span class="key-pill">Tab</span></div>
+                            <div><strong>Translucent Tactical Mini-Radar Overlay</strong></div>
+
+                            <div><span class="key-pill">M</span></div>
+                            <div><strong>15-Continent Expedition World Map</strong></div>
+
+                            <div><span class="key-pill">I</span> / <span class="key-pill">B</span></div>
+                            <div>Inventory & Equipment Bag</div>
+
+                            <div><span class="key-pill">F</span></div>
+                            <div><strong>Interact (Talk, Shop, Forge, Casino, Portal)</strong></div>
+
+                            <div><span class="key-pill">P</span> / <span class="key-pill">ESC</span></div>
+                            <div>Settings [P] &nbsp;•&nbsp; Pause Menu [ESC]</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: 4 Sloth Classes & 2nd Awakening -->
+                <div>
+                    <div class="settings-section-title">🏹 4 Sloth Classes & 2nd Awakening Guide</div>
+                    <div class="tutorial-card">
+                        <div style="margin-bottom: 8px; color: #facc15; font-weight: 800; font-size: 13px;">
+                            💡 [Class Switching] Equip desired weapon (Sword/Bow/Staff/Dagger) in bag ([I]) and press [ENTER] to switch combat class instantly!
+                        </div>
+                        <p style="font-size: 11.5px; color: #94a3b8; margin-bottom: 8px;">
+                            • <strong>Exclusive Skill Match</strong>: Class active skills can only be cast when wielding their matched weapon type. (General skills are unrestricted)<br>
+                            • <strong>2nd Awakening (Lv 50 Unlock)</strong>: Exclusive passives and ultimate skills unlock permanently upon <strong>reaching Lv 50</strong>. (Before Lv 50: <em>"How can you sleep at that level?"</em>)
+                        </p>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid #ef4444; border-radius: 8px; padding: 8px 10px;">
+                                <div style="color: #fca5a5; font-weight: 800; font-size: 12.5px;">⚔️ Lazy Warrior</div>
+                                <div style="font-size: 11px; color: #cbd5e1; margin-top: 3px;">• Weapon: Sword</div>
+                                <div style="font-size: 11px; color: #fde047;">• 2nd Awakening Passive [Unstoppable Sloth Will]: HP &lt; 30% grants +20% ATK & 25% Damage Reduction</div>
+                                <div style="font-size: 11px; color: #94a3b8;">• Skills: [Cross Slash], [Shield Charge(Stun)], [Whirlwind], [Earth Tremor]</div>
+                                <div style="font-size: 11px; color: #fca5a5; font-weight: 700;">• Ultimate: [Genesis Blade Storm] (10-Hit Golden Sword Tempest)</div>
+                            </div>
+                            <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid #10b981; border-radius: 8px; padding: 8px 10px;">
+                                <div style="color: #6ee7b7; font-weight: 800; font-size: 12.5px;">🏹 Homebody Archer</div>
+                                <div style="font-size: 11px; color: #cbd5e1; margin-top: 3px;">• Weapon: Bow</div>
+                                <div style="font-size: 11px; color: #fde047;">• 2nd Awakening Passive [Eagle Eye]: +30% Crit Rate & +30% Amplified Damage beyond 250px</div>
+                                <div style="font-size: 11px; color: #94a3b8;">• Skills: [Rapid Volley], [Wind Snipe], [Frost Arrow(Freeze 3s)], [Explosive Mine]</div>
+                                <div style="font-size: 11px; color: #6ee7b7; font-weight: 700;">• Ultimate: [Meteor Arrow Rain] (Full-Screen 20 Piercing Arrow Barrage)</div>
+                            </div>
+                            <div style="background: rgba(168, 85, 247, 0.12); border: 1px solid #a855f7; border-radius: 8px; padding: 8px 10px;">
+                                <div style="color: #d8b4fe; font-weight: 800; font-size: 12.5px;">🪄 Bedridden Archmage</div>
+                                <div style="font-size: 11px; color: #cbd5e1; margin-top: 3px;">• Weapon: Staff</div>
+                                <div style="font-size: 11px; color: #fde047;">• 2nd Awakening Passive [Infinite Mana Furnace]: +100% Mana Regen & 20% Cooldown Reset chance</div>
+                                <div style="font-size: 11px; color: #94a3b8;">• Skills: [Chain Lightning], [Arcane Singularity], [Meteor Strike], [Mana Shield]</div>
+                                <div style="font-size: 11px; color: #d8b4fe; font-weight: 700;">• Ultimate: [Spacetime Black Hole] (12-Hit Gravitational Supernova)</div>
+                            </div>
+                            <div style="background: rgba(234, 179, 8, 0.12); border: 1px solid #eab308; border-radius: 8px; padding: 8px 10px;">
+                                <div style="color: #fde047; font-weight: 800; font-size: 12.5px;">🗡️ Slothful Rogue</div>
+                                <div style="font-size: 11px; color: #cbd5e1; margin-top: 3px;">• Weapon: Dagger</div>
+                                <div style="font-size: 11px; color: #fde047;">• 2nd Awakening Passive [Lethal Instinct]: +100% Crit DMG & 2s Stealth + 100 Speed on Kill</div>
+                                <div style="font-size: 11px; color: #94a3b8;">• Skills: [Shadow Stealth], [Shuriken Boomerang], [Vitals Thrust], [Blade Storm]</div>
+                                <div style="font-size: 11px; color: #fde047; font-weight: 700;">• Ultimate: [Shadow Clone Frenzy] (3 Phantoms 15-Hit Phantom Slash)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Tower of Trial -->
+                <div>
+                    <div class="settings-section-title">🗼 Infinite Tower of Trial Strategy</div>
+                    <div class="tutorial-card">
+                        <h4>🚪 Entry & Climb Rules</h4>
+                        <p>• <strong>Entry Location:</strong> Portal at NW Starting Village (Coord 2100, 1500), press [F] to enter.</p>
+                        <p>• <strong>Floor 1 to 50:</strong> Clear monster waves to open the next floor portal.</p>
+                        <p>• <strong>Elite Mini-Bosses & Guardian Bosses:</strong> Defeat bosses to earn massive Trial Coins.</p>
+                        <p>• <strong>Floor Bonus:</strong> 40% HP & MP automatically recovered upon clearing each floor.</p>
+                    </div>
+
+                    <div class="tutorial-card" style="margin-top: 8px;">
+                        <h4>🪙 Trial Coins & Astel's Treasure Shop</h4>
+                        <p>• Spend earned <strong>[🪙 Trial Coins]</strong> at <strong>`✨ Astel`</strong> in NW Starting Village for legendary class weapons and transcendent elixirs.</p>
+                    </div>
+                </div>
+
+                <!-- Section 4: Adventure Tips -->
+                <div>
+                    <div class="settings-section-title">🗺️ Adventure & Progression Tips</div>
+                    <div class="tutorial-card">
+                        <h4>📜 Quests & Farming</h4>
+                        <p>• Talk to the Village Elder to accept chapter quests. Rewards include gold, EXP, and rare gear.</p>
+                        <p>• Slay monsters, cut bushes, and open treasure chests across the field for potions and loot.</p>
+                    </div>
+
+                    <div class="tutorial-card" style="margin-top: 8px;">
+                        <h4>⚒️ Blacksmith Forge (+1 to +15)</h4>
+                        <p>• Upgrade weapons/armor at the Village Blacksmith for massive stat boosts and radiant weapon glow.</p>
+                    </div>
+
+                    <div class="tutorial-card" style="margin-top: 8px;">
+                        <h4>📜 Town Return Scroll</h4>
+                        <p>• Purchase for 35G from general merchants to instantly teleport back to Starting Village from dangerous dungeons.</p>
+                    </div>
+
+                    <div class="tutorial-card" style="margin-top: 8px;">
+                        <h4>🎲 959 Lucky Casino House</h4>
+                        <p>• Visit `Gambler Jack` at the village square for High-Low Dice (2x~5x) and 3-Reel Slots (up to 50x Jackpot + Elixir).</p>
+                    </div>
+                </div>
+            `;
+        }
     }
 
     toggleTabRadar() {
@@ -1759,7 +1914,10 @@ class Game {
     closeSettings() {
         this.isSettingsOpen = false;
         const modal = document.getElementById('settingsModal');
-        if (modal) modal.classList.add('hidden');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
     }
 
     toggleSettings(forceState = null) {
@@ -1770,8 +1928,18 @@ class Game {
         }
         const modal = document.getElementById('settingsModal');
         if (modal) {
-            if (this.isSettingsOpen) modal.classList.remove('hidden');
-            else modal.classList.add('hidden');
+            if (this.isSettingsOpen) {
+                modal.classList.remove('hidden');
+                modal.style.display = 'flex';
+                this.loadSettings();
+                if (typeof updateAllDOMTranslations === 'function') {
+                    updateAllDOMTranslations();
+                }
+                sounds.playInteract();
+            } else {
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+            }
         }
     }
 
@@ -3469,11 +3637,14 @@ class Game {
             const tagEl = document.getElementById(`tag_${k}`);
             const cdEl = document.getElementById(`cd_${k}`);
 
+            const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
             if (slotEl && iconEl && tagEl) {
                 if (skill) {
                     slotEl.classList.remove('empty-slot');
                     iconEl.innerText = skill.icon;
-                    tagEl.innerText = skill.name.length > 3 ? skill.name.slice(0, 3) : skill.name;
+                    const sName = typeof tData === 'function' ? tData(skill, 'name') : skill.name;
+                    tagEl.innerText = sName.length > 4 ? sName.slice(0, 4) : sName;
+                    slotEl.title = `[${k}] ${sName}`;
 
                     const curCd = this.player.skillCooldowns[k] || 0;
                     const maxCd = skill.cd || 1.0;
@@ -3525,7 +3696,8 @@ class Game {
                 } else {
                     slotEl.classList.add('empty-slot');
                     iconEl.innerText = '➕';
-                    tagEl.innerText = '빈 슬롯';
+                    tagEl.innerText = isEn ? 'Empty' : '비어있음';
+                    slotEl.title = `[${k}] ${isEn ? 'Empty Slot' : '빈 슬롯'}`;
                     if (cdEl) {
                         cdEl.classList.remove('active');
                         cdEl.innerText = '';
@@ -3534,6 +3706,11 @@ class Game {
                 }
             }
         });
+
+        const dashTag = document.querySelector('#slot_Space .skill-name-tag');
+        if (dashTag) dashTag.innerText = typeof t === 'function' ? t('hotbar.dash') : '대시';
+        const interactTag = document.querySelector('.interact-slot .skill-name-tag');
+        if (interactTag) interactTag.innerText = typeof t === 'function' ? t('hotbar.interact') : '상호작용';
 
         // 파티원 HUD 프레임 갱신
         this.updatePartyHUD();
@@ -3673,9 +3850,11 @@ class Game {
             const px = pad + p.x * scaleX;
             const py = pad + p.y * scaleY;
 
+            const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
             if (p.type.startsWith('portal_')) {
                 const targetKey = p.type.replace('portal_', '');
-                const targetName = ZONE_CONFIG[targetKey]?.name || '포탈';
+                const zc = ZONE_CONFIG[targetKey];
+                const targetName = zc ? (typeof tData === 'function' ? tData(zc, 'name') : zc.name) : (isEn ? 'Portal' : '포탈');
                 
                 ctx.fillStyle = '#a855f7';
                 ctx.shadowColor = '#c084fc';
@@ -3687,12 +3866,13 @@ class Game {
                 ctx.fillStyle = '#e9d5ff';
                 ctx.textAlign = 'center';
                 ctx.fillText(`🌀 ${targetName}`, px, py - 10);
-            } else if (p.type === 'npc' || p.type === 'merchant' || p.type === 'blacksmith' || p.type === 'gambler') {
+            } else if (p.type === 'npc' || p.type === 'merchant' || p.type === 'blacksmith' || p.type === 'gambler' || p.type === 'trial_merchant') {
                 let npcIcon = '🧙';
-                let npcName = '장로';
-                if (p.type === 'merchant') { npcIcon = '🛒'; npcName = '상인'; }
-                else if (p.type === 'blacksmith') { npcIcon = '⚒️'; npcName = '대장장이'; }
-                else if (p.type === 'gambler') { npcIcon = '🎲'; npcName = '도박사 잭'; }
+                let npcName = isEn ? 'Elder' : '장로';
+                if (p.type === 'merchant') { npcIcon = '🛒'; npcName = isEn ? 'Merchant' : '상인'; }
+                else if (p.type === 'blacksmith') { npcIcon = '⚒️'; npcName = isEn ? 'Blacksmith' : '대장장이'; }
+                else if (p.type === 'gambler') { npcIcon = '🎲'; npcName = isEn ? 'Gambler Jack' : '도박사 잭'; }
+                else if (p.type === 'trial_merchant') { npcIcon = '✨'; npcName = isEn ? 'Astel' : '아스텔'; }
 
                 ctx.fillStyle = '#facc15';
                 ctx.shadowColor = '#facc15';
@@ -3710,7 +3890,7 @@ class Game {
                 ctx.font = '10px sans-serif';
                 ctx.fillStyle = '#fde68a';
                 ctx.textAlign = 'center';
-                ctx.fillText('📦 보물상자', px, py - 7);
+                ctx.fillText(isEn ? '📦 Chest' : '📦 보물상자', px, py - 7);
             } else if (p.type === 'fountain' || p.type === 'shrine') {
                 ctx.fillStyle = '#38bdf8';
                 ctx.beginPath(); ctx.arc(px, py, 6, 0, Math.PI * 2); ctx.fill();

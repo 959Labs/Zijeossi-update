@@ -695,7 +695,7 @@ body, html {
    Modals Backdrop & Layout (No Horizontal Scroll)
    ========================================================================== */
 .modal-backdrop {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
@@ -705,7 +705,7 @@ body, html {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 500;
+    z-index: 10000;
     overflow: hidden;
 }
 

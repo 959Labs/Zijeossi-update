@@ -33,6 +33,13 @@ cmd = [
 subprocess.run(cmd, cwd=BASE_DIR, check=True)
 
 if os.path.exists(DIST_EXE):
+    # Terminate any running instances before copying
+    try:
+        subprocess.run(['taskkill', '/F', '/IM', 'Zijeossi.exe'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(['taskkill', '/F', '/IM', '지저씨.exe'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception:
+        pass
+
     for name in ['Zijeossi.exe', '지저씨.exe']:
         target = os.path.join(BASE_DIR, name)
         try:

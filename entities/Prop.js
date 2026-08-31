@@ -83,11 +83,13 @@ class Prop {
             player.mp = player.maxMp;
             game.camera.shake(0.3, 8);
             game.particles.spawn(player.x, player.y, '#f472b6', 25, 90, 0.7, 4.5);
-            game.showNotification('💤 [완벽한 수면] 따뜻하고 푹신한 침대에서 꿀잠을 자 체력/마나가 100% 충전되었습니다!');
+            const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+            game.showNotification(isEn ? '💤 [Sweet Dreams] Recharged 100% HP & MP in cozy bed!' : '💤 [완벽한 수면] 따뜻하고 푹신한 침대에서 꿀잠을 자 체력/마나가 100% 충전되었습니다!');
         }
     }
 
     takeDamage(game) {
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         if (this.type === 'crystal' && this.active) {
             this.active = false;
             sounds.playHit();
@@ -95,7 +97,7 @@ class Prop {
             game.particles.spawn(this.x, this.y, '#38bdf8', 24, 130, 0.5, 5);
             game.player.gold += 40;
             game.player.gainExp(35, game);
-            game.showNotification('희귀 마력 수정을 채굴했습니다! (+80 골드, +120 EXP)');
+            game.showNotification(isEn ? 'Mined rare Mana Crystal! (+80 Gold, +120 EXP)' : '희귀 마력 수정을 채굴했습니다! (+80 골드, +120 EXP)');
         } else if (this.type === 'bush' && this.active) {
             this.active = false;
             sounds.playSlash();
@@ -200,12 +202,15 @@ class Prop {
             ctx.font = 'bold 10px sans-serif';
             ctx.fillText('💤 Zzz...', 6, zFloat);
 
+            const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
             ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
             ctx.strokeStyle = '#f472b6';
             ctx.lineWidth = 1.5;
-            ctx.beginPath(); ctx.roundRect(-38, -44, 76, 18, 8); ctx.fill(); ctx.stroke();
+            const bedTag = isEn ? '🛏️ Cozy Bed' : '🛏️ 푹신한 침대';
+            const bWidth = isEn ? 84 : 76;
+            ctx.beginPath(); ctx.roundRect(-bWidth / 2, -44, bWidth, 18, 8); ctx.fill(); ctx.stroke();
             ctx.fillStyle = '#ffffff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
-            ctx.fillText('🛏️ 푹신한 침대', 0, -31);
+            ctx.fillText(bedTag, 0, -31);
             ctx.restore();
             return;
         }
@@ -234,12 +239,15 @@ class Prop {
             ctx.fillStyle = '#ffffff';
             ctx.beginPath(); ctx.arc(0, -28, 4, 0, Math.PI * 2); ctx.fill();
 
+            const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+            const shrineTag = isEn ? '✨ Ancient Shrine' : '✨ 고대 힘의 제단';
+            const sWidth = isEn ? 96 : 84;
             ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
             ctx.strokeStyle = '#facc15';
             ctx.lineWidth = 1.5;
-            ctx.beginPath(); ctx.roundRect(-42, -50, 84, 18, 8); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.roundRect(-sWidth / 2, -50, sWidth, 18, 8); ctx.fill(); ctx.stroke();
             ctx.fillStyle = '#ffffff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
-            ctx.fillText('✨ 고대 힘의 제단', 0, -37);
+            ctx.fillText(shrineTag, 0, -37);
             ctx.restore();
             return;
         }
@@ -279,12 +287,15 @@ class Prop {
             ctx.fillStyle = '#ffffff';
             ctx.beginPath(); ctx.arc(0, -3 + Math.sin(this.fireAnim * 6) * 1.5, 3, 0, Math.PI * 2); ctx.fill();
 
+            const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+            const fountainTag = isEn ? '⛲ Fountain of Life' : '⛲ 생명의 분수대';
+            const fWidth = isEn ? 104 : 84;
             ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
             ctx.strokeStyle = '#38bdf8';
             ctx.lineWidth = 1.5;
-            ctx.beginPath(); ctx.roundRect(-42, -44, 84, 18, 8); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.roundRect(-fWidth / 2, -44, fWidth, 18, 8); ctx.fill(); ctx.stroke();
             ctx.fillStyle = '#ffffff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
-            ctx.fillText('⛲ 생명의 분수대', 0, -31);
+            ctx.fillText(fountainTag, 0, -31);
             ctx.restore();
             return;
         }
@@ -505,13 +516,32 @@ class Prop {
                 ctx.shadowBlur = 0;
             }
 
-            const labelText = this.type === 'npc' ? '📜 장로 (퀘스트)' : (this.type === 'merchant' ? '🛒 만물 상인' : (this.type === 'blacksmith' ? '⚒️ 대장장이' : (this.type === 'gambler' ? '🎲 도박사 잭' : (this.type === 'trial_merchant' ? '✨ 아스텔 (시련 보물)' : ''))));
+            const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+            let labelText = '';
+            let nWidth = 76;
+            if (this.type === 'npc') {
+                labelText = isEn ? '📜 Elder (Quest)' : '📜 장로 (퀘스트)';
+                nWidth = isEn ? 96 : 82;
+            } else if (this.type === 'merchant') {
+                labelText = isEn ? '🛒 Merchant' : '🛒 만물 상인';
+                nWidth = isEn ? 84 : 76;
+            } else if (this.type === 'blacksmith') {
+                labelText = isEn ? '⚒️ Blacksmith' : '⚒️ 대장장이';
+                nWidth = isEn ? 88 : 76;
+            } else if (this.type === 'gambler') {
+                labelText = isEn ? '🎲 Gambler Jack' : '🎲 도박사 잭';
+                nWidth = isEn ? 104 : 82;
+            } else if (this.type === 'trial_merchant') {
+                labelText = isEn ? '✨ Astel (Trial Shop)' : '✨ 아스텔 (시련 보물)';
+                nWidth = isEn ? 116 : 100;
+            }
+
             const borderColor = this.type === 'npc' ? '#f59e0b' : (this.type === 'merchant' ? '#34d399' : (this.type === 'blacksmith' ? '#ef4444' : (this.type === 'trial_merchant' ? '#38bdf8' : '#f59e0b')));
 
             ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
             ctx.strokeStyle = borderColor;
             ctx.lineWidth = 1.5;
-            ctx.beginPath(); ctx.roundRect(-38, -46, 76, 20, 10); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.roundRect(-nWidth / 2, -46, nWidth, 20, 10); ctx.fill(); ctx.stroke();
             ctx.fillStyle = '#ffffff'; ctx.font = 'bold 11.5px sans-serif'; ctx.textAlign = 'center';
             ctx.fillText(labelText, 0, -32);
         } else if (this.type === 'campfire') {

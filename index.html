@@ -29,9 +29,9 @@
                 <div id="cinematicTitleMenuLayer" class="cinematic-title-menu-layer">
             <!-- Top Developer Comment Banner (Above Title) -->
             <div class="intro-top-dev-comment">
-                <div class="dev-comment-badge">📢 개발자 코멘트</div>
+                <div class="dev-comment-badge" data-i18n="dev.badge">📢 개발자 코멘트</div>
                 <div class="dev-comment-bubble">
-                    <p class="dev-comment-line">누가 플레이 하게 될지는 모르지만 피드백은 언제나 환영입니다 ~~ ^3^</p>
+                    <p class="dev-comment-line" data-i18n="dev.comment">누가 플레이 하게 될지는 모르지만 피드백은 언제나 환영입니다 ~~ ^3^</p>
                 </div>
             </div>
 
@@ -80,15 +80,15 @@
             </div>
         </div>
 
-<!-- Bottom-Right: Floating Control Guide Badge -->
+        <!-- Bottom-Right: Floating Control Guide Badge -->
         <div class="intro-bottom-right-guide">
-            <div class="guide-badge-header">🎮 조작 가이드</div>
+            <div class="guide-badge-header" data-i18n="guide.badge_title">🎮 조작 가이드</div>
             <div class="guide-badge-content">
-                <div class="guide-row"><span class="key-pill">↑ / ↓</span><span>메뉴 이동</span></div>
-                <div class="guide-row"><span class="key-pill">ENTER / 클릭</span><span>선택 & 시작</span></div>
-                <div class="guide-row"><span class="key-pill">F</span><span>NPC & 상점 대화</span></div>
-                <div class="guide-row"><span class="key-pill">A / Space</span><span>기본 공격 / 대시</span></div>
-                <div class="guide-row"><span class="key-pill">W, E, S, D, Q</span><span>스킬 및 궁극기</span></div>
+                <div class="guide-row"><span class="key-pill">↑ / ↓</span><span data-i18n="guide.move">메뉴 이동</span></div>
+                <div class="guide-row"><span class="key-pill">ENTER / 클릭</span><span data-i18n="guide.select">선택 & 시작</span></div>
+                <div class="guide-row"><span class="key-pill">F</span><span data-i18n="guide.interact">NPC & 상점 대화</span></div>
+                <div class="guide-row"><span class="key-pill">A / Space</span><span data-i18n="guide.attack_dash">기본 공격 / 대시</span></div>
+                <div class="guide-row"><span class="key-pill">W, E, S, D, Q</span><span data-i18n="guide.skills">스킬 및 궁극기</span></div>
             </div>
         </div>
     </div>
@@ -938,13 +938,13 @@
                 <span id="tabRadarCoords" class="radar-coords">(2100, 2100)</span>
             </div>
             <div class="tab-radar-legend">
-                <span><span class="legend-dot player"></span>내 위치</span>
-                <span><span class="legend-dot portal"></span>포탈</span>
-                <span><span class="legend-dot npc"></span>NPC</span>
-                <span><span class="legend-dot enemy"></span>적</span>
-                <span><span class="legend-dot boss"></span>보스</span>
+                <span><span class="legend-dot player"></span><span data-i18n="radar.my_loc">내 위치</span></span>
+                <span><span class="legend-dot portal"></span><span data-i18n="radar.portal">포탈</span></span>
+                <span><span class="legend-dot npc"></span><span data-i18n="radar.npc">NPC</span></span>
+                <span><span class="legend-dot enemy"></span><span data-i18n="radar.enemy">적</span></span>
+                <span><span class="legend-dot boss"></span><span data-i18n="radar.boss">보스</span></span>
             </div>
-            <div class="tab-radar-hint">[Tab / ESC] 레이더 닫기</div>
+            <div class="tab-radar-hint" data-i18n="radar.close_hint">[Tab / ESC] 레이더 닫기</div>
         </div>
     </div>
 
@@ -952,10 +952,10 @@
     <div id="dialogueBox" class="hidden">
         <div class="dialogue-header">
             <div class="npc-avatar">🧙‍♂️</div>
-            <div id="dialogueSpeaker">마을 장로</div>
-            <button id="dialogueCloseBtn" class="dialogue-close">확인 [F/Enter]</button>
+            <div id="dialogueSpeaker" data-i18n="dialogue.default_speaker">마을 장로</div>
+            <button id="dialogueCloseBtn" class="dialogue-close" data-i18n="dialogue.confirm_btn">확인 [F/Enter]</button>
         </div>
-        <div id="dialogueText">용사여, 마을에 오신 것을 환영하네!</div>
+        <div id="dialogueText" data-i18n="dialogue.default_welcome">용사여, 마을에 오신 것을 환영하네!</div>
     </div>
 
     <!-- Top Boss Health Bar (Cinematic Boss Raid HUD) -->
