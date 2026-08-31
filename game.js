@@ -1710,7 +1710,7 @@ class Game {
 
                     <div class="tutorial-card" style="margin-top: 8px;">
                         <h4>🪙 Trial Coins & Astel's Treasure Shop</h4>
-                        <p>• Spend earned <strong>[🪙 Trial Coins]</strong> at <strong>`✨ Astel`</strong> in NW Starting Village for legendary class weapons and transcendent elixirs.</p>
+                        <p>• Spend earned <strong>[🪙 Trial Coins]</strong> at <strong>'✨ Astel'</strong> in NW Starting Village for legendary class weapons and transcendent elixirs.</p>
                     </div>
                 </div>
 
@@ -1735,7 +1735,7 @@ class Game {
 
                     <div class="tutorial-card" style="margin-top: 8px;">
                         <h4>🎲 959 Lucky Casino House</h4>
-                        <p>• Visit `Gambler Jack` at the village square for High-Low Dice (2x~5x) and 3-Reel Slots (up to 50x Jackpot + Elixir).</p>
+                        <p>• Visit 'Gambler Jack' at the village square for High-Low Dice (2x~5x) and 3-Reel Slots (up to 50x Jackpot + Elixir).</p>
                     </div>
                 </div>
             `;
