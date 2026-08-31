@@ -1,10 +1,11 @@
-# ⚔️ 《지저씨 : 각성했지만 게으르고 싶어》 (Zijeossi)
+# ⚔️ 《지저씨 : 각성했지만 게으르고 싶어》 (Uncle Bob's Lazy Awakening)
 
 > **"세계는 구하겠지만... 일단 5분만 더 누워있을게요."**  
-> 24개 전 대륙과 50층 시련의 탑을 누비며 귀찮은 몬스터들을 소탕하는 하드코어 백수 액션 RPG!
+> 15개 대륙과 50층 시련의 탑을 누비며 귀찮은 몬스터들을 소탕하는 글로벌 하드코어 백수 액션 RPG!
 
-![Version](https://img.shields.io/badge/version-v3.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-v3.1.0-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Web%20%7C%20Mobile-success.svg)
+![Language](https://img.shields.io/badge/language-Korean%20%7C%20English-green.svg)
 ![Multiplayer](https://img.shields.io/badge/multiplayer-4%20Player%20Co--op-purple.svg)
 ![Studio](https://img.shields.io/badge/studio-959%20Labs-orange.svg)
 
@@ -12,6 +13,9 @@
 
 ## 🌟 주요 특징 (Key Features)
 
+- 👑 **공식 영문 타이틀 & 글로벌 다국어(i18n) 시스템 (Uncle Bob's Lazy Awakening)**:
+  - 메인 타이틀 화면 및 환경설정에서 원클릭으로 🇰🇷 한국어 ↔ 🇺🇸 English 실시간 언어 전환 지원
+  - 15개 대륙, 40여 종 아이템, 32개 스킬/툴팁, 20개 챕터 퀘스트, NPC 대화문 100% 전면 영문화 완료
 - 🌐 **4인 실시간 분산 코옵 멀티플레이 (Co-op Multiplayer)**:
   - 분산 구역 호스트(Distributed Zone Authority) 기반 렉 없는 실시간 4인 파티 사냥 & 보스 레이드
   - 4대 직업군 32종 스킬 이펙트, 투사체, 탄막, 외형 및 장비 100% 원격 실시간 동기화

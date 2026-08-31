@@ -4,6 +4,27 @@
 
 ---
 
+## 🌍 [v3.1.0] 글로벌 다국어(i18n) 시스템 구축 & 영문화 (Uncle Bob's Lazy Awakening) (2026-09-01)
+- 👑 **공식 영문 글로벌 타이틀 탑재**:
+  - 공식 영문명: **`Uncle Bob's Lazy Awakening`**
+  - 메인 타이틀 화면 2줄 네온 레이아웃 (`Uncle Bob's` / `Lazy Awakening`) 자동 렌더링 지원.
+- 🌐 **다국어(i18n) 코어 엔진 (`i18n.js`) 신규 개발 & 실시간 언어 전환**:
+  - `I18N_DICTIONARY`: 메뉴, HUD, 가이드, 일시정지, 설정, 상점, 시련상점, 대장간, 카지노, 멀티플레이, 토스트 알림 완벽 1:1 한/영 번역 매핑.
+  - `setLanguage('ko' | 'en')`: 메인 타이틀 화면 및 환경설정(Settings / P) 최상단에서 원클릭 실시간 언어 전환 지원 (선호 언어 `localStorage` 자동 보존).
+  - DOM 속성 기반(`[data-i18n]`, `[data-i18n-title]`, `[data-i18n-placeholder]`) 실시간 UI 텍스트 치환.
+- 🗺️ **15개 대륙 & 던전 전면 영문화 (`data/zones.js`)**:
+  - 15개 구역 전체의 구역명(`name_en`), 서브타이틀(`sub_en`), 추천 레벨(`level_en`), 포탈명 영문화 및 `getZoneTheme()` 다국어 연동.
+- ⚔️ **40여 종 전체 아이템 & 5대 특산품 영문화 (`data/items.js`)**:
+  - 4대 직업군 무기(Sword, Bow, Staff, Dagger), 방어구(T1~T10), 장신구, 포션, 마을별 고유 특산품 전체 `name_en`, `desc_en` 추가.
+- ⚡ **32개 스킬 & 툴팁 데이터베이스 영문화 (`data/skills.js`)**:
+  - 직업별 액티브/궁극기/공용 스킬, 스킬 툴팁(`SKILL_TOOLTIPS`), 2차 각성 패시브 전체 `name_en`, `desc_en`, `tip_en`, `dmgDesc_en`, `typeName_en` 추가.
+- 📜 **20개 챕터 에픽 퀘스트 영문화 (`data/quests.js`)**:
+  - 20챕터 스토리 퀘스트 제목(`title_en`), 임무 설명(`desc_en`), 목표 지역명(`zoneName_en`) 전면 영문화.
+- 💬 **NPC 대화 & 인게임 서브시스템 다국어 연동**:
+  - 5대 마을 장로/촌장 스토리 대화문, 상점(일반/시련) UI, 카지노 미니게임(주사위/슬롯), 대장간, 20칸 인벤토리 카드 다국어 연동.
+
+---
+
 ## 🌐 [v3.0.0] 지저씨 : 함께하는 각성 - 코옵 멀티플레이 대규모 업데이트 (Co-op Multiplayer) (2026-08-25)
 - 🌐 **4인 실시간 분산 코옵 멀티플레이 네트워크 엔진 탑재 (Node.js & Socket.io)**:
   - 분산 구역 호스트(Distributed Zone Authority) 아키텍처: 각 맵에 머무는 유저가 독립적으로 몬스터 AI와 스폰을 연산하여 서버 부하 0, 랙 없는 실시간 분산 처리.

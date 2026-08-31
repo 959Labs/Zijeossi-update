@@ -1,4 +1,4 @@
-const CURRENT_CLIENT_VERSION = '3.0.0';
+const CURRENT_CLIENT_VERSION = '3.1.0';
 window.CURRENT_CLIENT_VERSION = CURRENT_CLIENT_VERSION;
 const UPDATE_MANIFEST_URLS = [
     'https://raw.githubusercontent.com/959Labs/Zijeossi-update/master/version.json',

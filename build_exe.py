@@ -15,6 +15,7 @@ cmd = [
     '--name=Zijeossi',
     '--add-data=index.html;.',
     '--add-data=style.css;.',
+    '--add-data=i18n.js;.',
     '--add-data=data;data',
     '--add-data=renderers;renderers',
     '--add-data=systems;systems',
