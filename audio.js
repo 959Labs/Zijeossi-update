@@ -299,6 +299,9 @@ class SoundManager {
     playHit() {
         if (this.muted || !this.ctx) return;
         const now = this.ctx.currentTime;
+        if (this._lastHitTime && now - this._lastHitTime < 0.05) return;
+        this._lastHitTime = now;
+
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
 

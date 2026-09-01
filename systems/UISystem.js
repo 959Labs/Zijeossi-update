@@ -80,9 +80,10 @@ class UISystem {
 
             this.showDialogue(speakerName, claimMsg);
         } else if (activeQ) {
-            const qTitle = typeof tData === 'function' ? tData(activeQ, 'title') : activeQ.title;
-            const qDesc = typeof tData === 'function' ? tData(activeQ, 'desc') : activeQ.desc;
-            const qZone = typeof tData === 'function' ? tData(activeQ, 'zoneName') : (activeQ.zoneName || '');
+            const dbQ = (typeof QUEST_DB !== 'undefined' && QUEST_DB.find(q => q.id === activeQ.id || q.title === activeQ.title || q.title_en === activeQ.title)) || activeQ;
+            const qTitle = typeof tData === 'function' ? tData(dbQ, 'title') : (isEn ? (dbQ.title_en || activeQ.title) : activeQ.title);
+            const qDesc = typeof tData === 'function' ? tData(dbQ, 'desc') : (isEn ? (dbQ.desc_en || activeQ.desc) : activeQ.desc);
+            const qZone = typeof tData === 'function' ? tData(dbQ, 'zoneName') : (isEn ? (dbQ.zoneName_en || activeQ.zoneName || '') : (activeQ.zoneName || ''));
 
             const activeMsg = isEn
                 ? `${greetingPrefix}Current Task:\n📜 [${qTitle}]\n📍 Target: [${qZone || 'Target Zone'}] ${qDesc}\nProgress: (${activeQ.currentCount}/${activeQ.targetCount})\n\nI know it's a hassle, but finish it quickly so we can both sleep in peace!`
@@ -92,9 +93,10 @@ class UISystem {
         } else if (readyQ) {
             readyQ.status = 'active';
             sounds.playInteract();
-            const qTitle = typeof tData === 'function' ? tData(readyQ, 'title') : readyQ.title;
-            const qDesc = typeof tData === 'function' ? tData(readyQ, 'desc') : readyQ.desc;
-            const qZone = typeof tData === 'function' ? tData(readyQ, 'zoneName') : (readyQ.zoneName || '');
+            const dbQ = (typeof QUEST_DB !== 'undefined' && QUEST_DB.find(q => q.id === readyQ.id || q.title === readyQ.title || q.title_en === readyQ.title)) || readyQ;
+            const qTitle = typeof tData === 'function' ? tData(dbQ, 'title') : (isEn ? (dbQ.title_en || readyQ.title) : readyQ.title);
+            const qDesc = typeof tData === 'function' ? tData(dbQ, 'desc') : (isEn ? (dbQ.desc_en || readyQ.desc) : readyQ.desc);
+            const qZone = typeof tData === 'function' ? tData(dbQ, 'zoneName') : (isEn ? (dbQ.zoneName_en || readyQ.zoneName || '') : (readyQ.zoneName || ''));
 
             const readyMsg = isEn
                 ? `${greetingPrefix}A new troublesome chore has come up!\n\n📜 [${qTitle}]\n📍 [${qZone || 'Target Zone'}] ${qDesc}\n\nGo take care of them and head straight back to bed! I'll prepare generous rewards!`

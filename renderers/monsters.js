@@ -13,6 +13,13 @@ function renderMonsterGraphic(ctx, enemy) {
         return;
     }
 
+    // 🎨 2D Pixel Sprite Renderer Integration with Procedural Fallback
+    if (typeof spriteManager !== 'undefined' && spriteManager.drawMonsterSprite) {
+        if (spriteManager.drawMonsterSprite(ctx, enemy)) {
+            return;
+        }
+    }
+
     switch(type) {
         case 'slime':
             renderSlime(ctx, t, r, col);

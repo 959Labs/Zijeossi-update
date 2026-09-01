@@ -3,7 +3,7 @@
 > **"세계는 구하겠지만... 일단 5분만 더 누워있을게요."**  
 > 15개 대륙과 50층 시련의 탑을 누비며 귀찮은 몬스터들을 소탕하는 글로벌 하드코어 백수 액션 RPG!
 
-![Version](https://img.shields.io/badge/version-v3.1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-v3.3.0-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Web%20%7C%20Mobile-success.svg)
 ![Language](https://img.shields.io/badge/language-Korean%20%7C%20English-green.svg)
 ![Multiplayer](https://img.shields.io/badge/multiplayer-4%20Player%20Co--op-purple.svg)
@@ -81,6 +81,7 @@ npm start
 - **2026-08-23**: v2.0.0 스킬북 시스템 및 4K 텍스처 리마스터
 - **2026-08-24**: v2.4.0 4대 직업 전용 스킬 20종 대확장 & 2차 각성 궁극기
 - **2026-08-25**: **v3.0.0 4인 실시간 코옵 멀티플레이 & 보스 레이드 대규모 업데이트 완성**
+- **2026-09-01**: **v3.3.0 다국어(i18n) 번역 시스템 완비, 타격감(Game Juice) 극대화, 2D 픽셀 스프라이트 전환 및 엔진 GPU 렌더링 한계 최적화 완료**
 
 ---
 © 2026 959 Labs. All rights reserved.

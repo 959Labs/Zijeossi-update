@@ -16,9 +16,10 @@ class QuestSystem {
 
         if (cur) {
             const isDone = cur.status === 'completed';
-            const qTitle = typeof tData === 'function' ? tData(cur, 'title') : cur.title;
-            const qDesc = typeof tData === 'function' ? tData(cur, 'desc') : cur.desc;
-            const qZone = typeof tData === 'function' ? tData(cur, 'zoneName') : (cur.zoneName || '');
+            const dbQ = (typeof QUEST_DB !== 'undefined' && QUEST_DB.find(q => q.id === cur.id || q.title === cur.title || q.title_en === cur.title)) || cur;
+            const qTitle = typeof tData === 'function' ? tData(dbQ, 'title') : (isEn ? (dbQ.title_en || cur.title) : cur.title);
+            const qDesc = typeof tData === 'function' ? tData(dbQ, 'desc') : (isEn ? (dbQ.desc_en || cur.desc) : cur.desc);
+            const qZone = typeof tData === 'function' ? tData(dbQ, 'zoneName') : (isEn ? (dbQ.zoneName_en || cur.zoneName || '') : (cur.zoneName || ''));
 
             const statusText = isDone
                 ? (isEn ? '✨ Complete! Report to Elder for rewards [F]' : '✨ 완료! 장로에게 보고하고 꿀잠 자기 [F]')
@@ -62,7 +63,7 @@ class QuestSystem {
         if (enemy.isBoss) {
             sounds.playUltimate();
             this.game.camera.shake(1.2, 25);
-            const bName = enemy.bossName_en && isEn ? enemy.bossName_en : enemy.bossName;
+            const bName = typeof enemy.getLocalizedBossName === 'function' ? enemy.getLocalizedBossName() : (enemy.bossName || 'Boss');
             const bossVictoryMsg = isEn
                 ? `🏆 [Raid Boss Cleared] '${bName}' conquered! (+${goldReward}G, +${enemy.expReward}EXP)`
                 : `🏆 [보스 토벌 성공] '${enemy.bossName}' 정복! (+${goldReward}G, +${enemy.expReward}EXP)`;
@@ -86,7 +87,8 @@ class QuestSystem {
                 if (q.currentCount >= q.targetCount) {
                     q.status = 'completed';
                     sounds.playLevelUp();
-                    const qTitle = typeof tData === 'function' ? tData(q, 'title') : q.title;
+                    const dbQ = (typeof QUEST_DB !== 'undefined' && QUEST_DB.find(dbq => dbq.id === q.id || dbq.title === q.title)) || q;
+                    const qTitle = typeof tData === 'function' ? tData(dbQ, 'title') : (isEn ? (dbQ.title_en || q.title) : q.title);
                     const completeMsg = isEn
                         ? `🎉 [Quest Complete!] '${qTitle}' - Report to Elder for rewards!`
                         : `[퀘스트 완료!] '${q.title}' - 장로에게 보상을 받으세요!`;

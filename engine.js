@@ -28,13 +28,40 @@ class InputHandler {
         this.mouse = { x: 0, y: 0, down: false, click: false };
         this.joystick = { active: false, x: 0, y: 0, dx: 0, dy: 0, originX: 0, originY: 0, touchId: null };
 
+        const isTextInputFocused = () => {
+            const el = document.activeElement;
+            if (!el) return false;
+            const tag = el.tagName;
+            if (tag === 'TEXTAREA') return true;
+            if (tag === 'INPUT') {
+                const type = (el.type || 'text').toLowerCase();
+                const textTypes = ['text', 'password', 'search', 'email', 'url', 'number', 'tel'];
+                if (textTypes.includes(type)) {
+                    return !el.disabled && el.offsetParent !== null && !el.closest('.hidden');
+                }
+            }
+            return false;
+        };
+
         // Keyboard support
         window.addEventListener('keydown', (e) => {
-            if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
-                if (e.code === 'Escape' && window.game && window.game.chatSystem && window.game.chatSystem.isOpen) {
-                    window.game.chatSystem.closeChat();
+            if (isTextInputFocused()) {
+                if (e.code === 'Escape') {
+                    if (document.activeElement && typeof document.activeElement.blur === 'function') {
+                        document.activeElement.blur();
+                    }
+                    if (window.game && window.game.chatSystem && window.game.chatSystem.isOpen) {
+                        window.game.chatSystem.closeChat();
+                    }
                 }
                 return;
+            }
+
+            // If activeElement is a non-text element (like button, slider, checkbox, select), blur it so game keys work cleanly
+            if (document.activeElement && document.activeElement !== document.body) {
+                if (typeof document.activeElement.blur === 'function') {
+                    document.activeElement.blur();
+                }
             }
 
             // In-game Chat Trigger (Enter Key)
@@ -44,7 +71,7 @@ class InputHandler {
                 return;
             }
 
-            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'Enter', 'Tab'].includes(e.code)) {
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'Tab'].includes(e.code)) {
                 e.preventDefault();
             }
 
@@ -82,6 +109,11 @@ class InputHandler {
         window.addEventListener('mousedown', () => {
             this.mouse.down = true;
             this.mouse.click = true;
+            if (!isTextInputFocused() && document.activeElement && document.activeElement !== document.body) {
+                if (typeof document.activeElement.blur === 'function') {
+                    document.activeElement.blur();
+                }
+            }
             sounds.init();
             if (window.game && !window.game.isIntroOpen) {
                 sounds.startBGM();
@@ -297,10 +329,14 @@ class ParticleSystem {
         this.particles = [];
         this.damageNumbers = [];
         this.slashArcs = [];
+        this.MAX_PARTICLES = 400;
+        this.MAX_DAMAGE_NUMBERS = 60;
     }
 
     spawn(x, y, color, count = 6, speed = 80, life = 0.35, size = 4) {
-        for (let i = 0; i < count; i++) {
+        if (this.particles.length >= this.MAX_PARTICLES) return;
+        const spawnCount = Math.min(count, this.MAX_PARTICLES - this.particles.length);
+        for (let i = 0; i < spawnCount; i++) {
             const angle = Math.random() * Math.PI * 2;
             const spd = (Math.random() * 0.7 + 0.3) * speed;
             this.particles.push({
@@ -312,6 +348,27 @@ class ParticleSystem {
                 life,
                 maxLife: life,
                 size: (Math.random() * 0.5 + 0.5) * size
+            });
+        }
+    }
+
+    spawnSlashSparks(x, y, angle, color = '#ffffff', count = 8) {
+        if (this.particles.length >= this.MAX_PARTICLES) return;
+        const spawnCount = Math.min(count, this.MAX_PARTICLES - this.particles.length);
+        for (let i = 0; i < spawnCount; i++) {
+            const spread = (Math.random() - 0.5) * 1.4;
+            const a = angle + spread + Math.PI;
+            const spd = Math.random() * 160 + 80;
+            this.particles.push({
+                x,
+                y,
+                vx: Math.cos(a) * spd,
+                vy: Math.sin(a) * spd,
+                color,
+                life: 0.22,
+                maxLife: 0.22,
+                size: Math.random() * 3 + 2,
+                spark: true
             });
         }
     }
@@ -330,73 +387,147 @@ class ParticleSystem {
     }
 
     spawnDamageNumber(x, y, text, color = '#ffffff', isCrit = false) {
+        if (this.damageNumbers.length >= this.MAX_DAMAGE_NUMBERS) return;
         this.damageNumbers.push({
-            x: x + (Math.random() * 20 - 10),
-            y: y - 10,
-            text,
-            color,
-            life: 0.8,
-            maxLife: 0.8,
-            vy: -45,
-            isCrit
+            x: x + (Math.random() * 16 - 8),
+            y: y - 8,
+            text: isCrit ? `💥 ${text}!` : text,
+            color: isCrit ? '#fde047' : color,
+            life: isCrit ? 0.95 : 0.75,
+            maxLife: isCrit ? 0.95 : 0.75,
+            vy: isCrit ? -55 : -42,
+            isCrit,
+            scale: isCrit ? 1.5 : 1.15
         });
     }
 
     update(dt) {
+        // 🚀 swap-and-pop deletion: O(1) instead of O(n) splice
         for (let i = this.particles.length - 1; i >= 0; i--) {
             const p = this.particles[i];
             p.x += p.vx * dt;
             p.y += p.vy * dt;
             p.life -= dt;
-            if (p.life <= 0) this.particles.splice(i, 1);
+            if (p.life <= 0) {
+                this.particles[i] = this.particles[this.particles.length - 1];
+                this.particles.length--;
+            }
         }
 
         for (let i = this.slashArcs.length - 1; i >= 0; i--) {
             const a = this.slashArcs[i];
             a.life -= dt;
-            if (a.life <= 0) this.slashArcs.splice(i, 1);
+            if (a.life <= 0) {
+                this.slashArcs[i] = this.slashArcs[this.slashArcs.length - 1];
+                this.slashArcs.length--;
+            }
         }
 
         for (let i = this.damageNumbers.length - 1; i >= 0; i--) {
             const d = this.damageNumbers[i];
             d.y += d.vy * dt;
             d.life -= dt;
-            if (d.life <= 0) this.damageNumbers.splice(i, 1);
+            if (d.life <= 0) {
+                this.damageNumbers[i] = this.damageNumbers[this.damageNumbers.length - 1];
+                this.damageNumbers.length--;
+            }
         }
     }
 
     render(ctx) {
-        for (const p of this.particles) {
-            ctx.save();
+        // ── 1. Normal particles ─────────────────────────────────────────
+        // 🚀 Group by type (spark vs normal) to minimize state changes.
+        // One save/restore around the whole batch instead of per-particle.
+        ctx.save();
+        ctx.shadowBlur = 0;
+
+        for (let i = 0; i < this.particles.length; i++) {
+            const p = this.particles[i];
+            if (p.spark) continue; // sparks rendered in second pass
             ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
             ctx.fillStyle = p.color;
-            ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+            ctx.fillRect(p.x - p.size * 0.5, p.y - p.size * 0.5, p.size, p.size);
+        }
+
+        ctx.restore();
+
+        // ── 2. Spark particles (need shadowBlur) ────────────────────────
+        // Set shadowBlur ONCE for the entire spark batch
+        let hasSparks = false;
+        for (let i = 0; i < this.particles.length; i++) {
+            if (this.particles[i].spark) { hasSparks = true; break; }
+        }
+
+        if (hasSparks) {
+            ctx.save();
+            ctx.shadowBlur = 6;
+            for (let i = 0; i < this.particles.length; i++) {
+                const p = this.particles[i];
+                if (!p.spark) continue;
+                ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
+                ctx.strokeStyle = p.color;
+                ctx.shadowColor = p.color;
+                ctx.lineWidth = p.size;
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p.x - p.vx * 0.035, p.y - p.vy * 0.035);
+                ctx.stroke();
+            }
             ctx.restore();
         }
 
-        for (const a of this.slashArcs) {
+        // ── 3. Slash arcs ───────────────────────────────────────────────
+        if (this.slashArcs.length > 0) {
             ctx.save();
-            ctx.globalAlpha = Math.max(0, a.life / a.maxLife);
-            ctx.strokeStyle = a.color;
             ctx.lineWidth = 4.5;
-            ctx.shadowColor = a.color;
             ctx.shadowBlur = 10;
-            ctx.beginPath();
-            ctx.arc(a.x, a.y, a.radius, a.startAngle, a.endAngle);
-            ctx.stroke();
+            for (let i = 0; i < this.slashArcs.length; i++) {
+                const a = this.slashArcs[i];
+                ctx.globalAlpha = Math.max(0, a.life / a.maxLife);
+                ctx.strokeStyle = a.color;
+                ctx.shadowColor = a.color;
+                ctx.beginPath();
+                ctx.arc(a.x, a.y, a.radius, a.startAngle, a.endAngle);
+                ctx.stroke();
+            }
             ctx.restore();
         }
 
-        for (const d of this.damageNumbers) {
+        // ── 4. Damage numbers ───────────────────────────────────────────
+        if (this.damageNumbers.length > 0) {
             ctx.save();
-            ctx.globalAlpha = Math.min(1, d.life * 2);
-            ctx.font = d.isCrit ? 'bold 16px sans-serif' : 'bold 12px sans-serif';
-            ctx.fillStyle = d.color;
-            ctx.strokeStyle = '#000000';
             ctx.lineWidth = 3;
-            ctx.strokeText(d.text, d.x, d.y);
-            ctx.fillText(d.text, d.x, d.y);
+            ctx.strokeStyle = '#000000';
+            for (let i = 0; i < this.damageNumbers.length; i++) {
+                const d = this.damageNumbers[i];
+                const progress = 1 - (d.life / d.maxLife);
+                let curScale = d.scale;
+                if (progress < 0.22) {
+                    curScale = d.scale * (1 + (0.22 - progress) * 2.2);
+                } else {
+                    curScale = d.scale * Math.max(0.85, (1 - (progress - 0.22) * 0.25));
+                }
+                ctx.save();
+                ctx.globalAlpha = Math.min(1, d.life * 2.4);
+                ctx.translate(d.x, d.y);
+                ctx.scale(curScale, curScale);
+                if (d.isCrit) {
+                    ctx.font = '900 16px sans-serif';
+                    ctx.lineWidth = 4.5;
+                    ctx.shadowColor = '#facc15';
+                    ctx.shadowBlur = 10;
+                } else {
+                    ctx.font = 'bold 12px sans-serif';
+                    ctx.lineWidth = 3;
+                    ctx.shadowBlur = 0;
+                }
+                ctx.fillStyle = d.color;
+                ctx.strokeText(d.text, 0, 0);
+                ctx.fillText(d.text, 0, 0);
+                ctx.restore();
+            }
             ctx.restore();
         }
     }
 }
+

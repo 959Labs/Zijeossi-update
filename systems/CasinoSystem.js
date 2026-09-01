@@ -72,10 +72,19 @@ class CasinoSystem {
     }
 
     updateCasinoUI() {
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         const goldEl = document.getElementById('casinoGold');
         if (goldEl) goldEl.innerText = `${this.game.player.gold.toLocaleString()} G`;
         const betDisp = document.getElementById('casinoBetAmount');
         if (betDisp) betDisp.innerText = `${this.casinoBet || 20} G`;
+        const sumText = document.getElementById('diceSumText');
+        if (sumText) {
+            if (this.lastSum) {
+                sumText.innerText = isEn ? `Dice Sum: ${this.lastSum} (${this.lastD1} + ${this.lastD2})` : `주사위 합: ${this.lastSum} (${this.lastD1} + ${this.lastD2})`;
+            } else {
+                sumText.innerText = isEn ? 'Dice Sum: 12' : '주사위 합: 12';
+            }
+        }
     }
 
     playHighLowDice(choice) {
@@ -113,6 +122,9 @@ class CasinoSystem {
             const d1 = Math.floor(Math.random() * 6) + 1;
             const d2 = Math.floor(Math.random() * 6) + 1;
             const sum = d1 + d2;
+            this.lastSum = sum;
+            this.lastD1 = d1;
+            this.lastD2 = d2;
 
             if (cube1) cube1.innerText = diceFaces[d1 - 1];
             if (cube2) cube2.innerText = diceFaces[d2 - 1];

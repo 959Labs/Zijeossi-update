@@ -80,19 +80,21 @@ class NetworkSystem {
         socket.on('connect', () => {
             this.isConnected = true;
             this.myId = socket.id;
-            console.log(`[NetworkSystem] 멀티플레이 서버 연결 완료! (ID: ${this.myId})`);
+            console.log(`[NetworkSystem] Connected to multiplayer server! (ID: ${this.myId})`);
             
             // 내 초기 캐릭터 정보 즉시 전송
             this.sendPlayerState(true);
-            this.game.showNotification('🌐 [멀티플레이] 서버에 연결되었습니다!');
+            const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+            this.game.showNotification(isEn ? '🌐 [Multiplayer] Connected to game server!' : '🌐 [멀티플레이] 서버에 연결되었습니다!');
         });
 
         // 2. 서버 연결 끊김
         socket.on('disconnect', () => {
             this.isConnected = false;
             this.game.remotePlayers = {};
-            console.log('[NetworkSystem] 서버 연결 해제');
-            this.game.showNotification('⚠️ [멀티플레이] 서버 연결이 종료되었습니다.');
+            console.log('[NetworkSystem] Disconnected from server');
+            const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+            this.game.showNotification(isEn ? '⚠️ [Multiplayer] Disconnected from server.' : '⚠️ [멀티플레이] 서버 연결이 종료되었습니다.');
         });
 
         // 3. 기존 플레이어 전체 목록 수신
@@ -108,8 +110,9 @@ class NetworkSystem {
         socket.on('newPlayer', (playerInfo) => {
             if (playerInfo.id !== this.myId) {
                 this.game.remotePlayers[playerInfo.id] = new RemotePlayer(playerInfo.id, playerInfo);
-                const nick = playerInfo.nickname || `유저_${playerInfo.id.slice(0, 4)}`;
-                this.game.showNotification(`🎮 파티원 [${nick}] 님이 입장했습니다!`);
+                const nick = playerInfo.nickname || `Player_${playerInfo.id.slice(0, 4)}`;
+                const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+                this.game.showNotification(isEn ? `🎮 Party member [${nick}] joined!` : `🎮 파티원 [${nick}] 님이 입장했습니다!`);
                 sounds.playCoin();
             }
         });
@@ -232,9 +235,10 @@ class NetworkSystem {
             if (this.game.remotePlayers[id]) {
                 const nick = this.game.remotePlayers[id].nickname;
                 delete this.game.remotePlayers[id];
-                this.game.showNotification(`👋 파티원 [${nick}] 님이 퇴장했습니다.`);
+                const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+                this.game.showNotification(isEn ? `👋 Party member [${nick}] left.` : `👋 파티원 [${nick}] 님이 퇴장했습니다.`);
                 if (this.game.chatSystem) {
-                    this.game.chatSystem.addSystemMessage(`파티원 [${nick}] 님이 퇴장했습니다.`);
+                    this.game.chatSystem.addSystemMessage(isEn ? `Party member [${nick}] left.` : `파티원 [${nick}] 님이 퇴장했습니다.`);
                 }
             }
         });

@@ -25,24 +25,38 @@ const I18N_DICTIONARY = {
 
         // Control Guide Badge
         "guide.badge_title": "🎮 조작 가이드",
+        "guide.key_move": "↑ / ↓",
         "guide.move": "메뉴 이동",
+        "guide.key_select": "ENTER / 클릭",
         "guide.select": "선택 & 시작",
+        "guide.key_interact": "F",
         "guide.interact": "NPC & 상점 대화",
+        "guide.key_attack": "A / Space",
         "guide.attack_dash": "기본 공격 / 대시",
+        "guide.key_skills": "W, E, S, D, Q",
         "guide.skills": "스킬 및 궁극기",
 
         // Top Right HUD Buttons
         "hud.pause": " 일시정지 [ESC]",
         "hud.quit": " 종료",
         "hud.map": " 지도 [M]",
+        "hud.skills": " 스킬북 [K]",
         "hud.skillbook": " 스킬북 [K]",
         "hud.inventory": " 가방 [I]",
         "hud.settings": " 설정 [P]",
         "hud.save": " 저장",
         "hud.fullscreen": " 전체화면",
+        "hud.windowed": " 창 모드",
         "hud.copy": " 복사",
+        "hud.export": " 복사",
         "hud.sync": " 동기화",
+        "hud.import": " 동기화",
         "hud.saved": "💾 저장됨",
+
+        "common.close": "닫기",
+        "skill.book_title": "스킬북 & 9슬롯 룬 각성",
+        "skill.quickslots": "장착된 9개 퀵슬롯",
+        "skill.clear_all": "전체 해제",
 
         // Top Left Stack
         "quest.header": "📜 퀘스트",
@@ -81,6 +95,7 @@ const I18N_DICTIONARY = {
         "chat.send": "전송",
 
         // Pause Modal
+        "pause.badge": "⏸️ 일시정지 (PAUSED)",
         "pause.title": "일시정지",
         "pause.resume": "▶️ 게임 계속하기 (Resume) [ESC]",
         "pause.skills": "⚡ 스킬북 & 9슬롯 세팅 [K]",
@@ -93,6 +108,7 @@ const I18N_DICTIONARY = {
 
         // Settings Modal
         "settings.title": "⚙️ 환경설정 (Settings)",
+        "settings.close_btn": "닫기 [P/F/ESC]",
         "settings.language_section": "🌐 언어 설정 (Language)",
         "settings.sound_section": "🔊 사운드 설정",
         "settings.bgm": "배경음악 음량 (BGM)",
@@ -153,11 +169,12 @@ const I18N_DICTIONARY = {
 
         // Shop Modal
         "shop.title": "🛒 방랑 상인의 만물상",
+        "shop.close_btn": "닫기 [F]",
         "shop.tab_buy": "🛒 아이템 구매",
         "shop.tab_sell": "💰 아이템 판매",
-        "shop.controls": "조작: [← / → 또는 Tab] 탭 전환 • [↑ / ↓] 항목 선택 • [ENTER] 구매/판매 • [F] 닫기",
-        "shop.gold": "🪙 보유 골드: ",
-        "shop.bag": "🎒 가방: ",
+        "shop.controls": "조작: <strong>[← / → 또는 Tab]</strong> 탭 전환 &nbsp;•&nbsp; <strong>[↑ / ↓]</strong> 항목 선택 &nbsp;•&nbsp; <strong>[ENTER]</strong> 구매/판매 &nbsp;•&nbsp; <strong>[F]</strong> 닫기",
+        "shop.gold_label": "🪙 보유 골드: ",
+        "shop.bag_label": "🎒 가방: ",
         "shop.buy_btn": "구매 ({price} G)",
         "shop.sell_btn": "판매 (+{price} G)",
         "shop.buy_success": "🎉 [{name}]을(를) 구매했습니다! (-{price} G)",
@@ -168,8 +185,9 @@ const I18N_DICTIONARY = {
 
         // Trial Shop Modal
         "trial_shop.title": "✨ 아스텔의 시련 보물소 (전설 직업 무기 교환)",
-        "trial_shop.controls": "조작: [↑ / ↓ 방향키] 품목 선택 • [ENTER] 시련의 증표로 교환 • [F / ESC] 닫기",
-        "trial_shop.coins": "🪙 보유 시련의 증표: ",
+        "trial_shop.close_btn": "닫기 [F/ESC]",
+        "trial_shop.controls": "조작: <strong>[↑ / ↓ 방향키]</strong> 품목 선택 &nbsp;•&nbsp; <strong>[ENTER]</strong> 시련의 증표로 교환 &nbsp;•&nbsp; <strong>[F / ESC]</strong> 닫기",
+        "trial_shop.coins_label": "🪙 보유 시련의 증표: ",
         "trial_shop.unit": "개",
         "trial_shop.exchange_btn": "교환 ({price} 🪙)",
         "trial_shop.exchange_success": "🌟 [{name}] 교환 성공! (-{price} 시련의 증표)",
@@ -178,8 +196,9 @@ const I18N_DICTIONARY = {
         // Forge Modal
         "forge.title": "⚒️ 대장장이의 불꽃 대장간",
         "forge.desc": "✨ [슬롯 계승 강화] 어떤 새 장비를 착용해도 강화 수치가 100% 영구 유지·계승됩니다!",
-        "forge.controls": "조작: [↑/↓ 방향키] 항목 이동 • [ENTER] 강화 • [F] 닫기",
-        "forge.gold": "보유 골드: ",
+        "forge.close_btn": "닫기 [F]",
+        "forge.controls": "조작: <strong>[↑/↓ 방향키]</strong> 항목 이동 &nbsp;•&nbsp; <strong>[ENTER]</strong> 강화 &nbsp;•&nbsp; <strong>[F]</strong> 닫기",
+        "forge.gold_label": "보유 골드: ",
         "forge.upgrade_btn": "강화 (+{level} ➔ +{next})",
         "forge.max_level": "⭐ MAX 강화 달성",
         "forge.success": "✨ 강화 성공! [{slot}] 수치가 +{level}(으)로 상승했습니다! (-{price} G)",
@@ -187,11 +206,13 @@ const I18N_DICTIONARY = {
 
         // Casino Modal
         "casino.title": "🎲 959 럭키 카지노 하우스 (Jackpot House)",
+        "casino.close_btn": "닫기 [F/ESC]",
         "casino.tab_dice": "🎲 더블 다이스 (High-Low)",
         "casino.tab_slot": "🎰 3-릴 미니 슬롯",
-        "casino.gold": "🪙 내 보유 골드: ",
-        "casino.bet_display": "🎯 베팅액: ",
+        "casino.gold_label": "🪙 내 보유 골드: ",
+        "casino.bet_display_label": "🎯 베팅액: ",
         "casino.bet_label": "베팅 금액:",
+        "casino.dice_sum_default": "주사위 합: 12",
         "casino.dice_sum": "주사위 합: ",
         "casino.dice_low_title": "📉 로우 (LOW)",
         "casino.dice_low_sub": "주사위 합 2 ~ 6",
@@ -203,6 +224,11 @@ const I18N_DICTIONARY = {
         "casino.dice_high_sub": "주사위 합 8 ~ 12",
         "casino.dice_high_pay": "배당 2.0x",
         "casino.slot_spin": "🎰 레버 당기기 (SPIN!)",
+        "casino.slot_payout_1": "🍒 3개 (3x)",
+        "casino.slot_payout_2": "🔔 3개 (5x)",
+        "casino.slot_payout_3": "💎 3개 (10x)",
+        "casino.slot_payout_4": "7️⃣ 3개 (25x)",
+        "casino.slot_payout_5": "👑 3개 (50x + 전설 강화석)",
         "casino.default_comment": "도박사 잭: \"원하는 게임과 베팅액을 고르고 도전해 보게나!\"",
         "casino.win_dice": "🎉 적중! 도박사 잭: \"오호! 눈썰미가 제법이군! (+{payout} G)\"",
         "casino.lose_dice": "💸 낙첨! 도박사 잭: \"아쉽구먼! 운은 다시 돌아오는 법이지!\"",
@@ -212,12 +238,14 @@ const I18N_DICTIONARY = {
 
         // Skill Book Modal
         "skillbook.title": "⚡ 지저씨의 스킬북 & 9슬롯 커스텀 장착",
-        "skillbook.controls": "조작: [↑ / ↓] 스킬 선택 • [ENTER] 선택 후 배치할 키(Q, W, E, A, S, D, Z, X, C) 입력 • [DEL] 해제 • [X] 전체 해제 • [K / F / ESC] 닫기",
+        "skillbook.close_btn": "닫기 [K/F/ESC]",
+        "skillbook.controls": "조작: <strong>[↑ / ↓]</strong> 스킬 선택 &nbsp;•&nbsp; <strong>[ENTER]</strong> 선택 후 배치할 키<strong>(Q, W, E, A, S, D, Z, X, C)</strong> 입력 &nbsp;•&nbsp; <strong>[DEL]</strong> 해제 &nbsp;•&nbsp; <strong>[X]</strong> 전체 해제 &nbsp;•&nbsp; <strong>[K / F / ESC]</strong> 닫기",
         "skillbook.deck_title": "🎯 장착된 9개 퀵슬롯",
         "skillbook.active_slots": "{count} / 9 슬롯 활성화",
         "skillbook.clear_all": "🗑️ 전체 해제 [X]",
-        "skillbook.tip": "💡 팁: 모든 슬롯을 다 채우지 않아도 되며, 자주 쓰는 스킬만 원하는 키에 배치할 수 있습니다. 장착된 슬롯을 클릭하면 즉시 해제됩니다.",
+        "skillbook.tip": "💡 <strong>팁</strong>: 모든 슬롯을 다 채우지 않아도 되며, 자주 쓰는 스킬만 원하는 키에 배치할 수 있습니다. 장착된 슬롯을 클릭하면 즉시 해제됩니다.",
         "skillbook.lib_title": "📖 보유 스킬 라이브러리 (총 {count}종)",
+        "skillbook.lib_title_default": "📖 보유 스킬 라이브러리 (25종)",
         "skillbook.tab_all": "전체 (All)",
         "skillbook.tab_warrior": "⚔️ 검사",
         "skillbook.tab_archer": "🏹 궁수",
@@ -241,10 +269,12 @@ const I18N_DICTIONARY = {
 
         // World Map Modal
         "worldmap.title": "🗺️ 아르카디아 대륙 원정 지도 (Expedition Map)",
+        "worldmap.close_btn": "닫기 [M/F/ESC]",
         "worldmap.current_loc": "📍 현재 위치: ",
+        "worldmap.current_loc_label": "📍 현재 위치: ",
         "worldmap.mobs_header": "⚔️ 출현 몬스터 & 보스",
         "worldmap.roads_header": "🧭 연결된 원정 경로 (Connected Roads)",
-        "worldmap.tip": "💡 모험 안내: 지도를 통한 순간이동은 지원되지 않습니다. 필드 가장자리의 포탈을 걸어서 이동하세요. 마을로 복귀하려면 [📜 마을 귀환 주문서]를 사용하세요!",
+        "worldmap.tip": "💡 <strong>모험 안내</strong>: 지도를 통한 순간이동은 지원되지 않습니다. 필드 가장자리의 포탈을 걸어서 이동하세요. 마을로 복귀하려면 <strong>[📜 마을 귀환 주문서]</strong>를 사용하세요!",
 
         // Multiplayer Modal
         "multi.title": "코옵 멀티플레이 로비 (Co-op Lobby)",
@@ -310,24 +340,38 @@ const I18N_DICTIONARY = {
 
         // Control Guide Badge
         "guide.badge_title": "🎮 Controls Guide",
+        "guide.key_move": "↑ / ↓",
         "guide.move": "Move Menu",
+        "guide.key_select": "ENTER / Click",
         "guide.select": "Select & Start",
+        "guide.key_interact": "F",
         "guide.interact": "NPC / Shop Interact",
+        "guide.key_attack": "A / Space",
         "guide.attack_dash": "Attack / Dash",
+        "guide.key_skills": "W, E, S, D, Q",
         "guide.skills": "Skills & Ultimate",
 
         // Top Right HUD Buttons
         "hud.pause": " Pause [ESC]",
         "hud.quit": " Quit",
         "hud.map": " Map [M]",
+        "hud.skills": " Skills [K]",
         "hud.skillbook": " Skills [K]",
         "hud.inventory": " Bag [I]",
         "hud.settings": " Settings [P]",
         "hud.save": " Save",
         "hud.fullscreen": " Fullscreen",
+        "hud.windowed": " Windowed",
         "hud.copy": " Copy",
+        "hud.export": " Copy",
         "hud.sync": " Sync",
+        "hud.import": " Sync",
         "hud.saved": "💾 Saved",
+
+        "common.close": "Close",
+        "skill.book_title": "Skill Book & 9-Slot Rune Awakening",
+        "skill.quickslots": "Equipped 9 Quick Slots",
+        "skill.clear_all": "Clear All",
 
         // Top Left Stack
         "quest.header": "📜 Quest Log",
@@ -366,6 +410,7 @@ const I18N_DICTIONARY = {
         "chat.send": "Send",
 
         // Pause Modal
+        "pause.badge": "⏸️ GAME PAUSED",
         "pause.title": "GAME PAUSED",
         "pause.resume": "▶️ Resume Game (Resume) [ESC]",
         "pause.skills": "⚡ Skill Book & 9-Slot Loadout [K]",
@@ -378,6 +423,7 @@ const I18N_DICTIONARY = {
 
         // Settings Modal
         "settings.title": "⚙️ Settings & Options",
+        "settings.close_btn": "Close [P/F/ESC]",
         "settings.language_section": "🌐 Language (언어 설정)",
         "settings.sound_section": "🔊 Audio Settings",
         "settings.bgm": "Music Volume (BGM)",
@@ -438,11 +484,12 @@ const I18N_DICTIONARY = {
 
         // Shop Modal
         "shop.title": "🛒 Traveling Merchant's Outpost",
+        "shop.close_btn": "Close [F]",
         "shop.tab_buy": "🛒 Buy Items",
         "shop.tab_sell": "💰 Sell Items",
-        "shop.controls": "Controls: [← / → or Tab] Switch Tab • [↑ / ↓] Select • [ENTER] Buy/Sell • [F] Close",
-        "shop.gold": "🪙 Gold: ",
-        "shop.bag": "🎒 Bag: ",
+        "shop.controls": "Controls: <strong>[← / → or Tab]</strong> Switch Tab &nbsp;•&nbsp; <strong>[↑ / ↓]</strong> Select &nbsp;•&nbsp; <strong>[ENTER]</strong> Buy/Sell &nbsp;•&nbsp; <strong>[F]</strong> Close",
+        "shop.gold_label": "🪙 Gold: ",
+        "shop.bag_label": "🎒 Bag: ",
         "shop.buy_btn": "Buy ({price} G)",
         "shop.sell_btn": "Sell (+{price} G)",
         "shop.buy_success": "🎉 Purchased [{name}]! (-{price} G)",
@@ -453,8 +500,9 @@ const I18N_DICTIONARY = {
 
         // Trial Shop Modal
         "trial_shop.title": "✨ Astel's Trial Treasury (Legendary Weapon Exchange)",
-        "trial_shop.controls": "Controls: [↑ / ↓ Arrows] Select • [ENTER] Exchange with Trial Badges • [F / ESC] Close",
-        "trial_shop.coins": "🪙 Trial Badges: ",
+        "trial_shop.close_btn": "Close [F/ESC]",
+        "trial_shop.controls": "Controls: <strong>[↑ / ↓ Arrows]</strong> Select &nbsp;•&nbsp; <strong>[ENTER]</strong> Exchange with Trial Badges &nbsp;•&nbsp; <strong>[F / ESC]</strong> Close",
+        "trial_shop.coins_label": "🪙 Trial Badges: ",
         "trial_shop.unit": " pcs",
         "trial_shop.exchange_btn": "Exchange ({price} 🪙)",
         "trial_shop.exchange_success": "🌟 Successfully exchanged [{name}]! (-{price} Trial Badges)",
@@ -463,8 +511,9 @@ const I18N_DICTIONARY = {
         // Forge Modal
         "forge.title": "⚒️ Blacksmith's Blazing Forge",
         "forge.desc": "✨ [Permanent Slot Inheritance] Enhancement levels are 100% permanently inherited across all new gear!",
-        "forge.controls": "Controls: [↑/↓ Arrows] Select Slot • [ENTER] Upgrade • [F] Close",
-        "forge.gold": "Gold: ",
+        "forge.close_btn": "Close [F]",
+        "forge.controls": "Controls: <strong>[↑/↓ Arrows]</strong> Select Slot &nbsp;•&nbsp; <strong>[ENTER]</strong> Upgrade &nbsp;•&nbsp; <strong>[F]</strong> Close",
+        "forge.gold_label": "Gold: ",
         "forge.upgrade_btn": "Upgrade (+{level} ➔ +{next})",
         "forge.max_level": "⭐ MAX Upgrade Reached",
         "forge.success": "✨ Upgrade Successful! [{slot}] raised to +{level}! (-{price} G)",
@@ -472,22 +521,29 @@ const I18N_DICTIONARY = {
 
         // Casino Modal
         "casino.title": "🎲 959 Lucky Casino House (Jackpot)",
+        "casino.close_btn": "Close [F/ESC]",
         "casino.tab_dice": "🎲 Double Dice (High-Low)",
         "casino.tab_slot": "🎰 3-Reel Mini Slots",
-        "casino.gold": "🪙 Your Gold: ",
-        "casino.bet_display": "🎯 Bet: ",
+        "casino.gold_label": "🪙 Your Gold: ",
+        "casino.bet_display_label": "🎯 Bet: ",
         "casino.bet_label": "Bet Amount:",
+        "casino.dice_sum_default": "Dice Sum: 12",
         "casino.dice_sum": "Dice Sum: ",
-        "casino.dice_low_title": "📉 LOW (2 ~ 6)",
+        "casino.dice_low_title": "📉 LOW",
         "casino.dice_low_sub": "Dice sum 2 to 6",
         "casino.dice_low_pay": "Payout 2.0x",
         "casino.dice_seven_title": "🌟 LUCKY 7 (JACKPOT)",
         "casino.dice_seven_sub": "Dice sum exactly 7",
         "casino.dice_seven_pay": "Jackpot 5.0x",
-        "casino.dice_high_title": "📈 HIGH (8 ~ 12)",
+        "casino.dice_high_title": "📈 HIGH",
         "casino.dice_high_sub": "Dice sum 8 to 12",
         "casino.dice_high_pay": "Payout 2.0x",
         "casino.slot_spin": "🎰 PULL LEVER (SPIN!)",
+        "casino.slot_payout_1": "🍒 3x Match (3x)",
+        "casino.slot_payout_2": "🔔 3x Match (5x)",
+        "casino.slot_payout_3": "💎 3x Match (10x)",
+        "casino.slot_payout_4": "7️⃣ 3x Match (25x)",
+        "casino.slot_payout_5": "👑 3x Match (50x + Legendary Stone)",
         "casino.default_comment": "Gambler Jack: \"Pick your game and bet amount, and test your luck!\"",
         "casino.win_dice": "🎉 WON! Gambler Jack: \"Oho! Sharp eye! (+{payout} G)\"",
         "casino.lose_dice": "💸 LOST! Gambler Jack: \"Tough luck! Fortune always comes back around!\"",
@@ -497,12 +553,14 @@ const I18N_DICTIONARY = {
 
         // Skill Book Modal
         "skillbook.title": "⚡ Uncle Bob's Skill Codex & 9-Slot Custom Loadout",
-        "skillbook.controls": "Controls: [↑ / ↓] Select Skill • [ENTER] Assign to Key (Q, W, E, A, S, D, Z, X, C) • [DEL] Unequip • [X] Clear All • [K / F / ESC] Close",
+        "skillbook.close_btn": "Close [K/F/ESC]",
+        "skillbook.controls": "Controls: <strong>[↑ / ↓]</strong> Select Skill &nbsp;•&nbsp; <strong>[ENTER]</strong> Assign to Key <strong>(Q, W, E, A, S, D, Z, X, C)</strong> &nbsp;•&nbsp; <strong>[DEL]</strong> Unequip &nbsp;•&nbsp; <strong>[X]</strong> Clear All &nbsp;•&nbsp; <strong>[K / F / ESC]</strong> Close",
         "skillbook.deck_title": "🎯 Assigned 9 Quick Slots",
         "skillbook.active_slots": "{count} / 9 Slots Active",
         "skillbook.clear_all": "🗑️ Clear All [X]",
-        "skillbook.tip": "💡 Tip: You don't need to fill all slots. Place your favorite skills on any preferred key. Clicking an equipped slot unequips it.",
+        "skillbook.tip": "💡 <strong>Tip</strong>: You don't need to fill all slots. Place your favorite skills on any preferred key. Clicking an equipped slot unequips it.",
         "skillbook.lib_title": "📖 Skill Library ({count} Total)",
+        "skillbook.lib_title_default": "📖 Skill Library (25 Total)",
         "skillbook.tab_all": "All",
         "skillbook.tab_warrior": "⚔️ Warrior",
         "skillbook.tab_archer": "🏹 Archer",
@@ -526,10 +584,12 @@ const I18N_DICTIONARY = {
 
         // World Map Modal
         "worldmap.title": "🗺️ Arcadia Continent Expedition Atlas",
+        "worldmap.close_btn": "Close [M/F/ESC]",
         "worldmap.current_loc": "📍 Current Location: ",
+        "worldmap.current_loc_label": "📍 Current Location: ",
         "worldmap.mobs_header": "⚔️ Encounter Mobs & Bosses",
         "worldmap.roads_header": "🧭 Connected Expedition Roads",
-        "worldmap.tip": "💡 Exploration Tip: Fast travel via map is disabled. Walk into portal gates at the field edges. To safely return to village, use [📜 Town Return Scroll]!",
+        "worldmap.tip": "💡 <strong>Exploration Tip</strong>: Fast travel via map is disabled. Walk into portal gates at the field edges. To safely return to village, use <strong>[📜 Town Return Scroll]</strong>!",
 
         // Multiplayer Modal
         "multi.title": "Co-op Multiplayer Lobby",
@@ -617,6 +677,7 @@ function setLanguage(lang) {
 
     // Trigger Game UI Refresh if game instance exists
     if (window.game) {
+        if (window.game.updateIntroMenuUI) window.game.updateIntroMenuUI();
         if (window.game.updateHUD) window.game.updateHUD();
         if (window.game.updateQuestHUD) window.game.updateQuestHUD();
         if (window.game.updateInventoryUI) window.game.updateInventoryUI();
@@ -624,8 +685,30 @@ function setLanguage(lang) {
         if (window.game.updateShopUI) window.game.updateShopUI();
         if (window.game.updateForgeUI) window.game.updateForgeUI();
         if (window.game.updateCasinoUI) window.game.updateCasinoUI();
+        if (window.game.renderNodeWorldMap) window.game.renderNodeWorldMap();
         if (window.game.renderWorldMap) window.game.renderWorldMap();
         if (window.game.updateGuideUI) window.game.updateGuideUI();
+    } else {
+        updateSavedContinueButton();
+    }
+}
+
+function updateSavedContinueButton() {
+    const raw = localStorage.getItem('retro_rpg_save');
+    const contLabel = document.getElementById('introBtnContinueLabel');
+    if (!contLabel) return;
+    const isEn = (currentLanguage === 'en');
+    if (raw) {
+        try {
+            const data = JSON.parse(raw);
+            const zConf = (typeof ZONE_CONFIG !== 'undefined') ? ZONE_CONFIG[data.currentZone] : null;
+            const zoneName = zConf ? (isEn ? (zConf.name_en || zConf.name) : zConf.name) : (isEn ? 'Peaceful Starting Village' : '평화로운 시작의 마을');
+            contLabel.innerText = isEn ? `💾 Continue Adventure [Lv.${data.level || 1} · ${zoneName}]` : `💾 모험 이어하기 [Lv.${data.level || 1} · ${zoneName}]`;
+        } catch(e) {
+            contLabel.innerText = isEn ? '💾 Continue Adventure (Continue)' : '💾 싱글플레이 이어하기 (Continue)';
+        }
+    } else {
+        contLabel.innerText = isEn ? '💾 Continue Adventure (No Save Data)' : '💾 모험 이어하기 (저장 데이터 없음)';
     }
 }
 
@@ -654,6 +737,10 @@ function tData(obj, field = 'name') {
 function updateAllDOMTranslations() {
     // 1. Text Content: [data-i18n]
     document.querySelectorAll('[data-i18n]').forEach(el => {
+        if (el.id === 'introBtnContinueLabel') {
+            updateSavedContinueButton();
+            return;
+        }
         const key = el.getAttribute('data-i18n');
         if (key) {
             el.innerHTML = t(key);
@@ -694,6 +781,28 @@ function updateAllDOMTranslations() {
 
     // 5. Update Stamped Title Display
     updateTitleScreenDisplay();
+
+    // 6. Update In-Game Live HUDs (Quest Tracker, Tower Tracker, Boss Bar, Inventory)
+    if (typeof game !== 'undefined' && game !== null) {
+        if (game.questSystem && typeof game.questSystem.updateQuestHUD === 'function') {
+            game.questSystem.updateQuestHUD();
+        }
+        if (typeof game.updateHUD === 'function') {
+            game.updateHUD();
+        }
+        if (typeof game.updateBossHUD === 'function') {
+            game.updateBossHUD();
+        }
+        if (typeof game.updateInventoryUI === 'function' && game.isInventoryOpen) {
+            game.updateInventoryUI();
+        }
+        if (typeof game.updateSkillBookUI === 'function' && game.isSkillBookOpen) {
+            game.updateSkillBookUI();
+        }
+        if (typeof game.updateFullscreenButtonUI === 'function') {
+            game.updateFullscreenButtonUI(!!game.isFullscreen);
+        }
+    }
 }
 
 function updateTitleScreenDisplay() {

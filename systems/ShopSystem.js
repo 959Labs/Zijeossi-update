@@ -265,7 +265,7 @@ class ShopSystem {
                 const savedScroll = sellList.scrollTop;
                 sellList.innerHTML = '';
                 if (this.game.player.inventory.length === 0) {
-                    sellList.innerHTML = `<div style="color:#64748b; font-size:13px; text-align:center; padding: 40px 0;">판매할 소지품이 없습니다.</div>`;
+                    sellList.innerHTML = `<div style="color:#64748b; font-size:13px; text-align:center; padding: 40px 0;">${isEn ? 'No items in backpack to sell.' : '판매할 소지품이 없습니다.'}</div>`;
                     return;
                 }
 
@@ -278,6 +278,10 @@ class ShopSystem {
                     if (!item) return;
                     const isFocused = index === this.shopSellSelectedIndex;
                     const sellVal = item.sellPrice || 10;
+                    const iName = typeof tData === 'function' ? tData(item, 'name') : item.name;
+                    const iDesc = typeof tData === 'function' ? tData(item, 'desc') : item.desc;
+                    const sellBtnText = isEn ? `Sell (+${sellVal} G)` : `+${sellVal} G 판매`;
+
                     const div = document.createElement('div');
                     div.className = `shop-item-card ${item.rarity} ${isFocused ? 'keyboard-focused' : ''}`;
                     div.innerHTML = `
@@ -285,11 +289,11 @@ class ShopSystem {
                             <span class="focus-arrow ${isFocused ? 'active' : ''}">${isFocused ? '▶' : '&nbsp;'}</span>
                             <span class="shop-icon">${item.icon}</span>
                             <div>
-                                <div class="shop-name">${item.name} ${count > 1 ? `<span style="background:#22c55e; color:#0f172a; font-size:11px; font-weight:800; padding:2px 6px; border-radius:10px; margin-left:6px;">x${count}</span>` : ''}</div>
-                                <div class="shop-desc">${item.desc}</div>
+                                <div class="shop-name">${iName} ${count > 1 ? `<span style="background:#22c55e; color:#0f172a; font-size:11px; font-weight:800; padding:2px 6px; border-radius:10px; margin-left:6px;">x${count}</span>` : ''}</div>
+                                <div class="shop-desc">${iDesc}</div>
                             </div>
                         </div>
-                        <button class="shop-sell-btn" onclick="game.sellItem(${index})">+${sellVal} G 판매</button>
+                        <button class="shop-sell-btn" onclick="game.sellItem(${index})">${sellBtnText}</button>
                     `;
                     sellList.appendChild(div);
 
@@ -372,9 +376,16 @@ class ShopSystem {
 
     updateTrialShopUI() {
         const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+        const modal = document.getElementById('trialShopModal');
+        if (modal) {
+            const h2 = modal.querySelector('h2');
+            if (h2) h2.innerText = isEn ? '✨ Trial Treasure Merchant Astel' : '✨ 시련의 보물상인 아스텔 (Tower Shop)';
+            const closeBtn = modal.querySelector('#trialShopCloseBtn');
+            if (closeBtn) closeBtn.innerText = isEn ? 'Close [F/ESC]' : '닫기 [F/ESC]';
+        }
         const coinsEl = document.getElementById('trialShopCoins');
         const bagCountEl = document.getElementById('trialShopBagCount');
-        if (coinsEl) coinsEl.innerText = `${this.game.trialCoins || 0} ${isEn ? 'pcs' : '개'}`;
+        if (coinsEl) coinsEl.innerText = `${this.game.trialCoins || 0} ${isEn ? 'Badges' : '개'}`;
         if (bagCountEl) bagCountEl.innerText = `${this.game.player.getInventoryCount()} / 20`;
 
         const list = document.getElementById('trialShopItemList');

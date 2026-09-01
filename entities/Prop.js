@@ -35,7 +35,8 @@ class Prop {
             player.addItemToInventory('potion_buff', 1);
             game.updateInventoryUI();
             game.particles.spawn(this.x, this.y, '#fbbf24', 22, 110, 0.6, 5);
-            game.showNotification('보물상자를 열었습니다! (골드 +120, 물약 획득)');
+            const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+            game.showNotification(isEn ? 'Opened Treasure Chest! (+120 Gold, potions obtained)' : '보물상자를 열었습니다! (골드 +120, 물약 획득)');
         } else if (this.type === 'npc') {
             sounds.playInteract();
             game.interactWithElder();
@@ -63,20 +64,23 @@ class Prop {
             player.shrineBuffTimer = 35;
             sounds.playLevelUp();
             game.particles.spawn(player.x, player.y, '#facc15', 24, 120, 0.6, 5);
-            game.showNotification('고대 힘의 제단을 경배하여 35초간 공격력 & 이속 대폭 증가 버프를 획득했습니다!');
+            const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+            game.showNotification(isEn ? '✨ Revered the Ancient Shrine: +ATK & +Speed buff for 35s!' : '고대 힘의 제단을 경배하여 35초간 공격력 & 이속 대폭 증가 버프를 획득했습니다!');
         } else if (this.type === 'fountain') {
             sounds.playInteract();
             player.hp = player.maxHp;
             player.mp = player.maxMp;
             sounds.playPotion();
             game.particles.spawn(player.x, player.y, '#38bdf8', 24, 100, 0.6, 5);
-            game.showNotification('생명의 샘물로 체력과 마나가 완전히 회복되었습니다!');
+            const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+            game.showNotification(isEn ? '⛲ Fully restored HP and MP at the Fountain of Life!' : '생명의 샘물로 체력과 마나가 완전히 회복되었습니다!');
         } else if (this.type === 'campfire') {
             sounds.playInteract();
             player.hp = player.maxHp;
             player.mp = player.maxMp;
             game.particles.spawn(player.x, player.y, '#4ade80', 16, 80, 0.6, 4);
-            game.showNotification('따뜻한 모닥불에서 휴식하여 체력과 마나가 모두 회복되었습니다!');
+            const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+            game.showNotification(isEn ? '🔥 Rested by the warm campfire: HP & MP fully restored!' : '따뜻한 모닥불에서 휴식하여 체력과 마나가 모두 회복되었습니다!');
         } else if (this.type === 'bed') {
             sounds.playPotion();
             player.hp = player.maxHp;
@@ -123,9 +127,20 @@ class Prop {
         ctx.translate(this.x, this.y);
 
         if (this.type.startsWith('portal_')) {
-            const targetZoneKey = this.type.replace('portal_', '');
-            const theme = getZoneTheme(targetZoneKey);
-            const pCol = (theme && theme.color) ? theme.color : '#c084fc';
+            const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+            let portalLabel = '';
+            let pCol = '#c084fc';
+
+            if (this.type === 'portal_trial_tower_next') {
+                const nextFloor = (typeof game !== 'undefined' && game.towerFloor) ? (game.towerFloor + 1) : 2;
+                portalLabel = isEn ? `🗼 Enter Floor ${nextFloor} [F]` : `🗼 ${nextFloor}층 포탈 [F]`;
+                pCol = '#38bdf8';
+            } else {
+                const targetZoneKey = this.type.replace('portal_', '');
+                const theme = getZoneTheme(targetZoneKey);
+                if (theme && theme.color) pCol = theme.color;
+                portalLabel = theme ? (typeof tData === 'function' ? tData(theme, 'name') : theme.name) : (isEn ? "🌀 Unknown Portal" : "🌀 미지의 포탈");
+            }
 
             this.fireAnim += 0.05;
             ctx.save();
@@ -151,19 +166,27 @@ class Prop {
 
             ctx.restore();
 
+            // Dynamic Pill Badge Width based on Text Measurement
+            ctx.font = 'bold 12px sans-serif';
+            ctx.textAlign = 'center';
+            const textWidth = ctx.measureText(portalLabel).width;
+            const badgeWidth = Math.max(100, Math.round(textWidth + 32));
+            const badgeHeight = 26;
+
             // Floating Target Zone Badge with matching theme stroke and glow
             ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
             ctx.strokeStyle = pCol;
             ctx.lineWidth = 2;
             ctx.shadowColor = pCol;
             ctx.shadowBlur = 12;
-            ctx.beginPath(); ctx.roundRect(-75, -52, 150, 26, 13); ctx.fill(); ctx.stroke();
+            ctx.beginPath();
+            ctx.roundRect(-badgeWidth / 2, -52, badgeWidth, badgeHeight, 13);
+            ctx.fill();
+            ctx.stroke();
             ctx.shadowBlur = 0;
 
             ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 12px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText(theme.name || "🌀 미지의 포탈", 0, -35);
+            ctx.fillText(portalLabel, 0, -35);
             ctx.restore();
             return;
         }
@@ -203,13 +226,16 @@ class Prop {
             ctx.fillText('💤 Zzz...', 6, zFloat);
 
             const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+            const bedTag = isEn ? '🛏️ Cozy Bed' : '🛏️ 푹신한 침대';
+            ctx.font = 'bold 11px sans-serif';
+            ctx.textAlign = 'center';
+            const bWidth = Math.max(64, Math.round(ctx.measureText(bedTag).width + 22));
+
             ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
             ctx.strokeStyle = '#f472b6';
             ctx.lineWidth = 1.5;
-            const bedTag = isEn ? '🛏️ Cozy Bed' : '🛏️ 푹신한 침대';
-            const bWidth = isEn ? 84 : 76;
             ctx.beginPath(); ctx.roundRect(-bWidth / 2, -44, bWidth, 18, 8); ctx.fill(); ctx.stroke();
-            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
+            ctx.fillStyle = '#ffffff';
             ctx.fillText(bedTag, 0, -31);
             ctx.restore();
             return;
@@ -241,12 +267,15 @@ class Prop {
 
             const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
             const shrineTag = isEn ? '✨ Ancient Shrine' : '✨ 고대 힘의 제단';
-            const sWidth = isEn ? 96 : 84;
+            ctx.font = 'bold 11px sans-serif';
+            ctx.textAlign = 'center';
+            const sWidth = Math.max(64, Math.round(ctx.measureText(shrineTag).width + 22));
+
             ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
             ctx.strokeStyle = '#facc15';
             ctx.lineWidth = 1.5;
             ctx.beginPath(); ctx.roundRect(-sWidth / 2, -50, sWidth, 18, 8); ctx.fill(); ctx.stroke();
-            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
+            ctx.fillStyle = '#ffffff';
             ctx.fillText(shrineTag, 0, -37);
             ctx.restore();
             return;
@@ -258,28 +287,15 @@ class Prop {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
             ctx.beginPath(); ctx.ellipse(0, 10, 36, 18, 0, 0, Math.PI * 2); ctx.fill();
 
-            ctx.fillStyle = '#475569';
-            ctx.beginPath(); ctx.arc(0, 0, 30, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = '#64748b';
-            ctx.beginPath(); ctx.arc(0, 0, 26, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#334155';
+            ctx.beginPath(); ctx.ellipse(0, 8, 32, 15, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 2;
+            ctx.stroke();
 
-            // Crystal Clear Blue Water
-            const waterGrad = ctx.createRadialGradient(0, 0, 2, 0, 0, 24);
-            waterGrad.addColorStop(0, '#7dd3fc');
-            waterGrad.addColorStop(0.6, '#0284c7');
-            waterGrad.addColorStop(1, '#0369a1');
-            ctx.fillStyle = waterGrad;
-            ctx.beginPath(); ctx.arc(0, 0, 24, 0, Math.PI * 2); ctx.fill();
-
-            // Animated Concentric Water Ripple Waves
-            for (let i = 0; i < 3; i++) {
-                const rPhase = ((this.fireAnim * 1.5 + i * 0.8) % 2.4);
-                const rRad = rPhase * 9 + 4;
-                const rAlpha = Math.max(0, 1 - (rRad / 24));
-                ctx.strokeStyle = `rgba(255, 255, 255, ${rAlpha * 0.7})`;
-                ctx.lineWidth = 1.5;
-                ctx.beginPath(); ctx.arc(0, 0, rRad, 0, Math.PI * 2); ctx.stroke();
-            }
+            // Shimmering Pool Water
+            ctx.fillStyle = '#0284c7';
+            ctx.beginPath(); ctx.ellipse(0, 8, 28, 12, 0, 0, Math.PI * 2); ctx.fill();
 
             // Center Marble Spout & Sparkling Jet
             ctx.fillStyle = '#cbd5e1';
@@ -289,12 +305,15 @@ class Prop {
 
             const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
             const fountainTag = isEn ? '⛲ Fountain of Life' : '⛲ 생명의 분수대';
-            const fWidth = isEn ? 104 : 84;
+            ctx.font = 'bold 11px sans-serif';
+            ctx.textAlign = 'center';
+            const fWidth = Math.max(64, Math.round(ctx.measureText(fountainTag).width + 22));
+
             ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
             ctx.strokeStyle = '#38bdf8';
             ctx.lineWidth = 1.5;
             ctx.beginPath(); ctx.roundRect(-fWidth / 2, -44, fWidth, 18, 8); ctx.fill(); ctx.stroke();
-            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
+            ctx.fillStyle = '#ffffff';
             ctx.fillText(fountainTag, 0, -31);
             ctx.restore();
             return;
@@ -445,20 +464,24 @@ class Prop {
             ctx.fillStyle = '#15803d';
             ctx.beginPath(); ctx.arc(-7, -4, 4, 0, Math.PI * 2); ctx.fill();
         } else if (this.type === 'chest') {
-            // 3D Wood Grain Chest
-            ctx.fillStyle = this.opened ? '#5c2c16' : '#854d0e';
-            ctx.beginPath(); ctx.roundRect(-14, -10, 28, 20, 4); ctx.fill();
+            if (!this.opened && typeof spriteManager !== 'undefined' && spriteManager.cache['prop_chest_closed']) {
+                ctx.drawImage(spriteManager.cache['prop_chest_closed'], -18, -18, 36, 36);
+            } else {
+                // 3D Wood Grain Chest
+                ctx.fillStyle = this.opened ? '#5c2c16' : '#854d0e';
+                ctx.beginPath(); ctx.roundRect(-14, -10, 28, 20, 4); ctx.fill();
 
-            // Golden Filigree Straps
-            ctx.fillStyle = '#eab308';
-            ctx.fillRect(-14, -6, 28, 3);
-            ctx.fillRect(-14, 2, 28, 3);
+                // Golden Filigree Straps
+                ctx.fillStyle = '#eab308';
+                ctx.fillRect(-14, -6, 28, 3);
+                ctx.fillRect(-14, 2, 28, 3);
 
-            // Heavy Lock & Gem
-            ctx.fillStyle = '#ca8a04';
-            ctx.beginPath(); ctx.roundRect(-4, -3, 8, 8, 2); ctx.fill();
-            ctx.fillStyle = this.opened ? '#64748b' : '#38bdf8';
-            ctx.beginPath(); ctx.arc(0, 1, 2, 0, Math.PI * 2); ctx.fill();
+                // Heavy Lock & Gem
+                ctx.fillStyle = '#ca8a04';
+                ctx.beginPath(); ctx.roundRect(-4, -3, 8, 8, 2); ctx.fill();
+                ctx.fillStyle = this.opened ? '#64748b' : '#38bdf8';
+                ctx.beginPath(); ctx.arc(0, 1, 2, 0, Math.PI * 2); ctx.fill();
+            }
         } else if (this.type === 'npc' || this.type === 'merchant' || this.type === 'blacksmith' || this.type === 'gambler') {
             if (this.type === 'npc') {
                 // Elder Mage Robes & Wizard Hat
@@ -518,31 +541,30 @@ class Prop {
 
             const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
             let labelText = '';
-            let nWidth = 76;
             if (this.type === 'npc') {
                 labelText = isEn ? '📜 Elder (Quest)' : '📜 장로 (퀘스트)';
-                nWidth = isEn ? 96 : 82;
             } else if (this.type === 'merchant') {
                 labelText = isEn ? '🛒 Merchant' : '🛒 만물 상인';
-                nWidth = isEn ? 84 : 76;
             } else if (this.type === 'blacksmith') {
                 labelText = isEn ? '⚒️ Blacksmith' : '⚒️ 대장장이';
-                nWidth = isEn ? 88 : 76;
             } else if (this.type === 'gambler') {
                 labelText = isEn ? '🎲 Gambler Jack' : '🎲 도박사 잭';
-                nWidth = isEn ? 104 : 82;
             } else if (this.type === 'trial_merchant') {
                 labelText = isEn ? '✨ Astel (Trial Shop)' : '✨ 아스텔 (시련 보물)';
-                nWidth = isEn ? 116 : 100;
             }
 
             const borderColor = this.type === 'npc' ? '#f59e0b' : (this.type === 'merchant' ? '#34d399' : (this.type === 'blacksmith' ? '#ef4444' : (this.type === 'trial_merchant' ? '#38bdf8' : '#f59e0b')));
+
+            ctx.font = 'bold 11.5px sans-serif';
+            ctx.textAlign = 'center';
+            const textWidth = ctx.measureText(labelText).width;
+            const nWidth = Math.max(64, Math.round(textWidth + 24));
 
             ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
             ctx.strokeStyle = borderColor;
             ctx.lineWidth = 1.5;
             ctx.beginPath(); ctx.roundRect(-nWidth / 2, -46, nWidth, 20, 10); ctx.fill(); ctx.stroke();
-            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 11.5px sans-serif'; ctx.textAlign = 'center';
+            ctx.fillStyle = '#ffffff';
             ctx.fillText(labelText, 0, -32);
         } else if (this.type === 'campfire') {
             this.fireAnim += 0.12;

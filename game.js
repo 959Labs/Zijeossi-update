@@ -50,9 +50,16 @@ function scrollElementIntoContainerView(container, element) {
 class Game {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
-        this.ctx = this.canvas.getContext('2d');
+        try {
+            this.ctx = this.canvas.getContext('2d', { alpha: false, desynchronized: true }) || this.canvas.getContext('2d');
+        } catch (e) {
+            this.ctx = this.canvas.getContext('2d');
+        }
         this.minimapCanvas = document.getElementById('minimapCanvas');
         this.minimapCtx = this.minimapCanvas ? this.minimapCanvas.getContext('2d') : null;
+
+        this.renderQueue = [];
+        this.cachedLighting = {};
 
         this.input = new InputHandler();
         this.camera = new Camera(window.innerWidth, window.innerHeight);
@@ -124,6 +131,7 @@ class Game {
         this.introParticles = [];
         this.traps = [];
         this.groundZones = [];
+        this.hitStopTimer = 0;
 
         window.game = this;
         this.ensureV210UI();
@@ -183,13 +191,15 @@ class Game {
     set bagSelectedIndex(v)   { if (this.inventory)     this.inventory.bagSelectedIndex = v; }
 
     resize() {
-        const dpr = Math.min(window.devicePixelRatio || 1, 3);
+        const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
         this.canvas.width = window.innerWidth * dpr;
         this.canvas.height = window.innerHeight * dpr;
         this.ctx.resetTransform();
         this.ctx.scale(dpr, dpr);
         this.camera.resize(window.innerWidth, window.innerHeight);
-        this.ctx.imageSmoothingEnabled = true;
+        this.ctx.imageSmoothingEnabled = false;
+
+        this.cachedLighting = {};
 
         const cCanvas = document.getElementById('cinematicCanvas');
         if (cCanvas) {
@@ -456,8 +466,13 @@ class Game {
                     if (this.network && !this.network.isZoneHost) {
                         this.network.sendHitMonster(e.id, hitbox.damage, kx, ky, hitbox.isCrit);
                         sounds.playHit();
-                        this.particles.spawn(e.x, e.y, e.color || '#ef4444', 6, 70, 0.3, 3);
+                        this.triggerHitStop(hitbox.isCrit ? 0.055 : 0.03);
+                        this.camera.shake(hitbox.isCrit ? 0.16 : 0.08, hitbox.isCrit ? 5 : 2.5);
+                        this.particles.spawn(e.x, e.y, e.color || '#ef4444', hitbox.isCrit ? 8 : 4, 90, 0.3, 3.5);
                         this.particles.spawnDamageNumber(e.x, e.y, `${hitbox.damage}`, hitbox.isCrit ? '#facc15' : '#ffffff', hitbox.isCrit);
+                        const sparkAngle = Math.atan2(ky || 0, kx || 0);
+                        this.particles.spawnSlashSparks(e.x, e.y, sparkAngle, hitbox.isCrit ? '#fde047' : '#ffffff', hitbox.isCrit ? 5 : 3);
+                        e.flashTimer = hitbox.isCrit ? 0.12 : 0.08;
                     } else {
                         e.takeDamage(hitbox.damage, kx, ky, this, hitbox.isCrit);
                     }
@@ -510,12 +525,14 @@ class Game {
             sounds.playGameOver();
         } catch(e) {}
 
-        this.showNotification(`💀 [뼈아픈 나태] 사망하여 경험치 -${actualLost} EXP (-35%)를 잃고 마을 침대에서 일어났습니다!`);
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+        this.showNotification(isEn ? `💀 [Bitter Sloth] You died! Lost -${actualLost} EXP (-35%) and woke up in the village bed!` : `💀 [뼈아픈 나태] 사망하여 경험치 -${actualLost} EXP (-35%)를 잃고 마을 침대에서 일어났습니다!`);
 
         this.currentZone = 'village';
         this.player.x = 2100;
         this.player.y = 2100;
         this.projectiles = []; // Clear active projectiles
+        
         this.initWorld();
 
         this.camera.shake(0.5, 15);
@@ -551,7 +568,9 @@ class Game {
     // 🛡️ v2.1.0 Self-Healing Dynamic DOM & Style Injector (Backwards Compatibility)
     // ========================================================================
     ensureV210UI() {
+        if (this._v210UIInjected) return;  // ✅ 최초 1회 실행 가드
         if (!document.getElementById('zijeossi-v210-dynamic-style')) {
+            this._v210UIInjected = true;
             const style = document.createElement('style');
             style.id = 'zijeossi-v210-dynamic-style';
             style.textContent = `
@@ -898,7 +917,7 @@ class Game {
                     <div style="font-size: 56px; font-weight: 900; color: #f59e0b; letter-spacing: 4px;">959 LABS</div>
                     <div style="font-size: 14px; font-weight: 700; color: #94a3b8; letter-spacing: 2px;">GAME STUDIO</div>
                 </div>
-                <div class="splash-skip-hint">스킵: <strong>[Space / ENTER / ESC / 클릭]</strong></div>
+                <div class="splash-skip-hint" data-i18n="menu.skip_hint">스킵: <strong>[Space / ENTER / ESC / 클릭]</strong></div>
             `;
             document.body.appendChild(splashDiv);
         }
@@ -911,9 +930,9 @@ class Game {
                 <canvas id="titleBackgroundCanvas" class="title-bg-canvas"></canvas>
                 <div id="cinematicTitleMenuLayer" class="cinematic-title-menu-layer">
                     <div class="intro-top-dev-comment">
-                        <div class="dev-comment-badge">📢 개발자 코멘트</div>
+                        <div class="dev-comment-badge" data-i18n="dev.badge">📢 개발자 코멘트</div>
                         <div class="dev-comment-bubble">
-                            <p class="dev-comment-line">누가 플레이 하게 될지는 모르지만 피드백은 언제나 환영입니다 ~~ ^3^</p>
+                            <p class="dev-comment-line" data-i18n="dev.comment">누가 플레이 하게 될지는 모르지만 피드백은 언제나 환영입니다 ~~ ^3^</p>
                         </div>
                     </div>
                     <div class="stamped-title-box">
@@ -927,38 +946,39 @@ class Game {
                     <div id="introMenuContainer" class="intro-menu-container">
                         <button id="introBtnContinue" class="intro-menu-btn active" data-index="0">
                             <span class="btn-arrow">▶</span>
-                            <span class="btn-label" id="introBtnContinueLabel">💾 싱글플레이 이어하기 (Continue)</span>
+                            <span class="btn-label" id="introBtnContinueLabel" data-i18n="menu.continue">💾 싱글플레이 이어하기 (Continue)</span>
                         </button>
                         <button id="introBtnNewGame" class="intro-menu-btn" data-index="1">
                             <span class="btn-arrow">▶</span>
-                            <span class="btn-label">⚔️ 싱글플레이 새로 시작 (New Game)</span>
+                            <span class="btn-label" data-i18n="menu.new_game">⚔️ 싱글플레이 새로 시작 (New Game)</span>
                         </button>
                         <button id="introBtnMultiplayer" class="intro-menu-btn highlight-multi-menu" data-index="2">
                             <span class="btn-arrow">▶</span>
-                            <span class="btn-label">🌐 코옵 멀티플레이 (Co-op Multiplayer) <span class="hot-badge">HOT</span></span>
+                            <span class="btn-label" data-i18n="menu.multiplayer">🌐 코옵 멀티플레이 (Co-op Multiplayer) <span class="hot-badge">HOT</span></span>
                         </button>
                         <button id="introBtnSettings" class="intro-menu-btn" data-index="3">
                             <span class="btn-arrow">▶</span>
-                            <span class="btn-label">⚙️ 게임 가이드 & 환경설정 [P]</span>
+                            <span class="btn-label" data-i18n="menu.settings">⚙️ 게임 가이드 & 환경설정 [P]</span>
                         </button>
                         <button id="introBtnQuit" class="intro-menu-btn" data-index="4" onclick="game.quitGame()">
                             <span class="btn-arrow">▶</span>
-                            <span class="btn-label">🚪 게임 완전 종료 (Quit Game)</span>
+                            <span class="btn-label" data-i18n="menu.quit">🚪 게임 완전 종료 (Quit Game)</span>
                         </button>
                     </div>
                 </div>
                 <div class="intro-bottom-right-guide">
-                    <div class="guide-badge-header">🎮 조작 가이드</div>
+                    <div class="guide-badge-header" data-i18n="guide.badge_title">🎮 조작 가이드</div>
                     <div class="guide-badge-content">
-                        <div class="guide-row"><span class="key-pill">↑ / ↓</span><span>메뉴 이동</span></div>
-                        <div class="guide-row"><span class="key-pill">ENTER / 클릭</span><span>선택 & 시작</span></div>
-                        <div class="guide-row"><span class="key-pill">F</span><span>NPC & 상점 대화</span></div>
-                        <div class="guide-row"><span class="key-pill">A / Space</span><span>기본 공격 / 대시</span></div>
-                        <div class="guide-row"><span class="key-pill">W, E, S, D, Q</span><span>스킬 및 궁극기</span></div>
+                        <div class="guide-row"><span class="key-pill" data-i18n="guide.key_move">↑ / ↓</span><span data-i18n="guide.move">메뉴 이동</span></div>
+                        <div class="guide-row"><span class="key-pill" data-i18n="guide.key_select">ENTER / 클릭</span><span data-i18n="guide.select">선택 & 시작</span></div>
+                        <div class="guide-row"><span class="key-pill" data-i18n="guide.key_interact">F</span><span data-i18n="guide.interact">NPC & 상점 대화</span></div>
+                        <div class="guide-row"><span class="key-pill" data-i18n="guide.key_attack">A / Space</span><span data-i18n="guide.attack_dash">기본 공격 / 대시</span></div>
+                        <div class="guide-row"><span class="key-pill" data-i18n="guide.key_skills">W, E, S, D, Q</span><span data-i18n="guide.skills">스킬 및 궁극기</span></div>
                     </div>
                 </div>
             `;
             document.body.appendChild(introDiv);
+            if (typeof updateAllDOMTranslations === 'function') updateAllDOMTranslations();
             this.titleCanvas = document.getElementById('titleBackgroundCanvas');
             this.titleCtx = this.titleCanvas ? this.titleCanvas.getContext('2d') : null;
             this.setupIntroEventListeners();
@@ -972,8 +992,8 @@ class Game {
             sbModal.innerHTML = `
                 <div class="settings-card skillbook-card-theme" style="width: 1060px; max-width: 95vw;">
                     <div class="modal-header">
-                        <h2>📚 스킬북 & 9슬롯 룬 각성 (Skill Book)</h2>
-                        <button id="skillBookCloseBtn" class="dialogue-close" onclick="game.closeSkillBook()">닫기 [K/F/ESC]</button>
+                        <h2>📚 <span data-i18n="skill.book_title">스킬북 & 9슬롯 룬 각성</span> (Skill Book)</h2>
+                        <button id="skillBookCloseBtn" class="dialogue-close" onclick="game.closeSkillBook()"><span data-i18n="common.close">닫기</span> [K/F/ESC]</button>
                     </div>
                     <div class="skillbook-split-layout" style="display: flex; gap: 16px; padding: 14px; max-height: 75vh; overflow-y: auto;">
                         <div class="skill-slots-deck" style="width: 320px; flex-shrink: 0;">
@@ -1053,6 +1073,7 @@ class Game {
                 sounds.playInteract();
             } else {
                 modal.classList.add('hidden');
+                if (document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur();
             }
         }
     }
@@ -1065,44 +1086,216 @@ class Game {
         if (!svg || !pinsLayer) return;
 
         const currentZ = ZONE_CONFIG[this.currentZone] || ZONE_CONFIG['village'];
-        if (curZoneNameEl) curZoneNameEl.innerText = currentZ.name;
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+        if (curZoneNameEl) {
+            curZoneNameEl.innerText = currentZ ? (typeof tData === 'function' ? tData(currentZ, 'name') : (isEn ? (currentZ.name_en || currentZ.name) : currentZ.name)) : (isEn ? 'Peaceful Starting Village' : '시작의 마을');
+        }
+
         // Node Coordinates on a 680 x 520 canvas (Exact 24 Zones in 6 Columns x 4 Rows)
         const NODE_MAP_DATA = {
             // Column 1 (x: 55) - Extreme North & Deep Sea
-            'abyss_trench': { x: 55, y: 70, name: '심연의 해저 해구', icon: '🌊', lvl: 'Lv. 95 ~ 105', desc: '크라켄과 레비아탄이 지배하는 심해 초고수압 해구입니다.', mobs: '심해 아귀, 해저 촉수', bosses: '심해의 괴수 크라켄, 레비아탄', links: ['dungeon_b3', 'citadel_sanctuary'] },
-            'dungeon_b3': { x: 55, y: 190, name: '영구동토 감옥 B3', icon: '🧊', lvl: 'Lv. 85 ~ 95', desc: '서리한의 리치 킹이 군림하는 절대영도의 지하 감옥입니다.', mobs: '서리 망령, 빙하 전사', bosses: '서리한의 리치 킹, 빙룡 신드라고사', links: ['frozen_tundra', 'abyss_trench'] },
-            'frozen_tundra': { x: 55, y: 310, name: '혹한의 만년설원', icon: '❄️', lvl: 'Lv. 75 ~ 85', desc: '살을 에는 눈보라와 예티 거인이 배회하는 만년설원입니다.', mobs: '설원 늑대, 빙하 골렘', bosses: '빙하 거인 예티 킹, 늑대왕 펜리르', links: ['frost_camp', 'dungeon_b3', 'ancient_ruins'] },
-            'frost_camp': { x: 55, y: 430, name: '설원 전진기지', icon: '⛺', lvl: 'Lv. 75 (안전 마을)', desc: '혹한의 설원 입구에 위치한 따뜻한 모닥불 기지입니다.', mobs: '평화 구역 (몬스터 없음)', bosses: '없음', links: ['dragon_nest', 'frozen_tundra'] },
+            'abyss_trench': { 
+                x: 55, y: 70, icon: '🌊', links: ['dungeon_b3', 'citadel_sanctuary'],
+                name: '심연의 해저 해구', name_en: 'Abyssal Ocean Trench',
+                lvl: 'Lv. 95 ~ 105', lvl_en: 'Lv. 95 ~ 105',
+                desc: '크라켄과 레비아탄이 지배하는 심해 초고수압 해구입니다.', desc_en: 'A high-pressure oceanic trench ruled by the Kraken and Leviathan.',
+                mobs: '심해 아귀, 해저 촉수', mobs_en: 'Abyssal Angler, Deepsea Tentacle',
+                bosses: '심해의 괴수 크라켄, 레비아탄', bosses_en: 'Abyssal Kraken, Leviathan'
+            },
+            'dungeon_b3': { 
+                x: 55, y: 190, icon: '🧊', links: ['frozen_tundra', 'abyss_trench'],
+                name: '영구동토 감옥 B3', name_en: 'Permafrost Prison B3',
+                lvl: 'Lv. 85 ~ 95', lvl_en: 'Lv. 85 ~ 95',
+                desc: '서리한의 리치 킹이 군림하는 절대영도의 지하 감옥입니다.', desc_en: 'Subzero subterranean dungeon ruled by the Frostmourne Lich King.',
+                mobs: '서리 망령, 빙하 전사', mobs_en: 'Frost Wraith, Glacial Warrior',
+                bosses: '서리한의 리치 킹, 빙룡 신드라고사', bosses_en: 'Lich King Kel\'Thuzad, Frost Dragon Sindragosa'
+            },
+            'frozen_tundra': { 
+                x: 55, y: 310, icon: '❄️', links: ['frost_camp', 'dungeon_b3', 'ancient_ruins'],
+                name: '혹한의 만년설원', name_en: 'Frozen Permafrost Tundra',
+                lvl: 'Lv. 75 ~ 85', lvl_en: 'Lv. 75 ~ 85',
+                desc: '살을 에는 눈보라와 예티 거인이 배회하는 만년설원입니다.', desc_en: 'Biting blizzards and giant yetis roaming endless snowfields.',
+                mobs: '설원 늑대, 빙하 골렘', mobs_en: 'Tundra Wolf, Glacial Golem',
+                bosses: '빙하 거인 예티 킹, 늑대왕 펜리르', bosses_en: 'Glacial Yeti King, Wolf King Fenrir'
+            },
+            'frost_camp': { 
+                x: 55, y: 430, icon: '⛺', links: ['dragon_nest', 'frozen_tundra'],
+                name: '설원 전진기지', name_en: 'Frost Outpost Camp',
+                lvl: 'Lv. 75 (안전 마을)', lvl_en: 'Lv. 75 (Safe Haven)',
+                desc: '혹한의 설원 입구에 위치한 따뜻한 모닥불 기지입니다.', desc_en: 'A warm campfire base situated at the entrance of the frozen tundra.',
+                mobs: '평화 구역 (몬스터 없음)', mobs_en: 'Peaceful Sanctuary (No Mobs)',
+                bosses: '없음', bosses_en: 'None'
+            },
 
             // Column 2 (x: 168) - Fire & Dragon & Sanctum
-            'citadel_sanctuary': { x: 168, y: 70, name: '성채 비밀 은신처', icon: '🏰', lvl: 'Lv. 105 (안전 쉼터)', desc: '성기사단 피난민들이 모여 휴식하는 안전한 성채입니다.', mobs: '평화 구역 (몬스터 없음)', bosses: '없음', links: ['abyss_trench', 'blood_citadel'] },
-            'dragon_nest': { x: 168, y: 190, name: '화룡의 둥지', icon: '🐲', lvl: 'Lv. 65 ~ 75', desc: '진홍의 화룡 이그니스가 지배하는 거대한 화산 분화구입니다.', mobs: '화염 드레이크, 화룡 새끼', bosses: '진홍의 화룡 이그니스, 흑룡 칼라미티', links: ['dungeon_b2', 'frost_camp'] },
-            'dungeon_b2': { x: 168, y: 310, name: '화염 심연 B2', icon: '🌋', lvl: 'Lv. 55 ~ 65', desc: '작열하는 마그마와 화염 몬스터가 우글거리는 지하 2층입니다.', mobs: '용암 드레이크, 마그마 골렘', bosses: '용암 거인 베히모스, 켈베로스', links: ['dungeon_b1', 'dragon_nest', 'pyramid'] },
-            'dungeon_b1': { x: 168, y: 430, name: '고대 미궁 B1', icon: '🌀', lvl: 'Lv. 15 ~ 25', desc: '고대 석판과 어둠의 해골 병단이 가득한 지하 1층입니다.', mobs: '해골 궁수, 화염 박쥐, 가고일', bosses: '타락한 암흑 기사 아서, 가고일 로드', links: ['village', 'dungeon_b2', 'crystal_cave'] },
+            'citadel_sanctuary': { 
+                x: 168, y: 70, icon: '🏰', links: ['abyss_trench', 'blood_citadel'],
+                name: '성채 비밀 은신처', name_en: 'Citadel Secret Sanctuary',
+                lvl: 'Lv. 105 (안전 쉼터)', lvl_en: 'Lv. 105 (Safe Shelter)',
+                desc: '성기사단 피난민들이 모여 휴식하는 안전한 성채입니다.', desc_en: 'A fortress sanctuary where holy paladin refugees rest safely.',
+                mobs: '평화 구역 (몬스터 없음)', mobs_en: 'Peaceful Sanctuary (No Mobs)',
+                bosses: '없음', bosses_en: 'None'
+            },
+            'dragon_nest': { 
+                x: 168, y: 190, icon: '🐲', links: ['dungeon_b2', 'frost_camp'],
+                name: '화룡의 둥지', name_en: 'Fire Dragon Nest',
+                lvl: 'Lv. 65 ~ 75', lvl_en: 'Lv. 65 ~ 75',
+                desc: '진홍의 화룡 이그니스가 지배하는 거대한 화산 분화구입니다.', desc_en: 'A colossal volcanic crater ruled by Ignis the Crimson Fire Dragon.',
+                mobs: '화염 드레이크, 화룡 새끼', mobs_en: 'Fire Drake, Dragon Hatchling',
+                bosses: '진홍의 화룡 이그니스, 흑룡 칼라미티', bosses_en: 'Fire Dragon Ignis, Black Dragon Calamity'
+            },
+            'dungeon_b2': { 
+                x: 168, y: 310, icon: '🌋', links: ['dungeon_b1', 'dragon_nest', 'pyramid'],
+                name: '화염 심연 B2', name_en: 'Infernal Abyss B2',
+                lvl: 'Lv. 55 ~ 65', lvl_en: 'Lv. 55 ~ 65',
+                desc: '작열하는 마그마와 화염 몬스터가 우글거리는 지하 2층입니다.', desc_en: 'Scorching magma chambers packed with fiery behemoths.',
+                mobs: '용암 드레이크, 마그마 골렘', mobs_en: 'Lava Drake, Magma Golem',
+                bosses: '용암 거인 베히모스, 켈베로스', bosses_en: 'Magma Behemoth, Cerberus'
+            },
+            'dungeon_b1': { 
+                x: 168, y: 430, icon: '🌀', links: ['village', 'dungeon_b2', 'crystal_cave'],
+                name: '고대 미궁 B1', name_en: 'Ancient Labyrinth B1',
+                lvl: 'Lv. 15 ~ 25', lvl_en: 'Lv. 15 ~ 25',
+                desc: '고대 석판과 어둠의 해골 병단이 가득한 지하 1층입니다.', desc_en: 'Labyrinth corridors crowded with skeleton archers and gargoyles.',
+                mobs: '해골 궁수, 화염 박쥐, 가고일', mobs_en: 'Skeleton Archer, Fire Bat, Gargoyle',
+                bosses: '타락한 암흑 기사 아서, 가고일 로드', bosses_en: 'Corrupted Dark Knight Arthur, Gargoyle Lord'
+            },
 
             // Column 3 (x: 282) - Central Heartland & Castle
-            'blood_citadel': { x: 282, y: 70, name: '진홍빛 흡혈귀 성채', icon: '🩸', lvl: 'Lv. 100 ~ 110', desc: '흡혈귀 황제 블라드 3세가 군림하는 피의 고성입니다.', mobs: '흡혈 박쥐, 피의 사제', bosses: '흡혈귀 황제 블라드 3세, 핏빛룡', links: ['citadel_sanctuary', 'poison_swamp'] },
-            'ancient_ruins': { x: 282, y: 190, name: '고대 거신 유적', icon: '🏛️', lvl: 'Lv. 70 ~ 80', desc: '태양 전차와 고대 골리앗 거신이 지키는 유적지입니다.', mobs: '고대 골렘, 파수병', bosses: '고대 거신 골리앗, 태양 전차', links: ['crystal_cave', 'frozen_tundra', 'heaven_altar'] },
-            'crystal_cave': { x: 282, y: 310, name: '신비의 수정 동굴', icon: '💎', lvl: 'Lv. 40 ~ 50', desc: '영롱한 보석 광맥과 자수정 거신이 잠든 동굴입니다.', mobs: '수정 골렘, 비취 와이번', bosses: '자수정 거신 크리스탈로스', links: ['forest', 'dungeon_b1', 'ancient_ruins'] },
-            'village': { x: 282, y: 430, name: '시작의 마을', icon: '🌲', lvl: 'Lv. 1 (안전 마을)', desc: '평화로운 시작점이자 모험가들의 안식처입니다.', mobs: '평화 구역 (몬스터 없음)', bosses: '없음', links: ['forest', 'dungeon_b1', 'graveyard'] },
+            'blood_citadel': { 
+                x: 282, y: 70, icon: '🩸', links: ['citadel_sanctuary', 'poison_swamp'],
+                name: '진홍빛 흡혈귀 성채', name_en: 'Crimson Vampire Citadel',
+                lvl: 'Lv. 100 ~ 110', lvl_en: 'Lv. 100 ~ 110',
+                desc: '흡혈귀 황제 블라드 3세가 군림하는 피의 고성입니다.', desc_en: 'Ancient blood castle ruled by Vampire Emperor Vlad III.',
+                mobs: '흡혈 박쥐, 피의 사제', mobs_en: 'Vampire Bat, Blood Priest',
+                bosses: '흡혈귀 황제 블라드 3세, 핏빛룡', bosses_en: 'Vampire Emperor Vlad III, Blood Dragon Karma'
+            },
+            'ancient_ruins': { 
+                x: 282, y: 190, icon: '🏛️', links: ['crystal_cave', 'frozen_tundra', 'heaven_altar'],
+                name: '고대 거신 유적', name_en: 'Ancient Titan Ruins',
+                lvl: 'Lv. 70 ~ 80', lvl_en: 'Lv. 70 ~ 80',
+                desc: '태양 전차와 고대 골리앗 거신이 지키는 유적지입니다.', desc_en: 'Sun chariots and ancient Colossus Goliath guarding lost ruins.',
+                mobs: '고대 골렘, 파수병', mobs_en: 'Ancient Golem, Sentry Automaton',
+                bosses: '고대 거신 골리앗, 태양 전차', bosses_en: 'Colossus Goliath, Sun Chariot Phantom'
+            },
+            'crystal_cave': { 
+                x: 282, y: 310, icon: '💎', links: ['forest', 'dungeon_b1', 'ancient_ruins'],
+                name: '신비의 수정 동굴', name_en: 'Mystic Crystal Cave',
+                lvl: 'Lv. 40 ~ 50', lvl_en: 'Lv. 40 ~ 50',
+                desc: '영롱한 보석 광맥과 자수정 거신이 잠든 동굴입니다.', desc_en: 'Glittering gemstone caverns where the Amethyst Colossus slumbers.',
+                mobs: '수정 골렘, 비취 와이번', mobs_en: 'Crystal Golem, Jade Wyvern',
+                bosses: '자수정 거신 크리스탈로스', bosses_en: 'Amethyst Colossus Crystallos'
+            },
+            'village': { 
+                x: 282, y: 430, icon: '🌲', links: ['forest', 'dungeon_b1', 'graveyard'],
+                name: '시작의 마을', name_en: 'Peaceful Starting Village',
+                lvl: 'Lv. 1 (안전 마을)', lvl_en: 'Lv. 1 (Safe Town)',
+                desc: '평화로운 시작점이자 모험가들의 안식처입니다.', desc_en: 'A peaceful starting haven and home for lazy adventurers.',
+                mobs: '평화 구역 (몬스터 없음)', mobs_en: 'Peaceful Sanctuary (No Mobs)',
+                bosses: '없음', bosses_en: 'None'
+            },
 
             // Column 4 (x: 395) - Nature, Graveyard & Void
-            'poison_swamp': { x: 395, y: 70, name: '맹독의 부패 늪지대', icon: '☣️', lvl: 'Lv. 105 ~ 115', desc: '구두룡 히드라와 역병 파리가 숨쉬는 맹독의 늪입니다.', mobs: '맹독 거미, 부패 슬라임', bosses: '구두룡 맹독 히드라, 역병 군주 벨제붑', links: ['blood_citadel', 'shadow_realm'] },
-            'shadow_realm': { x: 395, y: 190, name: '암흑 그림자 차원', icon: '🌌', lvl: 'Lv. 115 ~ 125', desc: '공허 추적자와 그림자 군주의 암흑 차원입니다.', mobs: '공허 추적자, 차원 변종', bosses: '그림자 군주 아시본, 공허 추적자', links: ['poison_swamp', 'sky_haven'] },
-            'graveyard': { x: 395, y: 310, name: '망자의 묘지', icon: '🪦', lvl: 'Lv. 25 ~ 35', desc: '해골과 망령, 좀비가 울부짖는 음산한 묘지입니다.', mobs: '좀비, 해골, 망령', bosses: '죽음의 사신 타나토스, 밴시 퀸', links: ['village', 'forest', 'desert', 'oasis_town'] },
-            'forest': { x: 395, y: 430, name: '요정의 비취 숲', icon: '🌿', lvl: 'Lv. 5 ~ 15', desc: '고블린과 엘더 엔트가 배회하는 울창한 숲입니다.', mobs: '숲 고블린, 엘더 엔트', bosses: '고블린 대족장 그룩타, 엘더 엔트', links: ['village', 'graveyard', 'oasis_town', 'crystal_cave'] },
+            'poison_swamp': { 
+                x: 395, y: 70, icon: '☣️', links: ['blood_citadel', 'shadow_realm'],
+                name: '맹독의 부패 늪지대', name_en: 'Toxic Decay Swampland',
+                lvl: 'Lv. 105 ~ 115', lvl_en: 'Lv. 105 ~ 115',
+                desc: '구두룡 히드라와 역병 파리가 숨쉬는 맹독의 늪입니다.', desc_en: 'Poisonous marshlands where Nine-headed Hydra and Plague Lord dwell.',
+                mobs: '맹독 거미, 부패 슬라임', mobs_en: 'Venom Spider, Corrupt Slime',
+                bosses: '구두룡 맹독 히드라, 역병 군주 벨제붑', bosses_en: 'Hydra Venom Lord, Plague Lord Beelzebub'
+            },
+            'shadow_realm': { 
+                x: 395, y: 190, icon: '🌌', links: ['poison_swamp', 'sky_haven'],
+                name: '암흑 그림자 차원', name_en: 'Dark Shadow Realm',
+                lvl: 'Lv. 115 ~ 125', lvl_en: 'Lv. 115 ~ 125',
+                desc: '공허 추적자와 그림자 군주의 암흑 차원입니다.', desc_en: 'Shadow domain ruled by Void Stalker and Shadow Monarch.',
+                mobs: '공허 추적자, 차원 변종', mobs_en: 'Void Hunter, Dimension Aberration',
+                bosses: '그림자 군주 아시본, 공허 추적자', bosses_en: 'Shadow Monarch Ashborn, Void Stalker Kha\'Zix'
+            },
+            'graveyard': { 
+                x: 395, y: 310, icon: '🪦', links: ['village', 'forest', 'desert', 'oasis_town'],
+                name: '망자의 묘지', name_en: 'Cemetery of the Dead',
+                lvl: 'Lv. 25 ~ 35', lvl_en: 'Lv. 25 ~ 35',
+                desc: '해골과 망령, 좀비가 울부짖는 음산한 묘지입니다.', desc_en: 'Eerie graveyard haunted by restless zombies, wraiths, and banshees.',
+                mobs: '좀비, 해골, 망령', mobs_en: 'Zombie, Skeleton, Wraith',
+                bosses: '죽음의 사신 타나토스, 밴시 퀸', bosses_en: 'Reaper Thanatos, Banshee Queen'
+            },
+            'forest': { 
+                x: 395, y: 430, icon: '🌿', links: ['village', 'graveyard', 'oasis_town', 'crystal_cave'],
+                name: '요정의 비취 숲', name_en: 'Jade Fairy Forest',
+                lvl: 'Lv. 5 ~ 15', lvl_en: 'Lv. 5 ~ 15',
+                desc: '고블린과 엘더 엔트가 배회하는 울창한 숲입니다.', desc_en: 'Lush emerald woodland inhabited by goblins and ancient treants.',
+                mobs: '숲 고블린, 엘더 엔트', mobs_en: 'Forest Goblin, Elder Treant',
+                bosses: '고블린 대족장 그룩타, 엘더 엔트', bosses_en: 'Goblin Warlord Grukta, Ancient Treant'
+            },
 
             // Column 5 (x: 508) - Desert, Pyramid & Sky Haven
-            'sky_haven': { x: 508, y: 70, name: '천공의 구름 안식처', icon: '🪽', lvl: 'Lv. 125 (안전 성소)', desc: '구름 위에 떠 있는 최후의 신성 안식처 마을입니다.', mobs: '평화 구역 (몬스터 없음)', bosses: '없음', links: ['shadow_realm', 'heaven_altar'] },
-            'pyramid': { x: 508, y: 190, name: '파라오의 영묘', icon: '🏛️', lvl: 'Lv. 45 ~ 55', desc: '황금 보물과 저주가 잠든 피라미드 영묘입니다.', mobs: '미이라, 스핑크스', bosses: '황금 파라오 투탕카멘, 아누비스', links: ['desert', 'oasis_town', 'dungeon_b2'] },
-            'desert': { x: 508, y: 310, name: '황혼의 사막', icon: '🏜️', lvl: 'Lv. 35 ~ 45', desc: '모래폭풍과 거대전갈, 샌드웜이 도사리는 사막입니다.', mobs: '사막 전갈, 미이라', bosses: '사막의 지배자 샌드웜, 전갈 여제', links: ['oasis_town', 'graveyard', 'pyramid'] },
-            'oasis_town': { x: 508, y: 430, name: '사막 오아시스', icon: '🏝️', lvl: 'Lv. 35 (안전 마을)', desc: '사막 한가운데 자리 잡은 오아시스 마을입니다.', mobs: '평화 구역 (몬스터 없음)', bosses: '없음', links: ['forest', 'desert', 'pyramid', 'graveyard'] },
+            'sky_haven': { 
+                x: 508, y: 70, icon: '🪽', links: ['shadow_realm', 'heaven_altar'],
+                name: '천공의 구름 안식처', name_en: 'Sky Haven Sanctuary',
+                lvl: 'Lv. 125 (안전 성소)', lvl_en: 'Lv. 125 (Holy Sanctuary)',
+                desc: '구름 위에 떠 있는 최후의 신성 안식처 마을입니다.', desc_en: 'A celestial holy haven resting atop the clouds.',
+                mobs: '평화 구역 (몬스터 없음)', mobs_en: 'Peaceful Sanctuary (No Mobs)',
+                bosses: '없음', bosses_en: 'None'
+            },
+            'pyramid': { 
+                x: 508, y: 190, icon: '🏛️', links: ['desert', 'oasis_town', 'dungeon_b2'],
+                name: '파라오의 영묘', name_en: 'Pharaoh\'s Golden Tomb',
+                lvl: 'Lv. 45 ~ 55', lvl_en: 'Lv. 45 ~ 55',
+                desc: '황금 보물과 저주가 잠든 피라미드 영묘입니다.', desc_en: 'Cursed ancient pyramid housing royal treasures and mummies.',
+                mobs: '미이라, 스핑크스', mobs_en: 'Mummy, Sphinx Guard',
+                bosses: '황금 파라오 투탕카멘, 아누비스', bosses_en: 'Golden Pharaoh Tutankhamun, Judge Anubis'
+            },
+            'desert': { 
+                x: 508, y: 310, icon: '🏜️', links: ['oasis_town', 'graveyard', 'pyramid'],
+                name: '황혼의 사막', name_en: 'Twilight Dune Desert',
+                lvl: 'Lv. 35 ~ 45', lvl_en: 'Lv. 35 ~ 45',
+                desc: '모래폭풍과 거대전갈, 샌드웜이 도사리는 사막입니다.', desc_en: 'Vast sandstorm desert infested by giant scorpions and sandworms.',
+                mobs: '사막 전갈, 미이라', mobs_en: 'Desert Scorpion, Mummy',
+                bosses: '사막의 지배자 샌드웜, 전갈 여제', bosses_en: 'Sandworm Lord, Scorpion Empress Selket'
+            },
+            'oasis_town': { 
+                x: 508, y: 430, icon: '🏝️', links: ['forest', 'desert', 'pyramid', 'graveyard'],
+                name: '사막 오아시스', name_en: 'Desert Oasis Village',
+                lvl: 'Lv. 35 (안전 마을)', lvl_en: 'Lv. 35 (Safe Oasis)',
+                desc: '사막 한가운데 자리 잡은 오아시스 마을입니다.', desc_en: 'A lush refreshing oasis haven nestled in the desert sands.',
+                mobs: '평화 구역 (몬스터 없음)', mobs_en: 'Peaceful Sanctuary (No Mobs)',
+                bosses: '없음', bosses_en: 'None'
+            },
 
             // Column 6 (x: 620) - Divine Celestial, Void & Paradise
-            'heaven_altar': { x: 620, y: 70, name: '천공 판테온 제단', icon: '✨', lvl: 'Lv. 125 ~ 140', desc: '대천사 우리엘과 세라핌이 강림하는 신들의 판테온입니다.', mobs: '천공 아바타, 발키리', bosses: '천공의 심판자 세라핌, 대천사 우리엘', links: ['sky_haven', 'ancient_ruins', 'astral_void'] },
-            'astral_void': { x: 620, y: 190, name: '시공간 성간 공허', icon: '🌌', lvl: 'Lv. 130 ~ 145', desc: '성간 포식자 네뷸라와 시공의 지배자 크로노스의 우주입니다.', mobs: '성간 포식자, 시간 왜곡체', bosses: '성간 포식자 네뷸라, 시간 크로노스', links: ['heaven_altar', 'god_sanctuary'] },
-            'god_sanctuary': { x: 620, y: 310, name: '태초의 신역', icon: '👑', lvl: 'Lv. 140 ~ MAX', desc: '신역의 문을 지키는 태초의 수호신 아르고스의 성소입니다.', mobs: '성소 수호병, 신역 사제', bosses: '태초의 수호신 아르고스, 타락천사 루시퍼', links: ['astral_void', 'lazy_paradise'] },
-            'lazy_paradise': { x: 620, y: 430, name: '꿈속의 나태 낙원', icon: '🛌', lvl: 'Lv. 150 END', desc: '모든 모험을 마친 지저씨가 영원히 꿀잠을 자는 지상 낙원입니다.', mobs: '평화 구역 (온수매트)', bosses: '온수매트 대왕 슬리퍼', links: ['god_sanctuary', 'village'] }
+            'heaven_altar': { 
+                x: 620, y: 70, icon: '✨', links: ['sky_haven', 'ancient_ruins', 'astral_void'],
+                name: '천공 판테온 제단', name_en: 'Celestial Pantheon Altar',
+                lvl: 'Lv. 125 ~ 140', lvl_en: 'Lv. 125 ~ 140',
+                desc: '대천사 우리엘과 세라핌이 강림하는 신들의 판테온입니다.', desc_en: 'Grand pantheon where Archangel Uriel and Seraphim descend.',
+                mobs: '천공 아바타, 발키리', mobs_en: 'Celestial Avatar, Valkyrie',
+                bosses: '천공의 심판자 세라핌, 대천사 우리엘', bosses_en: 'Judge Seraphim, Archangel Uriel'
+            },
+            'astral_void': { 
+                x: 620, y: 190, icon: '🌌', links: ['heaven_altar', 'god_sanctuary'],
+                name: '시공간 성간 공허', name_en: 'Spacetime Astral Void',
+                lvl: 'Lv. 130 ~ 145', lvl_en: 'Lv. 130 ~ 145',
+                desc: '성간 포식자 네뷸라와 시공의 지배자 크로노스의 우주입니다.', desc_en: 'Deep cosmos where Astral Devourer Nebula and Chronos rule.',
+                mobs: '성간 포식자, 시간 왜곡체', mobs_en: 'Nebula Stalker, Time Distortion',
+                bosses: '성간 포식자 네뷸라, 시간 크로노스', bosses_en: 'Astral Devourer Nebula, Chronos'
+            },
+            'god_sanctuary': { 
+                x: 620, y: 310, icon: '👑', links: ['astral_void', 'lazy_paradise'],
+                name: '태초의 신역', name_en: 'Primordial Realm of the Gods',
+                lvl: 'Lv. 140 ~ MAX', lvl_en: 'Lv. 140 ~ MAX',
+                desc: '신역의 문을 지키는 태초의 수호신 아르고스의 성소입니다.', desc_en: 'Divine sanctuary guarded by Primordial Overlord Argos and Lucifer.',
+                mobs: '성소 수호병, 신역 사제', mobs_en: 'Sanctuary Defender, Godly Priest',
+                bosses: '태초의 수호신 아르고스, 타락천사 루시퍼', bosses_en: 'Primordial Argos, Fallen Angel Lucifer'
+            },
+            'lazy_paradise': { 
+                x: 620, y: 430, icon: '🛌', links: ['god_sanctuary', 'village'],
+                name: '꿈속의 나태 낙원', name_en: 'Dreaming Sloth Paradise',
+                lvl: 'Lv. 150 END', lvl_en: 'Lv. 150 END',
+                desc: '모든 모험을 마친 지저씨가 영원히 꿀잠을 자는 지상 낙원입니다.', desc_en: 'The eternal comfy paradise where Uncle Bob can sleep forever in peace.',
+                mobs: '평화 구역 (온수매트)', mobs_en: 'Peaceful Sanctuary (Electric Blanket)',
+                bosses: '온수매트 대왕 슬리퍼', bosses_en: 'Heated Mattress King Sleeper'
+            }
         };
 
         this.nodeMapData = NODE_MAP_DATA;
@@ -1133,6 +1326,7 @@ class Game {
             const node = NODE_MAP_DATA[zKey];
             const isCurrent = this.currentZone === zKey;
             const isSelected = this.selectedMapZone === zKey;
+            const nodeName = isEn ? (node.name_en || node.name) : node.name;
 
             const pin = document.createElement('div');
             pin.className = `map-node-pin ${isCurrent ? 'current-zone-pin' : ''} ${isSelected ? 'active-selected' : ''}`;
@@ -1140,9 +1334,9 @@ class Game {
             pin.style.top = `${node.y}px`;
 
             pin.innerHTML = `
-                ${isCurrent ? '<div class="player-here-badge">📍 내 위치</div>' : ''}
+                ${isCurrent ? `<div class="player-here-badge">${isEn ? '📍 You Are Here' : '📍 내 위치'}</div>` : ''}
                 <div class="node-icon-circle">${node.icon}</div>
-                <div class="node-name-pill">${node.name}</div>
+                <div class="node-name-pill">${nodeName}</div>
             `;
 
             pin.onclick = () => {
@@ -1164,6 +1358,7 @@ class Game {
     updateWorldMapDetailPanel(zoneKey) {
         const node = this.nodeMapData?.[zoneKey] || this.nodeMapData?.['village'];
         if (!node) return;
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
 
         const iconEl = document.getElementById('mapDetailIcon');
         const titleEl = document.getElementById('mapDetailTitle');
@@ -1172,20 +1367,29 @@ class Game {
         const mobsEl = document.getElementById('mapDetailMobs');
         const portalsEl = document.getElementById('mapDetailPortals');
 
+        const nodeName = isEn ? (node.name_en || node.name) : node.name;
+        const nodeLvl = isEn ? (node.lvl_en || node.lvl) : node.lvl;
+        const nodeDesc = isEn ? (node.desc_en || node.desc) : node.desc;
+        const nodeMobs = isEn ? (node.mobs_en || node.mobs) : node.mobs;
+        const nodeBosses = isEn ? (node.bosses_en || node.bosses) : node.bosses;
+
         if (iconEl) iconEl.innerText = node.icon;
-        if (titleEl) titleEl.innerText = node.name;
-        if (lvlEl) lvlEl.innerText = node.lvl;
-        if (descEl) descEl.innerText = node.desc;
-        if (mobsEl) mobsEl.innerHTML = `<strong>출현 몬스터</strong>: ${node.mobs}<br><strong style="color:#f87171;">출현 보스</strong>: ${node.bosses}`;
+        if (titleEl) titleEl.innerText = nodeName;
+        if (lvlEl) lvlEl.innerText = nodeLvl;
+        if (descEl) descEl.innerText = nodeDesc;
+        if (mobsEl) mobsEl.innerHTML = isEn 
+            ? `<strong>Spawn Mobs</strong>: ${nodeMobs}<br><strong style="color:#f87171;">Spawn Bosses</strong>: ${nodeBosses}`
+            : `<strong>출현 몬스터</strong>: ${nodeMobs}<br><strong style="color:#f87171;">출현 보스</strong>: ${nodeBosses}`;
 
         if (portalsEl) {
             portalsEl.innerHTML = '';
             (node.links || []).forEach(linkKey => {
                 const targetNode = this.nodeMapData[linkKey];
                 if (targetNode) {
+                    const targetName = isEn ? (targetNode.name_en || targetNode.name) : targetNode.name;
                     const chip = document.createElement('span');
                     chip.className = 'portal-chip';
-                    chip.innerText = `${targetNode.icon} ${targetNode.name}`;
+                    chip.innerText = `${targetNode.icon} ${targetName}`;
                     chip.onclick = () => this.selectWorldMapNode(linkKey);
                     chip.style.cursor = 'pointer';
                     portalsEl.appendChild(chip);
@@ -1465,8 +1669,9 @@ class Game {
     }
 
     advanceTrialTowerFloor() {
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         if (this.towerFloor >= this.towerMaxFloor) {
-            this.showNotification('👑 [시련의 정복자] 50층 최종 보스를 격파하여 시련의 탑을 완전 정복했습니다!');
+            this.showNotification(isEn ? '👑 [Trial Conqueror] Defeated 50F Final Boss and conquered the Tower of Trial!' : '👑 [시련의 정복자] 50층 최종 보스를 격파하여 시련의 탑을 완전 정복했습니다!');
             sounds.playJackpot();
             return;
         }
@@ -1477,7 +1682,7 @@ class Game {
         this.player.y = 2100;
         this.isTowerFloorCleared = false;
         this.initWorld();
-        this.showNotification(`🗼 [시련의 탑 ${this.towerFloor}F 진입] 새로운 도전이 시작됩니다!`);
+        this.showNotification(isEn ? `🗼 [Tower of Trial ${this.towerFloor}F] A new challenge begins!` : `🗼 [시련의 탑 ${this.towerFloor}F 진입] 새로운 도전이 시작됩니다!`);
     }
 
     toggleTrialShop() {
@@ -1566,7 +1771,8 @@ class Game {
             this.toggleGuide();
         } else if (idx === 3) {
             this.saveGame();
-            this.showNotification('💾 게임이 안전하게 저장되었습니다!');
+            const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+            this.showNotification(isEn ? '💾 Game saved safely!' : '💾 게임이 안전하게 저장되었습니다!');
         } else if (idx === 4) {
             this.togglePause();
             this.toggleSettings();
@@ -1768,8 +1974,9 @@ class Game {
             }
         });
         sounds.playInteract();
-        const label = this.autoPotionThreshold === 0 ? 'OFF' : `${Math.round(this.autoPotionThreshold * 100)}% 이하`;
-        this.showNotification(`🛵 [배달앱 설정] 자동 물약 결제: ${label}`);
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+        const label = this.autoPotionThreshold === 0 ? 'OFF' : (isEn ? `Under ${Math.round(this.autoPotionThreshold * 100)}%` : `${Math.round(this.autoPotionThreshold * 100)}% 이하`);
+        this.showNotification(isEn ? `🛵 [Auto-Potion Setting] Delivery threshold: ${label}` : `🛵 [배달앱 설정] 자동 물약 결제: ${label}`);
         this.saveGame(true);
     }
 
@@ -1793,17 +2000,19 @@ class Game {
             introEl.style.opacity = '1';
             introEl.style.pointerEvents = 'auto';
         }
-        this.showNotification('🏠 타이틀 화면으로 돌아왔습니다.');
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+        this.showNotification(isEn ? '🏠 Returned to title screen.' : '🏠 타이틀 화면으로 돌아왔습니다.');
     }
 
     quitGame() {
         this.saveGame(true);
-        if (window.confirm('게임을 안전하게 저장하고 종료하시겠습니까?')) {
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+        if (window.confirm(isEn ? 'Save game safely and quit?' : '게임을 안전하게 저장하고 종료하시겠습니까?')) {
             if (window.pywebview && window.pywebview.api && window.pywebview.api.quit_game) {
                 window.pywebview.api.quit_game();
             } else {
                 window.close();
-                this.showNotification('게임을 안전하게 저장했습니다. 창을 닫아주세요.');
+                this.showNotification(isEn ? 'Game saved safely. You may close the window.' : '게임을 안전하게 저장했습니다. 창을 닫아주세요.');
             }
         }
     }
@@ -1820,6 +2029,7 @@ class Game {
                 sounds.playInteract();
             } else {
                 modal.classList.add('hidden');
+                if (document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur();
             }
         }
     }
@@ -1849,7 +2059,9 @@ class Game {
         this.updateSkillBookUI();
         this.updateHUD();
         this.saveGame(true);
-        this.showNotification(`⚡ [${SKILL_DB[skillId].name}] 스킬이 [${slotKey}] 슬롯에 장착되었습니다!`);
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+        const skName = typeof tData === 'function' ? tData(SKILL_DB[skillId], 'name') : SKILL_DB[skillId].name;
+        this.showNotification(isEn ? `⚡ [${skName}] equipped to slot [${slotKey}]!` : `⚡ [${SKILL_DB[skillId].name}] 스킬이 [${slotKey}] 슬롯에 장착되었습니다!`);
     }
 
     clearAllEquippedSkills() {
@@ -1866,7 +2078,8 @@ class Game {
         this.updateSkillBookUI();
         this.updateHUD();
         this.saveGame(true);
-        this.showNotification(`🗑️ [전체 해제] 장착된 ${count}개의 모든 스킬 슬롯을 비웠습니다.`);
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+        this.showNotification(isEn ? `🗑️ [Clear All] Cleared all ${count} equipped skill slots.` : `🗑️ [전체 해제] 장착된 ${count}개의 모든 스킬 슬롯을 비웠습니다.`);
     }
 
     unequipSkillFromSlot(slotKey) {
@@ -1878,7 +2091,8 @@ class Game {
         this.updateSkillBookUI();
         this.updateHUD();
         this.saveGame(true);
-        this.showNotification(`🗑️ [${slotKey}] 슬롯의 스킬이 해제되었습니다.`);
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+        this.showNotification(isEn ? `🗑️ [${slotKey}] Skill unequipped.` : `🗑️ [${slotKey}] 슬롯의 스킬이 해제되었습니다.`);
     }
 
     updateSkillBookSelectionHighlight(shouldScroll = false) {
@@ -1918,6 +2132,7 @@ class Game {
             modal.classList.add('hidden');
             modal.style.display = 'none';
         }
+        if (document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur();
     }
 
     toggleSettings(forceState = null) {
@@ -1939,6 +2154,7 @@ class Game {
             } else {
                 modal.classList.add('hidden');
                 modal.style.display = 'none';
+                if (document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur();
             }
         }
     }
@@ -1947,37 +2163,68 @@ class Game {
         this.isGuideOpen = false;
         const modal = document.getElementById('guideModal');
         if (modal) modal.classList.add('hidden');
+        if (document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur();
     }
 
     closeInventory() {
+        if (document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur();
         return this.inventory.closeInventory();
     }
 
     closeShop() {
+        if (document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur();
         return this.shop.closeShop();
     }
 
     closeForge() {
+        if (document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur();
         return this.inventory.closeForge();
     }
 
     closeSkillBook() {
         this.isSkillBookOpen = false;
-        const modal = document.getElementById('skillBookModal');
+        const modal = document.getElementById('skillModal') || document.getElementById('skillBookModal');
         if (modal) modal.classList.add('hidden');
+        if (document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur();
+    }
+
+    closeWorldMap() {
+        this.isWorldMapOpen = false;
+        const modal = document.getElementById('worldMapModal');
+        if (modal) modal.classList.add('hidden');
+        if (document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur();
+    }
+
+    closeMultiplayerModal() {
+        this.isMultiplayerModalOpen = false;
+        const modal = document.getElementById('multiplayerLobbyModal');
+        if (modal) modal.classList.add('hidden');
+        if (document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur();
+    }
+
+    updateFullscreenButtonUI(isFs) {
+        this.isFullscreen = isFs;
+        const btn = document.getElementById('btnFullscreen');
+        if (!btn) return;
+        const icon = btn.querySelector('.btn-icon');
+        const text = btn.querySelector('.btn-text');
+        const key = isFs ? 'hud.windowed' : 'hud.fullscreen';
+        const label = (typeof t === 'function') ? t(key) : (isFs ? ' 창 모드' : ' 전체화면');
+
+        if (icon) icon.textContent = isFs ? '🗗' : '⛶';
+        if (text) {
+            text.setAttribute('data-i18n', key);
+            text.textContent = label;
+        }
+        btn.setAttribute('data-i18n-title', key);
+        btn.setAttribute('title', label.trim());
     }
 
     toggleFullscreen() {
         // pywebview native fullscreen toggle
         if (window.pywebview && window.pywebview.api && window.pywebview.api.toggle_fullscreen) {
             window.pywebview.api.toggle_fullscreen().then(isFs => {
-                const btn = document.getElementById('btnFullscreen');
-                if (btn) {
-                    const icon = btn.querySelector('.btn-icon');
-                    const text = btn.querySelector('.btn-text');
-                    if (icon) icon.textContent = isFs ? '⛶' : '⛶';
-                    if (text) text.textContent = isFs ? ' 창 모드' : ' 전체화면';
-                }
+                this.updateFullscreenButtonUI(isFs);
             });
             return;
         }
@@ -1985,9 +2232,13 @@ class Game {
         const doc = document.documentElement;
         try {
             if (!document.fullscreenElement) {
-                doc.requestFullscreen().catch(() => {});
+                doc.requestFullscreen().then(() => {
+                    this.updateFullscreenButtonUI(true);
+                }).catch(() => {});
             } else {
-                document.exitFullscreen();
+                document.exitFullscreen().then(() => {
+                    this.updateFullscreenButtonUI(false);
+                }).catch(() => {});
             }
         } catch(e) {}
     }
@@ -2250,9 +2501,11 @@ class Game {
     saveGame(isAuto = false) {
         const data = this.getSaveData();
         localStorage.setItem('retro_rpg_save', JSON.stringify(data));
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         if (isAuto) {
             const autoIcon = document.getElementById('autoSaveIndicator');
             if (autoIcon) {
+                autoIcon.innerText = isEn ? '💾 Saved' : '💾 저장됨';
                 autoIcon.classList.remove('hidden');
                 autoIcon.classList.add('pulse');
                 setTimeout(() => {
@@ -2261,13 +2514,14 @@ class Game {
                 }, 1500);
             }
         } else {
-            this.showNotification('게임이 저장되었습니다!');
+            this.showNotification(isEn ? '💾 Game saved successfully!' : '💾 게임이 저장되었습니다!');
         }
     }
 
     loadGame(isAuto = false) {
         try {
             const raw = localStorage.getItem('retro_rpg_save');
+            const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
             if (raw) {
                 const data = JSON.parse(raw);
                 this.player.level = data.level || 1;
@@ -2326,7 +2580,21 @@ class Game {
                     this.setAutoPotionThreshold(data.autoPotionThreshold);
                 }
                 this.player.potions = data.potions || { hp: 3, mp: 3, buff: 2 };
-                if (data.quests) this.quests = data.quests;
+                if (data.quests && Array.isArray(data.quests) && typeof QUEST_DB !== 'undefined') {
+                    this.quests = QUEST_DB.map((dbQ, idx) => {
+                        const savedQ = data.quests.find(sq => (sq.id === dbQ.id || sq.id === ('q' + (idx + 1)) || sq.title === dbQ.title || sq.title_en === dbQ.title_en)) || data.quests[idx];
+                        if (savedQ) {
+                            return Object.assign({}, dbQ, {
+                                status: savedQ.status,
+                                currentCount: savedQ.currentCount !== undefined ? savedQ.currentCount : dbQ.currentCount,
+                                targetCount: savedQ.targetCount || dbQ.targetCount
+                            });
+                        }
+                        return JSON.parse(JSON.stringify(dbQ));
+                    });
+                } else if (data.quests) {
+                    this.quests = data.quests;
+                }
                 this.usedCodes = data.usedCodes || {};
 
                 // Restore saved zone and player coordinates
@@ -2343,9 +2611,9 @@ class Game {
                 this.updateInventoryUI();
                 this.updateQuestHUD();
                 this.updateHUD();
-                if (!isAuto) this.showNotification(`💾 저장 데이터를 불러왔습니다! (Lv.${this.player.level} / ${this.player.gold} G)`);
+                if (!isAuto) this.showNotification(isEn ? `💾 Loaded save data! (Lv.${this.player.level} / ${this.player.gold} G)` : `💾 저장 데이터를 불러왔습니다! (Lv.${this.player.level} / ${this.player.gold} G)`);
             } else {
-                if (!isAuto) this.showNotification('저장된 데이터가 없어 새로운 모험을 시작합니다!');
+                if (!isAuto) this.showNotification(isEn ? 'No save data found. Starting a new adventure!' : '저장된 데이터가 없어 새로운 모험을 시작합니다!');
             }
         } catch (e) {
             console.error('Failed to load save', e);
@@ -2361,6 +2629,7 @@ class Game {
         const code = rawCode.trim().toLowerCase();
         const fbEl = document.getElementById('cheatFeedbackMsg');
         this.usedCodes = this.usedCodes || {};
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
 
         const showCheatMsg = (msg, isSuccess = true) => {
             if (isSuccess) sounds.playLevelUp();
@@ -2375,7 +2644,7 @@ class Game {
 
         if (code === '지준성') {
             if (this.usedCodes['지준성']) {
-                showCheatMsg('이미 사용 완료된 쿠폰 번호입니다.', false);
+                showCheatMsg(isEn ? 'Coupon code already redeemed.' : '이미 사용 완료된 쿠폰 번호입니다.', false);
                 return;
             }
             this.usedCodes['지준성'] = true;
@@ -2383,19 +2652,19 @@ class Game {
             this.updateHUD();
             this.updateInventoryUI();
             this.saveGame(true);
-            showCheatMsg('🎁 [이벤트 쿠폰] +500 Gold가 지급되었습니다! (1회 한정)');
+            showCheatMsg(isEn ? '🎁 [Event Code] +500 Gold granted! (1-time use)' : '🎁 [이벤트 쿠폰] +500 Gold가 지급되었습니다! (1회 한정)');
         } else if (code === 'jsj') {
             this.player.gold += 100000;
             this.updateHUD();
             this.updateInventoryUI();
             this.saveGame(true);
-            showCheatMsg('🪙 [시크릿 코드] +100,000 Gold가 지급되었습니다! (보유 골드: ' + this.player.gold + ' G)');
+            showCheatMsg(isEn ? `🪙 [Secret Code] +100,000 Gold granted! (Current: ${this.player.gold} G)` : '🪙 [시크릿 코드] +100,000 Gold가 지급되었습니다! (보유 골드: ' + this.player.gold + ' G)');
         } else if (code === 'makemerich') {
             this.player.gold += 100000000;
             this.updateHUD();
             this.updateInventoryUI();
             this.saveGame(true);
-            showCheatMsg('💰 [시크릿 코드] +100,000,000 Gold가 지급되었습니다!');
+            showCheatMsg(isEn ? '💰 [Secret Code] +100,000,000 Gold granted!' : '💰 [시크릿 코드] +100,000,000 Gold가 지급되었습니다!');
         } else if (code === '자라나라머리머리') {
             this.player.level = 50;
             this.player.baseAttack = 200;
@@ -2407,7 +2676,7 @@ class Game {
             this.player.mp = this.player.maxMp;
             this.updateHUD();
             this.saveGame(true);
-            showCheatMsg('⚡ [시크릿 코드] 자라나라 머리머리! Lv.50 각성 완료! (공격력 200, HP 2,000, MP 1,500, +50만G)');
+            showCheatMsg(isEn ? '⚡ [Secret Code] Lv.50 Awakening Complete! (ATK 200, HP 2,000, MP 1,500, +500k G)' : '⚡ [시크릿 코드] 자라나라 머리머리! Lv.50 각성 완료! (공격력 200, HP 2,000, MP 1,500, +50만G)');
         } else if (code === '킹왕짱') {
             this.player.equipment.weapon = 'sword_lazy_god';
             this.player.equipment.armor = 'armor_lazy_god';
@@ -2417,58 +2686,57 @@ class Game {
             this.player.addItemToInventory('potion_hp', 99);
             this.player.addItemToInventory('potion_mp', 99);
             this.player.addItemToInventory('potion_buff', 99);
-            this.player.addItemToInventory('potion_hp', 99);
-            this.player.addItemToInventory('potion_mp', 99);
-            this.player.addItemToInventory('potion_buff', 99);
             this.player.recalculateStats();
             this.player.hp = this.player.maxHp;
             this.player.mp = this.player.maxMp;
             this.updateHUD();
             this.updateInventoryUI();
             this.saveGame(true);
-            showCheatMsg('✨ [시크릿 코드] 킹왕짱! 전설의 나태 신 종결 풀세트(+10 풀강) & 물약 99개가 지급되었습니다!');
+            showCheatMsg(isEn ? '✨ [Secret Code] Mythic Sloth God +10 Full Set & 99 Potions granted!' : '✨ [시크릿 코드] 킹왕짱! 전설의 나태 신 종결 풀세트(+10 풀강) & 물약 99개가 지급되었습니다!');
         } else if (code === '각성') {
             this.player.hp = this.player.maxHp;
             this.player.mp = this.player.maxMp;
             this.player.buffTimer = 60;
             this.updateHUD();
-            showCheatMsg('💖 [시크릿 코드] 각성 완료! 체력/마나 100% 충전 & 공격/이속 +40% 버프 60초 발동!');
+            showCheatMsg(isEn ? '💖 [Secret Code] Awakening activated! 100% HP/MP & +40% ATK/Speed for 60s!' : '💖 [시크릿 코드] 각성 완료! 체력/마나 100% 충전 & 공격/이속 +40% 버프 60초 발동!');
         } else if (code === '나태낙원' || code === '낙원' || code === 'paradise') {
             this.switchZone('lazy_paradise');
-            showCheatMsg('🛏️ [시크릿 코드] 최종 구역 [꿈속의 나태 낙원]으로 이동했습니다!');
+            showCheatMsg(isEn ? '🛏️ [Secret Code] Teleported to final area [Dreamy Sloth Paradise]!' : '🛏️ [시크릿 코드] 최종 구역 [꿈속의 나태 낙원]으로 이동했습니다!');
         } else if (code === '신역' || code === '보스' || code === 'boss') {
             this.switchZone('god_sanctuary');
-            showCheatMsg('🏛️ [시크릿 코드] 최종 보스 구역 [태초의 신역]으로 이동했습니다!');
+            showCheatMsg(isEn ? '🏛️ [Secret Code] Teleported to final boss area [Primordial Sanctuary]!' : '🏛️ [시크릿 코드] 최종 보스 구역 [태초의 신역]으로 이동했습니다!');
         } else if (code === '사막' || code === 'desert') {
             this.switchZone('desert');
-            showCheatMsg('🏜️ [시크릿 코드] [황혼의 사막]으로 이동했습니다!');
+            showCheatMsg(isEn ? '🏜️ [Secret Code] Teleported to [Twilight Desert]!' : '🏜️ [시크릿 코드] [황혼의 사막]으로 이동했습니다!');
         } else if (code === '설원' || code === 'snow') {
             this.switchZone('frozen_tundra');
-            showCheatMsg('❄️ [시크릿 코드] [혹한의 빙하 설원]으로 이동했습니다!');
+            showCheatMsg(isEn ? '❄️ [Secret Code] Teleported to [Frozen Tundra]!' : '❄️ [시크릿 코드] [혹한의 빙하 설원]으로 이동했습니다!');
         } else {
-            showCheatMsg('유효하지 않은 쿠폰 번호이거나 사용 기간이 만료된 코드입니다.', false);
+            showCheatMsg(isEn ? 'Invalid coupon code or expired secret code.' : '유효하지 않은 쿠폰 번호이거나 사용 기간이 만료된 코드입니다.', false);
         }
     }
 
     exportSaveCode() {
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         const data = this.getSaveData();
         const code = btoa(encodeURIComponent(JSON.stringify(data)));
         navigator.clipboard.writeText(code).then(() => {
-            this.showNotification('세이브 코드가 복사되었습니다!');
+            this.showNotification(isEn ? 'Save code copied to clipboard!' : '세이브 코드가 복사되었습니다!');
         });
         return code;
     }
 
     importSaveCode(code) {
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         try {
             const jsonStr = decodeURIComponent(atob(code.trim()));
             const data = JSON.parse(jsonStr);
             localStorage.setItem('retro_rpg_save', JSON.stringify(data));
             this.loadGame();
-            this.showNotification('크로스 세이브 적용 완료!');
+            this.showNotification(isEn ? 'Cross-save applied successfully!' : '크로스 세이브 적용 완료!');
             return true;
         } catch (e) {
-            alert('올바르지 않은 세이브 코드입니다.');
+            alert(isEn ? 'Invalid save code.' : '올바르지 않은 세이브 코드입니다.');
             return false;
         }
     }
@@ -2600,9 +2868,15 @@ class Game {
     }
 
     start() {
+        // 🖥️ 무제한 FPS — requestAnimationFrame이 모니터 주사율(144/165/240Hz)을 자동으로 따름.
+        // dt는 최소 1fps~최대 240fps 범위로 클램프하여 물리 계산 안정성 보장.
+        const TARGET_DT_MAX = 1 / 15;   // 15fps 미만 드랍 시 게임이 점프하지 않도록 상한 cap
+        const TARGET_DT_MIN = 1 / 360;  // 360fps 초과 시 물리 오차 방지를 위한 하한 cap
+
         const loop = (timestamp) => {
             try {
-                const dt = Math.min((timestamp - this.lastTime) / 1000, 0.1);
+                const rawDt = (timestamp - this.lastTime) / 1000;
+                const dt = Math.min(Math.max(rawDt, TARGET_DT_MIN), TARGET_DT_MAX);
                 this.lastTime = timestamp;
 
                 if (this.isIntroOpen) {
@@ -2653,12 +2927,14 @@ class Game {
     updateIntroMenuUI() {
         const raw = localStorage.getItem('retro_rpg_save');
         const contLabel = document.getElementById('introBtnContinueLabel');
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         if (raw) {
             try {
                 const data = JSON.parse(raw);
-                const zoneName = ZONE_CONFIG[data.currentZone]?.name || '마을';
+                const zConf = (typeof ZONE_CONFIG !== 'undefined') ? ZONE_CONFIG[data.currentZone] : null;
+                const zoneName = zConf ? (typeof tData === 'function' ? tData(zConf, 'name') : (isEn ? (zConf.name_en || zConf.name) : zConf.name)) : (isEn ? '🌲 Peaceful Starting Village' : '🌲 평화로운 시작의 마을');
                 if (contLabel) {
-                    contLabel.innerText = `💾 모험 이어하기 [Lv.${data.level || 1} · ${zoneName}]`;
+                    contLabel.innerText = isEn ? `💾 Continue Adventure [Lv.${data.level || 1} · ${zoneName}]` : `💾 모험 이어하기 [Lv.${data.level || 1} · ${zoneName}]`;
                 }
                 this.setIntroMenuIndex(0, false); // Select 'Continue' by default
             } catch (e) {
@@ -2666,7 +2942,7 @@ class Game {
             }
         } else {
             if (contLabel) {
-                contLabel.innerText = '💾 모험 이어하기 (저장 데이터 없음)';
+                contLabel.innerText = isEn ? '💾 Continue Adventure (No Save Data)' : '💾 모험 이어하기 (저장 데이터 없음)';
             }
             this.setIntroMenuIndex(1, false); // Select 'New Game' by default if no save
         }
@@ -2801,7 +3077,9 @@ class Game {
         // Prefill Nickname
         const nickInput = document.getElementById('multiNicknameInput');
         if (nickInput) {
-            const savedNick = (typeof localStorage !== 'undefined' && localStorage.getItem('zijeossi_nickname')) || '게으른_지저씨';
+            const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+            const defaultNick = isEn ? 'LazyBob_Awakened' : '게으른_지저씨';
+            const savedNick = (typeof localStorage !== 'undefined' && localStorage.getItem('zijeossi_nickname')) || defaultNick;
             nickInput.value = savedNick;
         }
 
@@ -2830,15 +3108,26 @@ class Game {
     }
 
     randomizeMultiNickname() {
-        const prefixes = [
-            '게으른', '각성한', '누워있는', '칼퇴하는', '피곤한', 
-            '낮잠자는', '만렙백수', '비범한', '귀차니즘', '치맥원하는', 
-            '대마법', '황금빛', '전설의', '폭풍성장', '은밀한', 
-            '치명적인', '로또1등', '월급루팡', '일단자자', '심연의',
-            '재택근무', '무적의', '눈치빠른', '초사이어인', '소주한잔'
-        ];
-        const randomNick = `${prefixes[Math.floor(Math.random() * prefixes.length)]}_지저씨`;
-        
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+        let randomNick;
+        if (isEn) {
+            const enPrefixes = [
+                'Lazy', 'Awakened', 'Sleepy', 'Couch', 'Napping',
+                'Legendary', 'Golden', 'Shadow', 'Epic', 'Mythic',
+                'Chill', 'Retired', 'Freelance', 'Remote', 'Invincible'
+            ];
+            randomNick = `${enPrefixes[Math.floor(Math.random() * enPrefixes.length)]}_Bob`;
+        } else {
+            const prefixes = [
+                '게으른', '각성한', '누워있는', '칼퇴하는', '피곤한',
+                '낮잠자는', '만렙백수', '비범한', '귀차니즘', '치맥원하는',
+                '대마법', '황금빛', '전설의', '폭풍성장', '은밀한',
+                '치명적인', '로또1등', '월급루팡', '일단자자', '심연의',
+                '재택근무', '무적의', '눈치빠른', '초사이어인', '소주한잔'
+            ];
+            randomNick = `${prefixes[Math.floor(Math.random() * prefixes.length)]}_지저씨`;
+        }
+
         const nickInput = document.getElementById('multiNicknameInput');
         if (nickInput) nickInput.value = randomNick;
         if (typeof localStorage !== 'undefined') localStorage.setItem('zijeossi_nickname', randomNick);
@@ -2862,8 +3151,10 @@ class Game {
 
     startMultiplayerHost() {
         const nickInput = document.getElementById('multiNicknameInput');
-        const chosen = (nickInput && nickInput.value.trim().length > 0) ? nickInput.value.trim().slice(0, 12) : '게으른_지저씨';
-        
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+        const defaultNick = isEn ? 'LazyBob_Awakened' : '게으른_지저씨';
+        const chosen = (nickInput && nickInput.value.trim().length > 0) ? nickInput.value.trim().slice(0, 12) : defaultNick;
+
         if (typeof localStorage !== 'undefined') localStorage.setItem('zijeossi_nickname', chosen);
 
         this.closeMultiplayerModal();
@@ -2874,13 +3165,15 @@ class Game {
         if (this.network) {
             this.network.connect();
         }
-        this.showNotification(`👑 [방장] 멀티플레이 방을 개설했습니다! (닉네임: ${chosen})`);
+        this.showNotification(isEn ? `👑 [Host] Multiplayer room opened! (Nickname: ${chosen})` : `👑 [방장] 멀티플레이 방을 개설했습니다! (닉네임: ${chosen})`);
     }
 
     startMultiplayerJoin() {
         const nickInput = document.getElementById('multiNicknameInput');
-        const chosen = (nickInput && nickInput.value.trim().length > 0) ? nickInput.value.trim().slice(0, 12) : '게으른_지저씨';
-        
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+        const defaultNick = isEn ? 'LazyBob_Awakened' : '게으른_지저씨';
+        const chosen = (nickInput && nickInput.value.trim().length > 0) ? nickInput.value.trim().slice(0, 12) : defaultNick;
+
         const joinInput = document.getElementById('multiJoinServerUrl');
         let targetUrl = (joinInput && joinInput.value.trim().length > 0) ? joinInput.value.trim() : undefined;
 
@@ -2894,7 +3187,7 @@ class Game {
         if (this.network) {
             this.network.connect(targetUrl);
         }
-        this.showNotification(`⚔️ [파티원] 멀티플레이 서버에 접속합니다... (닉네임: ${chosen})`);
+        this.showNotification(isEn ? `⚔️ [Party] Connecting to multiplayer server... (Nickname: ${chosen})` : `⚔️ [파티원] 멀티플레이 서버에 접속합니다... (닉네임: ${chosen})`);
     }
 
     startAdventure(loadSave = false, isMultiplayer = false) {
@@ -2950,7 +3243,8 @@ class Game {
             this.updateInventoryUI();
             this.updateQuestHUD();
             this.updateHUD();
-            this.showNotification(isMultiplayer ? '🌐 [코옵 멀티플레이] 파티 모험을 시작합니다!' : '⚔️ [싱글플레이] 모험을 시작합니다!');
+            const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+            this.showNotification(isMultiplayer ? (isEn ? '🌐 [Co-op Multiplayer] Party adventure started!' : '🌐 [코옵 멀티플레이] 파티 모험을 시작합니다!') : (isEn ? '⚔️ [Singleplayer] Adventure started!' : '⚔️ [싱글플레이] 모험을 시작합니다!'));
         }
 
         const multiNickInput = document.getElementById('multiNicknameInput');
@@ -3217,6 +3511,12 @@ class Game {
         }
     }
 
+    triggerHitStop(duration = 0.02) {
+        if (!this.hitStopTimer || this.hitStopTimer <= 0) {
+            this.hitStopTimer = Math.min(duration, 0.025);
+        }
+    }
+
     update(dt) {
         if (this.isIntroOpen) {
             this.handleKeyboardUINavigation();
@@ -3228,6 +3528,11 @@ class Game {
             this.handleKeyboardUINavigation();
             this.input.update();
             return;
+        }
+
+        if (this.hitStopTimer > 0) {
+            this.hitStopTimer -= dt;
+            // ❌ 유저들이 '역경직(Hit Stop)'을 '프레임 드랍/렉'으로 오인하므로 시간 지연(dt *= 0.3) 삭제
         }
 
         this.windTime += dt;
@@ -3283,13 +3588,23 @@ class Game {
             const towerTracker = document.getElementById('hudTowerTracker');
             if (towerTracker) {
                 towerTracker.classList.remove('hidden');
+                const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+                const titleEl = document.getElementById('towerTitleLabel');
                 const floorNumEl = document.getElementById('towerFloorNum');
                 const mobsLeftEl = document.getElementById('towerMobsLeft');
+                const mobStatusEl = document.getElementById('towerMobStatus');
                 const coinsCountEl = document.getElementById('towerCoinsCount');
-                if (floorNumEl) floorNumEl.innerText = `${this.towerFloor}F`;
+                const coinStatusEl = document.getElementById('towerCoinStatus');
+
+                if (titleEl) titleEl.innerHTML = `${isEn ? '🗼 Tower of Trial' : '🗼 무한의 시련 탑'} <span id="towerFloorNum" class="tower-floor-badge">${this.towerFloor}F</span>`;
+                else if (floorNumEl) floorNumEl.innerText = `${this.towerFloor}F`;
+
                 const activeMobs = this.enemies.filter(e => e.active).length;
-                if (mobsLeftEl) mobsLeftEl.innerText = `${activeMobs}`;
-                if (coinsCountEl) coinsCountEl.innerText = `${this.trialCoins || 0}`;
+                if (mobStatusEl) mobStatusEl.innerHTML = `${isEn ? '👾 Mobs Left: ' : '👾 잔여 몬스터: '}<strong id="towerMobsLeft" style="color:#f43f5e;">${activeMobs}</strong>${isEn ? '' : '마리'}`;
+                else if (mobsLeftEl) mobsLeftEl.innerText = `${activeMobs}`;
+
+                if (coinStatusEl) coinStatusEl.innerHTML = `${isEn ? '🪙 Badges: ' : '🪙 시련의 증표: '}<strong id="towerCoinsCount" style="color: #facc15;">${this.trialCoins || 0}</strong>${isEn ? '' : '개'}`;
+                else if (coinsCountEl) coinsCountEl.innerText = `${this.trialCoins || 0}`;
             }
 
             // Check Floor Clear
@@ -3301,7 +3616,8 @@ class Game {
                 this.trialCoins = (this.trialCoins || 0) + coins;
                 this.props.push(new Prop(2100, 1800, 'portal_trial_tower_next'));
                 this.particles.spawn(2100, 1800, '#38bdf8', 35, 150, 0.8, 6);
-                this.showNotification(`🎉 [시련의 탑 ${this.towerFloor}F 돌파!] 획득: 시련의 증표 +${coins}🪙 (중앙 포탈로 다음 층 이동)`);
+                const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+                this.showNotification(isEn ? `🎉 [Cleared Tower ${this.towerFloor}F!] Badges +${coins}🪙 (Enter center portal for next floor)` : `🎉 [시련의 탑 ${this.towerFloor}F 돌파!] 획득: 시련의 증표 +${coins}🪙 (중앙 포탈로 다음 층 이동)`);
             }
         } else {
             const towerTracker = document.getElementById('hudTowerTracker');
@@ -3406,10 +3722,15 @@ class Game {
             const fillBar = document.getElementById('bossHpFill');
             const ghostBar = document.getElementById('bossHpGhost');
 
+            const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+            const bName = typeof activeBoss.getLocalizedBossName === 'function' ? activeBoss.getLocalizedBossName() : activeBoss.bossName;
+            const bTitle = typeof activeBoss.getLocalizedBossTitle === 'function' ? activeBoss.getLocalizedBossTitle() : (activeBoss.bossTitle || '');
+
             const hpRatio = activeBoss.maxHp > 0 ? Math.max(0, Math.min(1, activeBoss.hp / activeBoss.maxHp)) : 0;
             const isEnraged = activeBoss.phase === 2;
+            const enragedPrefix = isEnraged ? (isEn ? '⚡ [ENRAGED] ' : '⚡ [광폭화] ') : '';
 
-            nameLabel.innerText = `${isEnraged ? '⚡ [광폭화] ' : ''}👑 ${activeBoss.bossName} <${activeBoss.bossTitle || ''}>`;
+            nameLabel.innerText = `${enragedPrefix}👑 ${bName} ${bTitle ? `<${bTitle}>` : ''}`;
             percentLabel.innerText = `${Math.ceil(hpRatio * 100)}% (${Math.ceil(Math.max(0, activeBoss.hp))} / ${activeBoss.maxHp})`;
             fillBar.style.width = `${hpRatio * 100}%`;
             if (ghostBar) ghostBar.style.width = `${hpRatio * 100}%`;
@@ -3429,7 +3750,7 @@ class Game {
         if (coordsEl) coordsEl.innerText = `${Math.round(this.player.x)}, ${Math.round(this.player.y)}`;
         if (zoneNameEl) {
             const zConf = ZONE_CONFIG[this.currentZone] || ZONE_CONFIG['village'];
-            zoneNameEl.innerText = zConf.name;
+            zoneNameEl.innerText = typeof tData === 'function' ? tData(zConf, 'name') : zConf.name;
         }
 
         const zConf = ZONE_CONFIG[this.currentZone] || ZONE_CONFIG['village'];
@@ -3790,7 +4111,10 @@ class Game {
     teleportToPartyZone(targetZone) {
         if (!targetZone || targetZone === this.currentZone) return;
         this.switchZone(targetZone, false);
-        this.showNotification(`🚀 파티원이 있는 [${(ZONE_CONFIG[targetZone] && ZONE_CONFIG[targetZone].name) || targetZone}] (으)로 이동했습니다!`);
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+        const zConf = ZONE_CONFIG[targetZone];
+        const zName = zConf ? (typeof tData === 'function' ? tData(zConf, 'name') : zConf.name) : targetZone;
+        this.showNotification(isEn ? `🚀 Teleported to party member at [${zName}]!` : `🚀 파티원이 있는 [${zName}] (으)로 이동했습니다!`);
     }
 
     renderTabRadar() {
@@ -3804,7 +4128,7 @@ class Game {
         const coordsEl = document.getElementById('tabRadarCoords');
         if (coordsEl) coordsEl.innerText = `(${Math.round(this.player.x)}, ${Math.round(this.player.y)})`;
         const zConf = ZONE_CONFIG[this.currentZone] || ZONE_CONFIG['village'];
-        if (zoneNameEl) zoneNameEl.innerText = zConf.name;
+        if (zoneNameEl) zoneNameEl.innerText = typeof tData === 'function' ? tData(zConf, 'name') : zConf.name;
 
         // Background
         ctx.fillStyle = 'rgba(10, 15, 29, 0.95)';
@@ -3915,10 +4239,9 @@ class Game {
                 ctx.lineWidth = 2;
                 ctx.stroke();
 
-                ctx.font = 'bold 12px sans-serif';
-                ctx.fillStyle = '#fecdd3';
-                ctx.textAlign = 'center';
-                ctx.fillText(`💀 ${e.bossName || '보스'}`, ex, ey - 14);
+                const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+                const bName = typeof e.getLocalizedBossName === 'function' ? e.getLocalizedBossName() : (e.bossName || (isEn ? 'Boss' : '보스'));
+                ctx.fillText(`💀 ${bName}`, ex, ey - 14);
 
                 const hpRatio = e.maxHp > 0 ? Math.max(0, Math.min(1, e.hp / e.maxHp)) : 0;
                 ctx.fillStyle = 'rgba(0,0,0,0.6)';
@@ -4007,11 +4330,33 @@ class Game {
 
         this.renderMapBackground();
 
-        const remoteList = this.remotePlayers ? Object.values(this.remotePlayers).filter(rp => !rp.currentZone || rp.currentZone === this.currentZone) : [];
-        const renderQueue = [this.player, ...remoteList, ...this.enemies.filter(e => e.active), ...this.props.filter(p => p.active)];
-        renderQueue.sort((a, b) => a.y - b.y);
+        // 🚀 Zero-allocation GC-free reusable renderQueue
+        this.renderQueue.length = 0;
+        this.renderQueue.push(this.player);
 
-        for (const entity of renderQueue) {
+        if (this.remotePlayers) {
+            for (const id in this.remotePlayers) {
+                const rp = this.remotePlayers[id];
+                if (!rp.currentZone || rp.currentZone === this.currentZone) {
+                    this.renderQueue.push(rp);
+                }
+            }
+        }
+
+        for (let i = 0; i < this.enemies.length; i++) {
+            const e = this.enemies[i];
+            if (e.active) this.renderQueue.push(e);
+        }
+
+        for (let i = 0; i < this.props.length; i++) {
+            const p = this.props[i];
+            if (p.active) this.renderQueue.push(p);
+        }
+
+        this.renderQueue.sort((a, b) => a.y - b.y);
+
+        for (let i = 0; i < this.renderQueue.length; i++) {
+            const entity = this.renderQueue[i];
             if (entity instanceof Enemy) {
                 entity.render(this.ctx, entity === this.player.targetedEnemy);
             } else if (entity instanceof Prop) {
@@ -4022,8 +4367,9 @@ class Game {
         }
 
         // Render Ground Zones (Lava puddles, etc.)
-        if (this.groundZones) {
-            for (const gz of this.groundZones) {
+        if (this.groundZones && this.groundZones.length > 0) {
+            for (let i = 0; i < this.groundZones.length; i++) {
+                const gz = this.groundZones[i];
                 this.ctx.save();
                 this.ctx.translate(gz.x, gz.y);
                 if (gz.type === 'lava') {
@@ -4040,8 +4386,9 @@ class Game {
         }
 
         // Render Archer Traps
-        if (this.traps) {
-            for (const t of this.traps) {
+        if (this.traps && this.traps.length > 0) {
+            for (let i = 0; i < this.traps.length; i++) {
+                const t = this.traps[i];
                 this.ctx.save();
                 this.ctx.translate(t.x, t.y);
                 this.ctx.shadowColor = '#f59e0b';
@@ -4061,7 +4408,7 @@ class Game {
             }
         }
 
-        for (const p of this.projectiles) p.render(this.ctx);
+        for (let i = 0; i < this.projectiles.length; i++) this.projectiles[i].render(this.ctx);
         this.particles.render(this.ctx);
 
         this.camera.restoreTransform(this.ctx);
@@ -4119,57 +4466,77 @@ class Game {
     }
 
     renderCelestialLighting() {
-        const cx = window.innerWidth / 2;
-        const cy = window.innerHeight / 2;
-        const grad = this.ctx.createRadialGradient(cx, cy, 90, cx, cy, Math.max(cx, cy) * 0.95);
-        grad.addColorStop(0, 'rgba(250, 204, 21, 0.08)');
-        grad.addColorStop(0.5, 'rgba(49, 46, 129, 0.35)');
-        grad.addColorStop(1, 'rgba(15, 10, 40, 0.88)');
-        this.ctx.fillStyle = grad;
+        if (!this.cachedLighting) this.cachedLighting = {};
+        if (!this.cachedLighting.celestial) {
+            const cx = window.innerWidth / 2;
+            const cy = window.innerHeight / 2;
+            const grad = this.ctx.createRadialGradient(cx, cy, 90, cx, cy, Math.max(cx, cy) * 0.95);
+            grad.addColorStop(0, 'rgba(250, 204, 21, 0.08)');
+            grad.addColorStop(0.5, 'rgba(49, 46, 129, 0.35)');
+            grad.addColorStop(1, 'rgba(15, 10, 40, 0.88)');
+            this.cachedLighting.celestial = grad;
+        }
+        this.ctx.fillStyle = this.cachedLighting.celestial;
         this.ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
     }
 
     renderFrostLighting() {
-        const cx = window.innerWidth / 2;
-        const cy = window.innerHeight / 2;
-        const grad = this.ctx.createRadialGradient(cx, cy, 80, cx, cy, Math.max(cx, cy) * 0.95);
-        grad.addColorStop(0, 'rgba(56, 189, 248, 0.06)');
-        grad.addColorStop(0.5, 'rgba(8, 47, 73, 0.42)');
-        grad.addColorStop(1, 'rgba(2, 20, 35, 0.92)');
-        this.ctx.fillStyle = grad;
+        if (!this.cachedLighting) this.cachedLighting = {};
+        if (!this.cachedLighting.frost) {
+            const cx = window.innerWidth / 2;
+            const cy = window.innerHeight / 2;
+            const grad = this.ctx.createRadialGradient(cx, cy, 80, cx, cy, Math.max(cx, cy) * 0.95);
+            grad.addColorStop(0, 'rgba(56, 189, 248, 0.06)');
+            grad.addColorStop(0.5, 'rgba(8, 47, 73, 0.42)');
+            grad.addColorStop(1, 'rgba(2, 20, 35, 0.92)');
+            this.cachedLighting.frost = grad;
+        }
+        this.ctx.fillStyle = this.cachedLighting.frost;
         this.ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
     }
 
     renderAbyssLighting() {
-        const cx = window.innerWidth / 2;
-        const cy = window.innerHeight / 2;
-        const grad = this.ctx.createRadialGradient(cx, cy, 80, cx, cy, Math.max(cx, cy) * 0.95);
-        grad.addColorStop(0, 'rgba(239, 68, 68, 0.05)');
-        grad.addColorStop(0.5, 'rgba(69, 10, 10, 0.45)');
-        grad.addColorStop(1, 'rgba(15, 2, 2, 0.92)');
-        this.ctx.fillStyle = grad;
+        if (!this.cachedLighting) this.cachedLighting = {};
+        if (!this.cachedLighting.abyss) {
+            const cx = window.innerWidth / 2;
+            const cy = window.innerHeight / 2;
+            const grad = this.ctx.createRadialGradient(cx, cy, 80, cx, cy, Math.max(cx, cy) * 0.95);
+            grad.addColorStop(0, 'rgba(239, 68, 68, 0.05)');
+            grad.addColorStop(0.5, 'rgba(69, 10, 10, 0.45)');
+            grad.addColorStop(1, 'rgba(15, 2, 2, 0.92)');
+            this.cachedLighting.abyss = grad;
+        }
+        this.ctx.fillStyle = this.cachedLighting.abyss;
         this.ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
     }
 
     renderDungeonLighting() {
-        const cx = window.innerWidth / 2;
-        const cy = window.innerHeight / 2;
-        const grad = this.ctx.createRadialGradient(cx, cy, 70, cx, cy, Math.max(cx, cy) * 0.95);
-        grad.addColorStop(0, 'rgba(0, 0, 0, 0)');
-        grad.addColorStop(0.5, 'rgba(5, 8, 17, 0.45)');
-        grad.addColorStop(1, 'rgba(2, 4, 10, 0.92)');
-        this.ctx.fillStyle = grad;
+        if (!this.cachedLighting) this.cachedLighting = {};
+        if (!this.cachedLighting.dungeon) {
+            const cx = window.innerWidth / 2;
+            const cy = window.innerHeight / 2;
+            const grad = this.ctx.createRadialGradient(cx, cy, 70, cx, cy, Math.max(cx, cy) * 0.95);
+            grad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+            grad.addColorStop(0.5, 'rgba(5, 8, 17, 0.45)');
+            grad.addColorStop(1, 'rgba(2, 4, 10, 0.92)');
+            this.cachedLighting.dungeon = grad;
+        }
+        this.ctx.fillStyle = this.cachedLighting.dungeon;
         this.ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
     }
 
     renderVignette() {
-        const cx = window.innerWidth / 2;
-        const cy = window.innerHeight / 2;
-        const maxR = Math.hypot(cx, cy);
-        const grad = this.ctx.createRadialGradient(cx, cy, maxR * 0.45, cx, cy, maxR);
-        grad.addColorStop(0, 'rgba(0, 0, 0, 0)');
-        grad.addColorStop(1, 'rgba(5, 8, 17, 0.55)');
-        this.ctx.fillStyle = grad;
+        if (!this.cachedLighting) this.cachedLighting = {};
+        if (!this.cachedLighting.vignette) {
+            const cx = window.innerWidth / 2;
+            const cy = window.innerHeight / 2;
+            const maxR = Math.hypot(cx, cy);
+            const grad = this.ctx.createRadialGradient(cx, cy, maxR * 0.45, cx, cy, maxR);
+            grad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+            grad.addColorStop(1, 'rgba(5, 8, 17, 0.55)');
+            this.cachedLighting.vignette = grad;
+        }
+        this.ctx.fillStyle = this.cachedLighting.vignette;
         this.ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
     }
 
@@ -4199,12 +4566,13 @@ class Game {
 
         const bFull = document.getElementById('btnFullscreen');
         if (bFull) bFull.onclick = () => this.toggleFullscreen();
+        document.addEventListener('fullscreenchange', () => this.updateFullscreenButtonUI(!!document.fullscreenElement));
         // Pause Menu Button Listeners (7 items with 1:1 matching indices)
         const pauseBtns = [
             { id: 'pauseBtnResume', idx: 0, action: () => this.togglePause() },
             { id: 'pauseBtnSkills', idx: 1, action: () => { this.togglePause(); this.toggleSkillBook(); } },
             { id: 'pauseBtnGuide', idx: 2, action: () => { this.togglePause(); this.toggleGuide(); } },
-            { id: 'pauseBtnSave', idx: 3, action: () => { this.saveGame(); this.showNotification('💾 게임이 안전하게 저장되었습니다!'); } },
+            { id: 'pauseBtnSave', idx: 3, action: () => { this.saveGame(); } },
             { id: 'pauseBtnSettings', idx: 4, action: () => { this.togglePause(); this.toggleSettings(); } },
             { id: 'pauseBtnTitle', idx: 5, action: () => this.returnToTitle() },
             { id: 'pauseBtnQuit', idx: 6, action: () => this.quitGame() }
@@ -4233,7 +4601,8 @@ class Game {
         if (bExp) bExp.onclick = () => this.exportSaveCode();
         const bImp = document.getElementById('btnImport');
         if (bImp) bImp.onclick = () => {
-            const code = prompt('세이브 코드를 입력하세요:');
+            const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+            const code = prompt(isEn ? 'Enter your save code:' : '세이브 코드를 입력하세요:');
             if (code) this.importSaveCode(code);
         };
 
@@ -4244,7 +4613,7 @@ class Game {
         const sCloseBtnBottom = document.getElementById('settingsCloseBtnBottom');
         if (sCloseBtnBottom) sCloseBtnBottom.onclick = (e) => { if (e) e.stopPropagation(); this.closeSettings(); };
 
-        const guideBtn = document.getElementById('btnGuide');
+        const guideBtn = document.getElementById('pauseBtnGuide') || document.getElementById('btnGuide');
         if (guideBtn) guideBtn.onclick = () => this.toggleGuide();
         const guideCloseBtn = document.getElementById('guideCloseBtn');
         if (guideCloseBtn) guideCloseBtn.onclick = (e) => { if (e) e.stopPropagation(); this.closeGuide(); };
@@ -4260,7 +4629,7 @@ class Game {
         const forgeCloseBtn = document.getElementById('forgeCloseBtn');
         if (forgeCloseBtn) forgeCloseBtn.onclick = (e) => { if (e) e.stopPropagation(); this.closeForge(); };
 
-        const skillBookCloseBtn = document.getElementById('skillBookCloseBtn');
+        const skillBookCloseBtn = document.getElementById('skillCloseBtn') || document.getElementById('skillBookCloseBtn');
         if (skillBookCloseBtn) skillBookCloseBtn.onclick = (e) => { if (e) e.stopPropagation(); this.closeSkillBook(); };
 
         const worldMapCloseBtn = document.getElementById('worldMapCloseBtn');
@@ -4377,6 +4746,7 @@ function initGame() {
     if (typeof initI18n === 'function') {
         initI18n();
     }
+    
     if (!game) {
         try {
             game = new Game();

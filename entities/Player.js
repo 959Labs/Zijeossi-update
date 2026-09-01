@@ -132,7 +132,9 @@ class Player {
         sounds.playInteract();
         this.recalculateStats();
         game.updateInventoryUI();
-        game.showNotification(`${item.name}을(를) 장착했습니다!`);
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+        const itName = typeof tData === 'function' ? tData(item, 'name') : item.name;
+        game.showNotification(isEn ? `Equipped [${itName}]!` : `${itName}을(를) 장착했습니다!`);
     }
 
 
@@ -186,16 +188,17 @@ class Player {
     }
 
     usePotionFromInventory(itemId, game) {
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         if (!itemId) return false;
         const count = this.countItemInInventory(itemId);
         if (count <= 0) {
-            game.showNotification('물약이 부족합니다!');
+            game.showNotification(isEn ? '⚠️ No potions remaining!' : '물약이 부족합니다!');
             return false;
         }
 
         if (itemId === 'potion_hp') {
             if (this.hp >= this.maxHp) {
-                game.showNotification('체력이 이미 가득 찼습니다!');
+                game.showNotification(isEn ? 'Health is already full!' : '체력이 이미 가득 찼습니다!');
                 return false;
             }
             this.removeItemFromInventory('potion_hp', 1);
@@ -204,10 +207,10 @@ class Player {
             sounds.playPotion();
             game.particles.spawn(this.x, this.y, '#ef4444', 15, 60, 0.4, 4);
             game.particles.spawnDamageNumber(this.x, this.y, `+${heal} HP`, '#4ade80', true);
-            game.showNotification(`💖 [체력 물약] 체력 +${heal} 회복!`);
+            game.showNotification(isEn ? `💖 [Health Potion] Restored +${heal} HP!` : `💖 [체력 물약] 체력 +${heal} 회복!`);
         } else if (itemId === 'potion_mp') {
             if (this.mp >= this.maxMp) {
-                game.showNotification('마나가 이미 가득 찼습니다!');
+                game.showNotification(isEn ? 'Mana is already full!' : '마나가 이미 가득 찼습니다!');
                 return false;
             }
             this.removeItemFromInventory('potion_mp', 1);
@@ -216,17 +219,17 @@ class Player {
             sounds.playPotion();
             game.particles.spawn(this.x, this.y, '#3b82f6', 15, 60, 0.4, 4);
             game.particles.spawnDamageNumber(this.x, this.y, `+${mana} MP`, '#60a5fa', true);
-            game.showNotification(`💧 [마나 물약] 마나 +${mana} 회복!`);
+            game.showNotification(isEn ? `💧 [Mana Potion] Restored +${mana} MP!` : `💧 [마나 물약] 마나 +${mana} 회복!`);
         } else if (itemId === 'potion_buff') {
             this.removeItemFromInventory('potion_buff', 1);
             this.buffTimer = 15.0;
             this.critPotionTimer = 15.0;
             sounds.playPotion();
             game.particles.spawn(this.x, this.y, '#f59e0b', 20, 80, 0.5, 4.5);
-            game.showNotification('⚡ [공격력 버프 물약] 15초간 공격력/이속 대폭 강화!');
+            game.showNotification(isEn ? '⚡ [ATK Buff Potion] +40% Attack & Speed for 15s!' : '⚡ [공격력 버프 물약] 15초간 공격력/이속 대폭 강화!');
         } else if (itemId === 'scroll_town_return') {
             if (game.currentZone === 'village') {
-                game.showNotification('이미 평화로운 [시작의 마을]에 위치하고 있습니다.');
+                game.showNotification(isEn ? 'Already in Peaceful Starting Village!' : '이미 평화로운 [시작의 마을]에 위치하고 있습니다.');
                 return false;
             }
             this.removeItemFromInventory('scroll_town_return', 1);
@@ -236,7 +239,7 @@ class Player {
                 const a = (i / 35) * Math.PI * 2;
                 game.particles.spawn(this.x + Math.cos(a) * 40, this.y + Math.sin(a) * 40, '#38bdf8', 1, 80, 0.6, 5);
             }
-            game.showNotification('📜 [마을 귀환] 시작의 마을로 순간이동합니다!');
+            game.showNotification(isEn ? '📜 [Town Return] Teleporting to Starting Village!' : '📜 [마을 귀환] 시작의 마을로 순간이동합니다!');
             game.switchZone('village', true, 2100, 2100);
         }
 
@@ -250,34 +253,36 @@ class Player {
     }
 
     useTownReturnScroll(game) {
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         if (this.countItemInInventory('scroll_town_return') <= 0) {
-            game.showNotification('마을 귀환 주문서가 없습니다!');
+            game.showNotification(isEn ? '⚠️ No Town Return Scrolls in inventory!' : '마을 귀환 주문서가 없습니다!');
             return false;
         }
         if (game.currentZone === 'village') {
-            game.showNotification('이미 시작의 마을 안전지대에 머물고 있습니다!');
+            game.showNotification(isEn ? 'Already in Peaceful Starting Village!' : '이미 시작의 마을 안전지대에 머물고 있습니다!');
             return false;
         }
         this.removeItemFromInventory('scroll_town_return', 1);
         sounds.playMagic();
         game.particles.spawn(this.x, this.y, '#38bdf8', 35, 140, 1.2, 6);
-        game.showNotification('🌀 [마을 귀환 주문서] 고대 공간 전이 마법을 시전합니다...!');
+        game.showNotification(isEn ? '🌀 [Town Return Scroll] Channeling teleportation spell...!' : '🌀 [마을 귀환 주문서] 고대 공간 전이 마법을 시전합니다...!');
         if (game.isInventoryOpen) game.toggleInventory();
 
         setTimeout(() => {
             game.switchZone('village', true, 2100, 2100);
             sounds.playLevelUp();
-            game.showNotification('✨ 시작의 마을(2100, 2100)로 안전하게 귀환했습니다!');
+            game.showNotification(isEn ? '✨ Teleported safely to Starting Village!' : '✨ 시작의 마을(2100, 2100)로 안전하게 귀환했습니다!');
         }, 400);
         return true;
     }
 
     unequipItem(slotName, game) {
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         const itemId = this.equipment[slotName];
         if (!itemId) return;
 
         if (!this.hasInventorySpace()) {
-            game.showNotification('가방이 가득 찼습니다!');
+            game.showNotification(isEn ? '⚠️ Backpack is full!' : '가방이 가득 찼습니다!');
             return;
         }
 
@@ -286,7 +291,7 @@ class Player {
         sounds.playInteract();
         this.recalculateStats();
         game.updateInventoryUI();
-        game.showNotification('장비를 해제했습니다.');
+        game.showNotification(isEn ? 'Unequipped item.' : '장비를 해제했습니다.');
     }
 
     update(dt, input, game) {
@@ -354,8 +359,8 @@ class Player {
                     this.hp = Math.min(this.maxHp, this.hp + healAmt);
                     game.autoPotionCooldown = 2.0;
                     sounds.playPotion();
-                    game.particles.spawn(this.x, this.y, 'rgba(52, 211, 153, 0.95)', 20, 70, 1.2, 5);
-                    game.particles.spawnDamageNumber(this.x, this.y - 24, `+${healAmt} HP (🛵 배달 완료!)`, '#4ade80', true);
+                    const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
+                    game.particles.spawnDamageNumber(this.x, this.y - 24, `+${healAmt} HP ${isEn ? '(🛵 Auto-Potion!)' : '(🛵 배달 완료!)'}`, '#4ade80', true);
                     game.updateInventoryUI();
                     game.updateHUD();
                 }
@@ -715,27 +720,28 @@ class Player {
         const skill = SKILL_DB[skillId];
         if (!skill) return;
 
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         // 1. ⚔️ 직업 전용 스킬 무기 일치 검사 (Class Weapon Requirement)
         const curWeaponType = this.getWeaponType();
         if (skill.classId && skill.classId !== 'all') {
             if (skill.classId === 'warrior' && curWeaponType !== 'sword') {
                 sounds.playTrash();
-                game.showNotification('⚔️ [직업 제한] 검(Sword)을 장착해야 검사 스킬을 시전할 수 있습니다!');
+                game.showNotification(isEn ? '⚔️ [Class Restricted] Must equip a Sword to cast Warrior skills!' : '⚔️ [직업 제한] 검(Sword)을 장착해야 검사 스킬을 시전할 수 있습니다!');
                 return;
             }
             if (skill.classId === 'archer' && curWeaponType !== 'bow') {
                 sounds.playTrash();
-                game.showNotification('🏹 [직업 제한] 활(Bow)을 장착해야 궁수 스킬을 시전할 수 있습니다!');
+                game.showNotification(isEn ? '🏹 [Class Restricted] Must equip a Bow to cast Archer skills!' : '🏹 [직업 제한] 활(Bow)을 장착해야 궁수 스킬을 시전할 수 있습니다!');
                 return;
             }
             if (skill.classId === 'mage' && curWeaponType !== 'staff') {
                 sounds.playTrash();
-                game.showNotification('🪄 [직업 제한] 지팡이(Staff)를 장착해야 마법사 스킬을 시전할 수 있습니다!');
+                game.showNotification(isEn ? '🪄 [Class Restricted] Must equip a Staff to cast Mage skills!' : '🪄 [직업 제한] 지팡이(Staff)를 장착해야 마법사 스킬을 시전할 수 있습니다!');
                 return;
             }
             if (skill.classId === 'rogue' && curWeaponType !== 'dagger') {
                 sounds.playTrash();
-                game.showNotification('🗡️ [직업 제한] 단검(Dagger)을 장착해야 암살자 스킬을 시전할 수 있습니다!');
+                game.showNotification(isEn ? '🗡️ [Class Restricted] Must equip Daggers to cast Rogue skills!' : '🗡️ [직업 제한] 단검(Dagger)을 장착해야 암살자 스킬을 시전할 수 있습니다!');
                 return;
             }
         }
@@ -743,14 +749,14 @@ class Player {
         // 2. 👑 Lv 50 2차 각성 궁극기 해금 검사 ("그 레벨에 잠이 오늬?")
         if (skill.type === 'ultimate' && skill.id !== 'skill_time_stop' && this.level < 50) {
             sounds.playTrash();
-            game.showNotification(`💤 [2차 각성 필요] 그 레벨에 잠이 오늬? (현재 Lv ${this.level} / 필요 Lv 50)`);
+            game.showNotification(isEn ? `💤 [2nd Awakening Required] How can you sleep at that level? (Current Lv ${this.level} / Required Lv 50)` : `💤 [2차 각성 필요] 그 레벨에 잠이 오늬? (현재 Lv ${this.level} / 필요 Lv 50)`);
             return;
         }
 
         if (skillId === 'skill_basic' && this.attackCooldown > 0) return;
         if (this.skillCooldowns[slotKey] > 0) return;
         if (this.mp < skill.mpCost) {
-            game.showNotification('💧 마나가 부족합니다!');
+            game.showNotification(isEn ? '💧 Not enough mana!' : '💧 마나가 부족합니다!');
             return;
         }
 
@@ -767,7 +773,7 @@ class Player {
             this.skillCooldowns[slotKey] = 0;
             sounds.playLevelUp();
             game.particles.spawn(this.x, this.y, '#c084fc', 20, 100, 0.5, 5);
-            game.showNotification('✨ [무한의 마력로] 20% 확률로 쿨다운이 즉시 초기화되었습니다!');
+            game.showNotification(isEn ? '✨ [Infinite Mana Furnace] Cooldown instantly refreshed (20% chance)!' : '✨ [무한의 마력로] 20% 확률로 쿨다운이 즉시 초기화되었습니다!');
         }
 
         // Auto Aim if targeted enemy exists
@@ -871,6 +877,7 @@ class Player {
         const buffMult = (this.buffTimer > 0 ? 1.4 : 1.0) * (this.critPotionTimer > 0 ? 2.0 : 1.0);
         const dmg = Math.round(this.attackPower * 3.4 * buffMult);
 
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         const angles = [this.facingAngle - 0.25, this.facingAngle + 0.25];
         angles.forEach(a => {
             const vx = Math.cos(a) * 580;
@@ -878,11 +885,12 @@ class Player {
             game.projectiles.push(new Projectile(this.x, this.y, vx, vy, dmg, 420, 'sword_beam', true));
         });
         game.particles.spawn(this.x, this.y, '#f59e0b', 20, 120, 0.4, 5);
-        game.showNotification('⚔️ [십자 참격] 전방으로 2연속 X자 거대 검기를 날렸습니다!');
+        game.showNotification(isEn ? '⚔️ [Cross Slash] Unleashed dual giant cross sword beams!' : '⚔️ [십자 참격] 전방으로 2연속 X자 거대 검기를 날렸습니다!');
     }
 
     castShieldCharge(game) {
         sounds.playShield();
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         this.invulnerableTimer = 0.45;
         const chargeDist = 220;
         const targetX = this.x + Math.cos(this.facingAngle) * chargeDist;
@@ -900,11 +908,12 @@ class Player {
         this.y = Math.max(64, Math.min(game.mapHeight - 64, targetY));
         game.camera.shake(0.3, 10);
         game.particles.spawn(this.x, this.y, '#38bdf8', 25, 140, 0.5, 6);
-        game.showNotification('🛡️ [방패 돌진] 초고속 돌진으로 적을 튕겨내고 2초간 기절시켰습니다!');
+        game.showNotification(isEn ? '🛡️ [Shield Charge] Dashed forward, knocking back and stunning enemies for 2s!' : '🛡️ [방패 돌진] 초고속 돌진으로 적을 튕겨내고 2초간 기절시켰습니다!');
     }
 
     castWhirlwind(game) {
         sounds.playWhirlwind();
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         game.camera.shake(0.25, 7);
         this.cycloneTimer = 2.0;
         const buffMult = (this.buffTimer > 0 ? 1.4 : 1.0) * (this.critPotionTimer > 0 ? 2.0 : 1.0);
@@ -922,11 +931,12 @@ class Player {
                 e.takeDamage(dmg, -Math.cos(angle) * 140, -Math.sin(angle) * 140, game, true);
             }
         });
-        game.showNotification('🌪️ [선풍 대검풍] 2초간 회전하며 주변 적들을 분쇄합니다!');
+        game.showNotification(isEn ? '🌪️ [Whirlwind] Spinning for 2s, shredding surrounding enemies!' : '🌪️ [선풍 대검풍] 2초간 회전하며 주변 적들을 분쇄합니다!');
     }
 
     castEarthShatter(game) {
         sounds.playSlam();
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         game.camera.shake(0.35, 12);
         const buffMult = (this.buffTimer > 0 ? 1.4 : 1.0) * (this.critPotionTimer > 0 ? 2.0 : 1.0);
         const dmg = Math.round(this.attackPower * 4.6 * buffMult);
@@ -945,11 +955,12 @@ class Player {
                 });
             }
         });
-        game.showNotification('💥 [대지 파쇄격] 3갈래 지진파로 적들을 2.5초간 기절시켰습니다!');
+        game.showNotification(isEn ? '💥 [Earth Shatter] Shockwaves stunned enemies in 3 directions for 2.5s!' : '💥 [대지 파쇄격] 3갈래 지진파로 적들을 2.5초간 기절시켰습니다!');
     }
 
     castHeavenSplitter(game) {
         sounds.playUltimate();
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         game.camera.shake(0.45, 16);
         const dmg = Math.round(this.attackPower * 2.0);
 
@@ -963,7 +974,7 @@ class Player {
                 game.particles.spawn(this.x, this.y, '#facc15', 15, 200, 0.6, 6);
             }, i * 120);
         }
-        game.showNotification('👑 [천지개벽 참격폭풍] 10연타 황금 검기 폭풍이 화면을 가릅니다!');
+        game.showNotification(isEn ? '👑 [Genesis Blade Storm] 10-Hit Golden Blade Tempest tears through the screen!' : '👑 [천지개벽 참격폭풍] 10연타 황금 검기 폭풍이 화면을 가릅니다!');
     }
 
     // ========================================================================
@@ -971,6 +982,7 @@ class Player {
     // ========================================================================
     castRapidStrafe(game) {
         sounds.playBow();
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         const baseDmg = Math.round(this.attackPower * 0.9);
         for (let i = 0; i < 7; i++) {
             const spread = (i - 3) * 0.08;
@@ -980,21 +992,23 @@ class Player {
             game.projectiles.push(new Projectile(this.x, this.y, vx, vy, baseDmg, 500, 'rapid_arrow', true));
         }
         game.particles.spawn(this.x, this.y, '#38bdf8', 15, 100, 0.3, 4);
-        game.showNotification('🎯 [속사 난사] 전방으로 7연속 관통 화살을 난사했습니다!');
+        game.showNotification(isEn ? '🎯 [Rapid Volley] Fired 7 rapid piercing arrows forward!' : '🎯 [속사 난사] 전방으로 7연속 관통 화살을 난사했습니다!');
     }
 
     castWindPiercer(game) {
         sounds.playSwordBeam();
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         game.camera.shake(0.25, 8);
         const dmg = Math.round(this.attackPower * 4.5);
         const vx = Math.cos(this.facingAngle) * 750;
         const vy = Math.sin(this.facingAngle) * 750;
         game.projectiles.push(new Projectile(this.x, this.y, vx, vy, dmg, 650, 'wind_piercer', true));
-        game.showNotification('🌪️ [바람의 관통 저격] 650px 초장거리 거대 바람 화살을 발사했습니다!');
+        game.showNotification(isEn ? '🌪️ [Wind Piercer Snipe] Launched a 650px long-range giant wind bolt!' : '🌪️ [바람의 관통 저격] 650px 초장거리 거대 바람 화살을 발사했습니다!');
     }
 
     castGlacialArrow(game) {
         sounds.playBow();
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         const dmg = Math.round(this.attackPower * 3.2);
         const vx = Math.cos(this.facingAngle) * 560;
         const vy = Math.sin(this.facingAngle) * 560;
@@ -1007,11 +1021,12 @@ class Player {
                 e.freezeTimer = 3.0;
             }
         });
-        game.showNotification('❄️ [서리 빙결 화살] 적중 지점 주변 적들을 3초간 완전 빙결시켰습니다!');
+        game.showNotification(isEn ? '❄️ [Frost Arrow] Froze surrounding enemies solid for 3s!' : '❄️ [서리 빙결 화살] 적중 지점 주변 적들을 3초간 완전 빙결시켰습니다!');
     }
 
     castExplosiveTrap(game) {
         sounds.playEquip();
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         if (!game.traps) game.traps = [];
         const dmg = Math.round(this.attackPower * 4.0);
         game.traps.push({
@@ -1023,11 +1038,12 @@ class Player {
             damage: dmg
         });
         game.particles.spawn(this.x, this.y, '#f59e0b', 12, 60, 0.4, 4);
-        game.showNotification('💣 [폭발 지뢰 덫] 발밑에 지뢰를 설치했습니다! (적 접근 시 400% 폭발)');
+        game.showNotification(isEn ? '💣 [Explosive Mine] Placed a landmine trap! (400% blast on approach)' : '💣 [폭발 지뢰 덫] 발밑에 지뢰를 설치했습니다! (적 접근 시 400% 폭발)');
     }
 
     castMeteorArrowRain(game) {
         sounds.playUltimate();
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         game.camera.shake(0.4, 14);
         const dmg = Math.round(this.attackPower * 1.1);
 
@@ -1040,7 +1056,7 @@ class Player {
                 game.particles.spawn(rx, ry, '#facc15', 8, 80, 0.3, 4);
             }, i * 80);
         }
-        game.showNotification('🌟 [유성우 폭격 화살비] 하늘에서 20발의 유성 화살이 쏟아집니다!');
+        game.showNotification(isEn ? '🌟 [Meteor Arrow Rain] 20 celestial arrows rain down upon the battlefield!' : '🌟 [유성우 폭격 화살비] 하늘에서 20발의 유성 화살이 쏟아집니다!');
     }
 
     // ========================================================================
@@ -1048,6 +1064,7 @@ class Player {
     // ========================================================================
     castChainLightning(game) {
         sounds.playSlash();
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         const dmg = Math.round(this.attackPower * 2.4);
         const vx = Math.cos(this.facingAngle) * 800;
         const vy = Math.sin(this.facingAngle) * 800;
@@ -1072,20 +1089,22 @@ class Player {
             e.stunTimer = 1.0;
             game.particles.spawn(e.x, e.y, '#60a5fa', 12, 90, 0.4, 4);
         });
-        game.showNotification(`⚡ [체인 라이트닝] ${Math.max(1, hitEnemies.length)}마리의 적에게 연쇄 전격을 튕겼습니다!`);
+        game.showNotification(isEn ? `⚡ [Chain Lightning] Shocked ${Math.max(1, hitEnemies.length)} enemies with chain bolts!` : `⚡ [체인 라이트닝] ${Math.max(1, hitEnemies.length)}마리의 적에게 연쇄 전격을 튕겼습니다!`);
     }
 
     castArcaneSingularity(game) {
         sounds.playSwordBeam();
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         const dmg = Math.round(this.attackPower * 3.6);
         const vx = Math.cos(this.facingAngle) * 250;
         const vy = Math.sin(this.facingAngle) * 250;
         game.projectiles.push(new Projectile(this.x, this.y, vx, vy, dmg, 180, 'singularity_orb', true));
-        game.showNotification('🌀 [비전 특이점] 3.5초간 적들을 한 점으로 빨아들이는 중력장을 생성했습니다!');
+        game.showNotification(isEn ? '🌀 [Arcane Singularity] Created a gravitational vortex pulling enemies for 3.5s!' : '🌀 [비전 특이점] 3.5초간 적들을 한 점으로 빨아들이는 중력장을 생성했습니다!');
     }
 
     castMeteorStrike(game) {
         sounds.playSlam();
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         game.camera.shake(0.4, 14);
         const dmg = Math.round(this.attackPower * 5.2);
         const tx = this.x + Math.cos(this.facingAngle) * 180;
@@ -1105,18 +1124,20 @@ class Player {
         });
 
         game.particles.spawn(tx, ty, '#ea580c', 35, 180, 0.7, 7);
-        game.showNotification('☄️ [메테오 스트라이크] 거대 운석이 낙하하여 520% 폭발 및 불바다를 일으켰습니다!');
+        game.showNotification(isEn ? '☄️ [Meteor Strike] Giant meteor impacted with 520% damage and burning lava!' : '☄️ [메테오 스트라이크] 거대 운석이 낙하하여 520% 폭발 및 불바다를 일으켰습니다!');
     }
 
     castManaShield(game) {
         sounds.playShield();
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         this.manaShieldTimer = 6.0;
         game.particles.spawn(this.x, this.y, '#38bdf8', 25, 120, 0.6, 6);
-        game.showNotification('🛡️ [마나 실드] 6초간 받는 피해를 70% 흡수하고 마나로 환원합니다!');
+        game.showNotification(isEn ? '🛡️ [Mana Shield] Absorbs 70% damage and converts into Mana for 6s!' : '🛡️ [마나 실드] 6초간 받는 피해를 70% 흡수하고 마나로 환원합니다!');
     }
 
     castSpaceCollapseBlackHole(game) {
         sounds.playUltimate();
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         game.camera.shake(0.5, 18);
         const dmg = Math.round(this.attackPower * 2.4);
 
@@ -1130,7 +1151,7 @@ class Player {
             }
         });
         game.particles.spawn(this.x, this.y, '#9333ea', 50, 260, 1.0, 8);
-        game.showNotification('🪐 [시공간 붕괴 블랙홀] 전 맵의 적을 빨아들여 압축 폭발시켰습니다! (총 2,400% 피해)');
+        game.showNotification(isEn ? '🪐 [Spacetime Black Hole] Collapsed reality, dealing 2,400% total cataclysmic damage!' : '🪐 [시공간 붕괴 블랙홀] 전 맵의 적을 빨아들여 압축 폭발시켰습니다! (총 2,400% 피해)');
     }
 
     // ========================================================================
@@ -1138,14 +1159,16 @@ class Player {
     // ========================================================================
     castShadowStealth(game) {
         sounds.playDodge();
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         this.stealthTimer = 3.0;
         this.speedBoostTimer = 3.0;
         game.particles.spawn(this.x, this.y, '#0f172a', 20, 80, 0.5, 5);
-        game.showNotification('💨 [그림자 은신] 3초간 완전 은신! (다음 공격 100% 치명타 2.8배)');
+        game.showNotification(isEn ? '💨 [Shadow Stealth] Total invisibility for 3s! (Next strike deals 2.8x Crit)' : '💨 [그림자 은신] 3초간 완전 은신! (다음 공격 100% 치명타 2.8배)');
     }
 
     castShurikenDance(game) {
         sounds.playSlash();
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         const dmg = Math.round(this.attackPower * 0.6);
         for (let i = 0; i < 5; i++) {
             const spread = (i - 2) * 0.15;
@@ -1154,11 +1177,12 @@ class Player {
             const vy = Math.sin(a) * 580;
             game.projectiles.push(new Projectile(this.x, this.y, vx, vy, dmg, 260, 'shuriken_boomerang', true));
         }
-        game.showNotification('🥷 [표창 부메랑] 5개의 독 표창이 궤도를 돌며 왕복 2회 타격합니다!');
+        game.showNotification(isEn ? '🥷 [Shuriken Boomerang] 5 toxic shurikens strike on double orbital pass!' : '🥷 [표창 부메랑] 5개의 독 표창이 궤도를 돌며 왕복 2회 타격합니다!');
     }
 
     castFatalBleed(game) {
         sounds.playSlash();
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         const target = this.targetedEnemy || game.enemies.find(e => e.active && Math.hypot(e.x - this.x, e.y - this.y) <= 350);
         if (target) {
             this.x = target.x - Math.cos(this.facingAngle) * 30;
@@ -1167,7 +1191,7 @@ class Player {
             target.takeDamage(dmg, Math.cos(this.facingAngle) * 200, Math.sin(this.facingAngle) * 200, game, true);
             target.stunTimer = 1.0;
             game.particles.spawn(target.x, target.y, '#ef4444', 25, 120, 0.5, 6);
-            game.showNotification('🩸 [출혈 급소 찌르기] 적 배후로 순간이동하여 급소 암습을 꽂았습니다!');
+            game.showNotification(isEn ? '🩸 [Vitals Thrust] Teleported behind enemy for critical assassination strike!' : '🩸 [출혈 급소 찌르기] 적 배후로 순간이동하여 급소 암습을 꽂았습니다!');
         } else {
             this.castSwordBeam(game);
         }
@@ -1175,6 +1199,7 @@ class Player {
 
     castFanOfKnives(game) {
         sounds.playSlash();
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         game.camera.shake(0.25, 7);
         const dmg = Math.round(this.attackPower * 3.6);
         for (let i = 0; i < 16; i++) {
@@ -1183,11 +1208,12 @@ class Player {
             const vy = Math.sin(a) * 600;
             game.projectiles.push(new Projectile(this.x, this.y, vx, vy, dmg, 160, 'blade_fan_dagger', true));
         }
-        game.showNotification('🌪️ [칼날 폭풍 춤] 360도 전방위로 16개의 단검을 고속 난사했습니다!');
+        game.showNotification(isEn ? '🌪️ [Blade Storm Dance] Hurled 16 rapid daggers in 360-degree all-range burst!' : '🌪️ [칼날 폭풍 춤] 360도 전방위로 16개의 단검을 고속 난사했습니다!');
     }
 
     castShadowClonePhantomStrike(game) {
         sounds.playUltimate();
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         game.camera.shake(0.45, 15);
         this.invulnerableTimer = 1.5;
         const dmg = Math.round(this.attackPower * 2.1);
@@ -1203,7 +1229,7 @@ class Player {
                 }
             }, i * 70);
         }
-        game.showNotification('🌑 [그림자 분신 환영살] 3개의 잔영 분신이 사방에서 적들을 난도질합니다!');
+        game.showNotification(isEn ? '🌑 [Shadow Clone Frenzy] 3 phantom clones unleash a 15-hit slaughter frenzy!' : '🌑 [그림자 분신 환영살] 3개의 잔영 분신이 사방에서 적들을 난도질합니다!');
     }
 
     // ========================================================================
@@ -1221,8 +1247,9 @@ class Player {
     castParry(game) {
         this.parryActiveTimer = 1.0;
         sounds.playShield();
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         game.particles.spawn(this.x, this.y, '#60a5fa', 16, 110, 0.35, 5);
-        game.showNotification('🛡️ 신성 방패 전개! (1.0초간 반격 대기)');
+        game.showNotification(isEn ? '🛡️ Divine Shield Deployed! (Counter stance active for 1.0s)' : '🛡️ 신성 방패 전개! (1.0초간 반격 대기)');
     }
 
     castSmash(game) {
@@ -1256,18 +1283,20 @@ class Player {
 
     castBlessing(game) {
         sounds.playBlessing();
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         this.buffTimer = 10.0;
         game.particles.spawn(this.x, this.y, '#facc15', 20, 100, 0.6, 5);
-        game.showNotification('✨ [나태의 가호] 10초간 이동속도 +30%, 치명타율 +30% 버프 부여!');
+        game.showNotification(isEn ? '✨ [Blessing of Sloth] +30% Movement Speed & +30% Crit Rate for 10s!' : '✨ [나태의 가호] 10초간 이동속도 +30%, 치명타율 +30% 버프 부여!');
     }
 
     castPrayer(game) {
         sounds.playHeal();
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         const healAmt = Math.round(this.maxHp * 0.35);
         this.hp = Math.min(this.maxHp, this.hp + healAmt);
         game.particles.spawn(this.x, this.y, '#4ade80', 25, 120, 0.7, 5);
         game.particles.spawnDamageNumber(this.x, this.y, `+${healAmt} HP`, '#4ade80', true);
-        game.showNotification('💖 [안식의 기도] 체력 35% 즉시 회복!');
+        game.showNotification(isEn ? `💖 [Prayer of Repose] Instantly restored +${healAmt} HP (35%)!` : '💖 [안식의 기도] 체력 35% 즉시 회복!');
     }
 
     castShadowStep(game) {
@@ -1276,10 +1305,11 @@ class Player {
 
     castTimeStop(game) {
         sounds.playUltimate();
+        const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en');
         this.timeStopTimer = 3.5;
         game.particles.spawn(this.x, this.y, '#a855f7', 30, 200, 0.8, 6);
         game.camera.shake(0.3, 10);
-        game.showNotification('⏳ [시간 감속] 3.5초간 모든 몬스터의 시간이 80% 느려집니다!');
+        game.showNotification(isEn ? '⏳ [Time Deceleration] All monster time slowed by 80% for 3.5s!' : '⏳ [시간 감속] 3.5초간 모든 몬스터의 시간이 80% 느려집니다!');
     }
 
     takeDamage(amount, kx, ky, game) {
@@ -1390,79 +1420,87 @@ class Player {
         ctx.arc(0, 0, 80, 0, Math.PI * 2);
         ctx.fill();
 
-        // 1. 역동적인 물리 망토 (Dynamic Flowing Cape)
-        ctx.save();
-        const capeSway = Math.sin(this.capeWave) * 4;
-        const capeAngle = this.facingAngle + Math.PI;
-        ctx.rotate(capeAngle);
-        const isCelestial = this.equipment.armor === 'armor_celestial';
-        const isFrost = this.equipment.armor === 'armor_frost';
-        const isDragon = this.equipment.armor === 'armor_dragon';
-        const isAbyss = this.equipment.armor === 'armor_abyss';
-
-        ctx.fillStyle = isCelestial ? '#fef08a' : (isFrost ? '#38bdf8' : (isDragon ? '#ef4444' : (isAbyss ? '#581c87' : '#991b1b')));
-        ctx.beginPath();
-        ctx.moveTo(-7, 2);
-        ctx.lineTo(-12 + capeSway, 18);
-        ctx.lineTo(12 + capeSway, 18);
-        ctx.lineTo(7, 2);
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
-
         const bounce = (this.state === 'move') ? Math.sin(this.walkAnimTimer) * 2.5 : 0;
 
-        // 2. 갑옷 본체 (4K Plate Armor Body)
-        ctx.fillStyle = isCelestial ? '#e0e7ff' : (isFrost ? '#0284c7' : (isAbyss ? '#0f172a' : (isDragon ? '#701a75' : '#475569')));
-        ctx.fillRect(-9, -4 + bounce, 18, 16);
-
-        ctx.fillStyle = isCelestial ? '#facc15' : (isFrost ? '#7dd3fc' : (isAbyss ? '#38bdf8' : (isDragon ? '#f43f5e' : '#94a3b8')));
-        ctx.fillRect(-7, -2 + bounce, 14, 12);
-
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(-3, -4 + bounce, 6, 6);
-
-        // 견갑
-        ctx.fillStyle = isCelestial ? '#facc15' : '#cbd5e1';
-        ctx.fillRect(-12, -7 + bounce, 4, 8);
-        ctx.fillRect(8, -7 + bounce, 4, 8);
-
-        // 3. 투구 & 머리 장식 (Helmet & Visor Glint)
-        ctx.fillStyle = isCelestial ? '#f8fafc' : '#334155';
-        ctx.beginPath();
-        ctx.arc(0, -12 + bounce, 10, 0, Math.PI * 2);
-        ctx.fill();
-
-        // 투구 뿔 / 깃털 / 왕관
-        if (isCelestial) {
-            ctx.strokeStyle = '#facc15';
-            ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.arc(0, -22 + bounce, 6, 0, Math.PI * 2); ctx.stroke();
-        } else if (isDragon) {
-            ctx.fillStyle = '#ef4444';
-            ctx.beginPath();
-            ctx.moveTo(-6, -16 + bounce); ctx.lineTo(-12, -26 + bounce); ctx.lineTo(-3, -16 + bounce);
-            ctx.moveTo(6, -16 + bounce); ctx.lineTo(12, -26 + bounce); ctx.lineTo(3, -16 + bounce);
-            ctx.fill();
-        } else if (isFrost) {
-            ctx.fillStyle = '#38bdf8';
-            ctx.beginPath();
-            ctx.moveTo(0, -16 + bounce); ctx.lineTo(0, -26 + bounce); ctx.lineTo(4, -18 + bounce);
-            ctx.fill();
-        } else {
-            ctx.fillStyle = '#dc2626';
-            ctx.beginPath();
-            ctx.ellipse(0, -21 + bounce, 3, 6, 0, 0, Math.PI * 2);
-            ctx.fill();
+        let spriteRendered = false;
+        if (typeof spriteManager !== 'undefined' && spriteManager.drawPlayerSprite) {
+            this.facingDirection = this.facing;
+            spriteRendered = spriteManager.drawPlayerSprite(ctx, this);
         }
 
-        // 바이저 안광
-        ctx.fillStyle = '#0f172a';
-        ctx.fillRect(-6, -14 + bounce, 12, 4);
-        ctx.fillStyle = isCelestial ? '#facc15' : (isFrost ? '#7dd3fc' : '#38bdf8');
-        if (this.facing === 'down') ctx.fillRect(-4, -13 + bounce, 8, 2);
-        else if (this.facing === 'left') ctx.fillRect(-5, -13 + bounce, 4, 2);
-        else if (this.facing === 'right') ctx.fillRect(1, -13 + bounce, 4, 2);
+        if (!spriteRendered) {
+            // Fallback: 1. 역동적인 물리 망토 (Dynamic Flowing Cape)
+            ctx.save();
+            const capeSway = Math.sin(this.capeWave) * 4;
+            const capeAngle = this.facingAngle + Math.PI;
+            ctx.rotate(capeAngle);
+            const isCelestial = this.equipment.armor === 'armor_celestial';
+            const isFrost = this.equipment.armor === 'armor_frost';
+            const isDragon = this.equipment.armor === 'armor_dragon';
+            const isAbyss = this.equipment.armor === 'armor_abyss';
+
+            ctx.fillStyle = isCelestial ? '#fef08a' : (isFrost ? '#38bdf8' : (isDragon ? '#ef4444' : (isAbyss ? '#581c87' : '#991b1b')));
+            ctx.beginPath();
+            ctx.moveTo(-7, 2);
+            ctx.lineTo(-12 + capeSway, 18);
+            ctx.lineTo(12 + capeSway, 18);
+            ctx.lineTo(7, 2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+
+            // 2. 갑옷 본체 (Plate Armor Body)
+            ctx.fillStyle = isCelestial ? '#e0e7ff' : (isFrost ? '#0284c7' : (isAbyss ? '#0f172a' : (isDragon ? '#701a75' : '#475569')));
+            ctx.fillRect(-9, -4 + bounce, 18, 16);
+
+            ctx.fillStyle = isCelestial ? '#facc15' : (isFrost ? '#7dd3fc' : (isAbyss ? '#38bdf8' : (isDragon ? '#f43f5e' : '#94a3b8')));
+            ctx.fillRect(-7, -2 + bounce, 14, 12);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(-3, -4 + bounce, 6, 6);
+
+            // 견갑
+            ctx.fillStyle = isCelestial ? '#facc15' : '#cbd5e1';
+            ctx.fillRect(-12, -7 + bounce, 4, 8);
+            ctx.fillRect(8, -7 + bounce, 4, 8);
+
+            // 3. 투구 & 머리 장식 (Helmet & Visor Glint)
+            ctx.fillStyle = isCelestial ? '#f8fafc' : '#334155';
+            ctx.beginPath();
+            ctx.arc(0, -12 + bounce, 10, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 투구 뿔 / 깃털 / 왕관
+            if (isCelestial) {
+                ctx.strokeStyle = '#facc15';
+                ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(0, -22 + bounce, 6, 0, Math.PI * 2); ctx.stroke();
+            } else if (isDragon) {
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath();
+                ctx.moveTo(-6, -16 + bounce); ctx.lineTo(-12, -26 + bounce); ctx.lineTo(-3, -16 + bounce);
+                ctx.moveTo(6, -16 + bounce); ctx.lineTo(12, -26 + bounce); ctx.lineTo(3, -16 + bounce);
+                ctx.fill();
+            } else if (isFrost) {
+                ctx.fillStyle = '#38bdf8';
+                ctx.beginPath();
+                ctx.moveTo(0, -16 + bounce); ctx.lineTo(0, -26 + bounce); ctx.lineTo(4, -18 + bounce);
+                ctx.fill();
+            } else {
+                ctx.fillStyle = '#dc2626';
+                ctx.beginPath();
+                ctx.ellipse(0, -21 + bounce, 3, 6, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // 바이저 안광
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(-6, -14 + bounce, 12, 4);
+            ctx.fillStyle = isCelestial ? '#facc15' : (isFrost ? '#7dd3fc' : '#38bdf8');
+            if (this.facing === 'down') ctx.fillRect(-4, -13 + bounce, 8, 2);
+            else if (this.facing === 'left') ctx.fillRect(-5, -13 + bounce, 4, 2);
+            else if (this.facing === 'right') ctx.fillRect(1, -13 + bounce, 4, 2);
+        }
 
         // 4. 무기 렌더링 & 이펙트 (4대 백수 직업 고유 무기 동적 비주얼 렌더링)
         ctx.save();

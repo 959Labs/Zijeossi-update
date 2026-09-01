@@ -160,6 +160,16 @@ def main():
     server = start_server(port)
     game_url = f"http://127.0.0.1:{port}/index.html"
 
+    # ⚡ Dedicated Hardware GPU Acceleration & High-Performance Flags for WebView2
+    os.environ['WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS'] = (
+        '--enable-gpu-rasterization '
+        '--enable-zero-copy '
+        '--ignore-gpu-blocklist '
+        '--enable-hardware-overlays '
+        '--disable-background-timer-throttling '
+        '--disable-renderer-backgrounding'
+    )
+
     api = GameAPI(SAVE_FILE_PATH)
 
     try:

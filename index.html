@@ -84,11 +84,11 @@
         <div class="intro-bottom-right-guide">
             <div class="guide-badge-header" data-i18n="guide.badge_title">🎮 조작 가이드</div>
             <div class="guide-badge-content">
-                <div class="guide-row"><span class="key-pill">↑ / ↓</span><span data-i18n="guide.move">메뉴 이동</span></div>
-                <div class="guide-row"><span class="key-pill">ENTER / 클릭</span><span data-i18n="guide.select">선택 & 시작</span></div>
-                <div class="guide-row"><span class="key-pill">F</span><span data-i18n="guide.interact">NPC & 상점 대화</span></div>
-                <div class="guide-row"><span class="key-pill">A / Space</span><span data-i18n="guide.attack_dash">기본 공격 / 대시</span></div>
-                <div class="guide-row"><span class="key-pill">W, E, S, D, Q</span><span data-i18n="guide.skills">스킬 및 궁극기</span></div>
+                <div class="guide-row"><span class="key-pill" data-i18n="guide.key_move">↑ / ↓</span><span data-i18n="guide.move">메뉴 이동</span></div>
+                <div class="guide-row"><span class="key-pill" data-i18n="guide.key_select">ENTER / 클릭</span><span data-i18n="guide.select">선택 & 시작</span></div>
+                <div class="guide-row"><span class="key-pill" data-i18n="guide.key_interact">F</span><span data-i18n="guide.interact">NPC & 상점 대화</span></div>
+                <div class="guide-row"><span class="key-pill" data-i18n="guide.key_attack">A / Space</span><span data-i18n="guide.attack_dash">기본 공격 / 대시</span></div>
+                <div class="guide-row"><span class="key-pill" data-i18n="guide.key_skills">W, E, S, D, Q</span><span data-i18n="guide.skills">스킬 및 궁극기</span></div>
             </div>
         </div>
     </div>
@@ -128,15 +128,15 @@
 
         <!-- Tower of Trial Floor Tracker -->
         <div id="hudTowerTracker" class="quest-tracker-box tower-tracker-box hidden">
-            <div class="tower-floor-title">🗼 무한의 시련 탑 <span id="towerFloorNum" class="tower-floor-badge">1F</span></div>
+            <div class="tower-floor-title" id="towerTitleLabel">🗼 무한의 시련 탑 <span id="towerFloorNum" class="tower-floor-badge">1F</span></div>
             <div class="tower-mob-status" id="towerMobStatus">👾 잔여 몬스터: <strong id="towerMobsLeft" style="color:#f43f5e;">0</strong>마리</div>
-            <div class="tower-coin-status">🪙 시련의 증표: <strong id="towerCoinsCount" style="color: #facc15;">0</strong>개</div>
+            <div class="tower-coin-status" id="towerCoinStatus">🪙 시련의 증표: <strong id="towerCoinsCount" style="color: #facc15;">0</strong>개</div>
         </div>
     </div>
 
     <!-- Top Right Controls (Mobile: Icon-Only Compact Mode / PC: Full Label Mode) -->
     <div id="hudTopRight">
-        <div id="autoSaveIndicator" class="auto-save-badge hidden">💾 저장됨</div>
+        <div id="autoSaveIndicator" class="auto-save-badge hidden" data-i18n="hud.saved">💾 저장됨</div>
         <button id="btnPause" class="hud-btn highlight-pause" data-i18n-title="hud.pause" title="일시정지 [ESC]">
             <span class="btn-icon">⏸️</span><span class="btn-text" data-i18n="hud.pause"> 일시정지 [ESC]</span>
         </button>
@@ -238,12 +238,12 @@
     </div>
 
     <!-- World Map Atlas Modal (M Key - Maple-Style Visual Node Roadmap) -->
-    <div id="worldMapModal" class="hidden modal-backdrop">
+    <div id="worldMapModal" class="hidden modal-backdrop" onclick="if(event.target===this) game.toggleWorldMap()">
         <div class="worldmap-card node-map-theme">
             <div class="modal-header">
-                <h2>🗺️ 아르카디아 대륙 원정 지도 (Expedition Map)</h2>
-                <div class="current-loc-badge" id="mapCurrentLocBadge">📍 현재 위치: <strong id="mapCurrentZoneName">시작의 마을</strong></div>
-                <button id="worldMapCloseBtn" class="dialogue-close">닫기 [M/F/ESC]</button>
+                <h2 data-i18n="worldmap.title">🗺️ 아르카디아 대륙 원정 지도 (Expedition Map)</h2>
+                <div class="current-loc-badge" id="mapCurrentLocBadge"><span data-i18n="worldmap.current_loc_label">📍 현재 위치: </span><strong id="mapCurrentZoneName">시작의 마을</strong></div>
+                <button id="worldMapCloseBtn" class="dialogue-close" data-i18n="worldmap.close_btn" onclick="game.toggleWorldMap()">닫기 [M/F/ESC]</button>
             </div>
             
             <div class="node-map-wrapper">
@@ -265,19 +265,19 @@
                     <p id="mapDetailDesc" class="detail-desc-text">장로와 대장장이, 상인이 있는 평화로운 안식처입니다.</p>
                     
                     <div class="detail-section">
-                        <h4>⚔️ 출현 몬스터 & 보스</h4>
+                        <h4 data-i18n="worldmap.mobs_header">⚔️ 출현 몬스터 & 보스</h4>
                         <div id="mapDetailMobs" class="detail-mobs-list">평화로운 안식처 (몬스터 없음)</div>
                     </div>
 
                     <div class="detail-section">
-                        <h4>🧭 연결된 원정 경로 (Connected Roads)</h4>
+                        <h4 data-i18n="worldmap.roads_header">🧭 연결된 원정 경로 (Connected Roads)</h4>
                         <div id="mapDetailPortals" class="detail-portals-list">
                             <span class="portal-chip">🌿 요정의 비취 숲</span>
                             <span class="portal-chip">🌀 고대 미궁 B1</span>
                         </div>
                     </div>
 
-                    <div class="map-explore-tip">
+                    <div class="map-explore-tip" data-i18n="worldmap.tip">
                         💡 <strong>모험 안내</strong>: 지도를 통한 순간이동은 지원되지 않습니다. 필드 가장자리의 포탈을 걸어서 이동하세요. 마을로 복귀하려면 <strong>[📜 마을 귀환 주문서]</strong>를 사용하세요!
                     </div>
                 </div>
@@ -289,24 +289,24 @@
     <div id="casinoModal" class="hidden modal-backdrop">
         <div class="casino-card">
             <div class="modal-header">
-                <h2>🎲 959 럭키 카지노 하우스 (Jackpot House)</h2>
-                <button id="casinoCloseBtn" class="dialogue-close" onclick="game.toggleCasino()">닫기 [F/ESC]</button>
+                <h2 data-i18n="casino.title">🎲 959 럭키 카지노 하우스 (Jackpot House)</h2>
+                <button id="casinoCloseBtn" class="dialogue-close" data-i18n="casino.close_btn" onclick="game.toggleCasino()">닫기 [F/ESC]</button>
             </div>
 
             <!-- Casino Tabs -->
             <div class="shop-tabs-row">
-                <button id="casinoTabDice" class="shop-tab active" onclick="game.switchCasinoTab('dice')">🎲 더블 다이스 (High-Low)</button>
-                <button id="casinoTabSlot" class="shop-tab" onclick="game.switchCasinoTab('slot')">🎰 3-릴 미니 슬롯</button>
+                <button id="casinoTabDice" class="shop-tab active" data-i18n="casino.tab_dice" onclick="game.switchCasinoTab('dice')">🎲 더블 다이스 (High-Low)</button>
+                <button id="casinoTabSlot" class="shop-tab" data-i18n="casino.tab_slot" onclick="game.switchCasinoTab('slot')">🎰 3-릴 미니 슬롯</button>
             </div>
 
             <div class="shop-gold-bar">
-                <span>🪙 내 보유 골드: <strong id="casinoGold" style="color: #facc15;">0 G</strong></span>
-                <span id="casinoBetDisplay" class="bag-space-badge">🎯 베팅액: <strong id="casinoBetAmount">20 G</strong></span>
+                <span><span data-i18n="casino.gold_label">🪙 내 보유 골드: </span><strong id="casinoGold" style="color: #facc15;">0 G</strong></span>
+                <span id="casinoBetDisplay" class="bag-space-badge"><span data-i18n="casino.bet_display_label">🎯 베팅액: </span><strong id="casinoBetAmount">20 G</strong></span>
             </div>
 
             <!-- Bet Selector Row -->
             <div class="bet-selector-row">
-                <span class="bet-label">베팅 금액:</span>
+                <span class="bet-label" data-i18n="casino.bet_label">베팅 금액:</span>
                 <button class="bet-btn active" onclick="game.setCasinoBet(10)">10 G</button>
                 <button class="bet-btn" onclick="game.setCasinoBet(30)">30 G</button>
                 <button class="bet-btn" onclick="game.setCasinoBet(50)">50 G</button>
@@ -320,24 +320,24 @@
                         <div id="diceCube1" class="dice-cube">⚅</div>
                         <div id="diceCube2" class="dice-cube">⚅</div>
                     </div>
-                    <div id="diceSumText" class="dice-sum-badge">주사위 합: 12</div>
+                    <div id="diceSumText" class="dice-sum-badge" data-i18n="casino.dice_sum_default">주사위 합: 12</div>
                 </div>
 
                 <div class="dice-options-grid">
                     <button id="btnBetLow" class="dice-choice-btn" onclick="game.playHighLowDice('low')">
-                        <div class="choice-title">📉 로우 (LOW)</div>
-                        <div class="choice-sub">주사위 합 2 ~ 6</div>
-                        <div class="choice-payout">배당 2.0x</div>
+                        <div class="choice-title" data-i18n="casino.dice_low_title">📉 로우 (LOW)</div>
+                        <div class="choice-sub" data-i18n="casino.dice_low_sub">주사위 합 2 ~ 6</div>
+                        <div class="choice-payout" data-i18n="casino.dice_low_pay">배당 2.0x</div>
                     </button>
                     <button id="btnBetSeven" class="dice-choice-btn lucky-seven" onclick="game.playHighLowDice('seven')">
-                        <div class="choice-title">🌟 럭키 7 (JACKPOT)</div>
-                        <div class="choice-sub">주사위 합 정확히 7</div>
-                        <div class="choice-payout">대박 5.0x</div>
+                        <div class="choice-title" data-i18n="casino.dice_seven_title">🌟 럭키 7 (JACKPOT)</div>
+                        <div class="choice-sub" data-i18n="casino.dice_seven_sub">주사위 합 정확히 7</div>
+                        <div class="choice-payout" data-i18n="casino.dice_seven_pay">대박 5.0x</div>
                     </button>
                     <button id="btnBetHigh" class="dice-choice-btn" onclick="game.playHighLowDice('high')">
-                        <div class="choice-title">📈 하이 (HIGH)</div>
-                        <div class="choice-sub">주사위 합 8 ~ 12</div>
-                        <div class="choice-payout">배당 2.0x</div>
+                        <div class="choice-title" data-i18n="casino.dice_high_title">📈 하이 (HIGH)</div>
+                        <div class="choice-sub" data-i18n="casino.dice_high_sub">주사위 합 8 ~ 12</div>
+                        <div class="choice-payout" data-i18n="casino.dice_high_pay">배당 2.0x</div>
                     </button>
                 </div>
             </div>
@@ -350,100 +350,100 @@
                         <div id="slotReel2" class="slot-reel">💎</div>
                         <div id="slotReel3" class="slot-reel">7️⃣</div>
                     </div>
-                    <button id="btnSpinSlot" class="slot-spin-btn" onclick="game.playSlotMachine()">
+                    <button id="btnSpinSlot" class="slot-spin-btn" data-i18n="casino.slot_spin" onclick="game.playSlotMachine()">
                         🎰 레버 당기기 (SPIN!)
                     </button>
                 </div>
 
                 <div class="slot-payout-table">
-                    <span>🍒 3개 (3x)</span>
-                    <span>🔔 3개 (5x)</span>
-                    <span>💎 3개 (10x)</span>
-                    <span>7️⃣ 3개 (25x)</span>
-                    <span>👑 3개 (50x + 전설 강화석)</span>
+                    <span data-i18n="casino.slot_payout_1">🍒 3개 (3x)</span>
+                    <span data-i18n="casino.slot_payout_2">🔔 3개 (5x)</span>
+                    <span data-i18n="casino.slot_payout_3">💎 3개 (10x)</span>
+                    <span data-i18n="casino.slot_payout_4">7️⃣ 3개 (25x)</span>
+                    <span data-i18n="casino.slot_payout_5">👑 3개 (50x + 전설 강화석)</span>
                 </div>
             </div>
 
             <!-- Casino Result Feedback Box -->
-            <div id="casinoResultBanner" class="casino-result-banner">도박사 잭: "원하는 게임과 베팅액을 고르고 도전해 보게나!"</div>
+            <div id="casinoResultBanner" class="casino-result-banner" data-i18n="casino.default_comment">도박사 잭: "원하는 게임과 베팅액을 고르고 도전해 보게나!"</div>
         </div>
     </div>
 
     <!-- Forge (대장간 장비 강화) Modal -->
-    <div id="forgeModal" class="hidden modal-backdrop">
+    <div id="forgeModal" class="hidden modal-backdrop" onclick="if(event.target===this) game.toggleForge()">
         <div class="forge-card">
             <div class="modal-header">
-                <h2>⚒️ 대장장이의 불꽃 대장간</h2>
-                <div style="font-size: 11px; color: #facc15; font-weight: 700; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 8px; padding: 4px 10px; margin-top: 4px; text-align: center;">
+                <h2 data-i18n="forge.title">⚒️ 대장장이의 불꽃 대장간</h2>
+                <div data-i18n="forge.desc" style="font-size: 11px; color: #facc15; font-weight: 700; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 8px; padding: 4px 10px; margin-top: 4px; text-align: center;">
                     ✨ [슬롯 계승 강화] 어떤 새 장비를 착용해도 강화 수치가 100% 영구 유지·계승됩니다!
                 </div>
-                <button id="forgeCloseBtn" class="dialogue-close">닫기 [F]</button>
+                <button id="forgeCloseBtn" class="dialogue-close" data-i18n="forge.close_btn" onclick="game.toggleForge()">닫기 [F]</button>
             </div>
             <div class="modal-key-guide desktop-only">
-                <span>조작: <strong>[↑/↓ 방향키]</strong> 항목 이동 &nbsp;•&nbsp; <strong>[ENTER]</strong> 강화 &nbsp;•&nbsp; <strong>[F]</strong> 닫기</span>
+                <span data-i18n="forge.controls">조작: <strong>[↑/↓ 방향키]</strong> 항목 이동 &nbsp;•&nbsp; <strong>[ENTER]</strong> 강화 &nbsp;•&nbsp; <strong>[F]</strong> 닫기</span>
             </div>
             <div class="shop-gold-bar">
-                <span>보유 골드: <strong id="forgeGold" style="color: #facc15;">0 G</strong></span>
+                <span><span data-i18n="forge.gold_label">보유 골드: </span><strong id="forgeGold" style="color: #facc15;">0 G</strong></span>
             </div>
             <div id="forgeItemList" class="forge-item-list"></div>
         </div>
     </div>
 
     <!-- Inventory & Equipment Modal (I Key - Spacious 3-Column Layout) -->
-    <div id="inventoryModal" class="hidden modal-backdrop">
+    <div id="inventoryModal" class="hidden modal-backdrop" onclick="if(event.target===this) game.toggleInventory()">
         <div class="inv-card">
             <div class="modal-header">
-                <h2>🎒 인벤토리 & 장비창</h2>
-                <button id="invCloseBtn" class="dialogue-close">닫기 [I/F]</button>
+                <h2 data-i18n="inv.title">🎒 인벤토리 & 장비창</h2>
+                <button id="invCloseBtn" class="dialogue-close" data-i18n="inv.close" onclick="game.toggleInventory()">닫기 [I/F]</button>
             </div>
             <div class="modal-key-guide desktop-only">
-                <span>조작: <strong>[방향키]</strong> 가방 슬롯 이동 &nbsp;•&nbsp; <strong>[ENTER]</strong> 장착/사용 &nbsp;•&nbsp; <strong>[I / F]</strong> 닫기</span>
+                <span data-i18n="inv.controls">조작: <strong>[방향키]</strong> 가방 슬롯 이동 &nbsp;•&nbsp; <strong>[ENTER]</strong> 장착/사용 &nbsp;•&nbsp; <strong>[I / F]</strong> 닫기</span>
             </div>
 
             <!-- Class Guide Notification Banner -->
             <div class="class-guide-banner">
                 <span class="guide-sparkle">💡</span>
-                <span><strong>[4대 백수 전직]</strong> 무기(검/활/지팡이/단검)를 가방에서 장착([ENTER])하면 해당 직업으로 즉시 전직되어 고유 평타와 모션이 활성화됩니다!</span>
+                <span data-i18n="inv.class_guide"><strong>[4대 백수 전직]</strong> 무기(검/활/지팡이/단검)를 가방에서 장착([ENTER])하면 해당 직업으로 즉시 전직되어 고유 평타와 모션이 활성화됩니다!</span>
             </div>
 
             <div class="inv-layout">
                 <!-- Column 1: Equipment & Character Stats -->
                 <div class="equip-section">
-                    <h3>장착 장비</h3>
+                    <h3 data-i18n="inv.equipped_gear">장착 장비</h3>
                     <div class="equip-slots">
                         <div class="equip-row">
-                            <span class="slot-tag">무기</span>
+                            <span class="slot-tag" data-i18n="inv.slot_weapon">무기</span>
                             <div id="slotEquip_weapon" class="equip-box"></div>
                         </div>
                         <div class="equip-row">
-                            <span class="slot-tag">갑옷</span>
+                            <span class="slot-tag" data-i18n="inv.slot_armor">갑옷</span>
                             <div id="slotEquip_armor" class="equip-box"></div>
                         </div>
                         <div class="equip-row">
-                            <span class="slot-tag">장신구</span>
+                            <span class="slot-tag" data-i18n="inv.slot_accessory">장신구</span>
                             <div id="slotEquip_accessory" class="equip-box"></div>
                         </div>
                     </div>
 
                     <div class="player-class-badge-box">
-                        <span class="class-title-tag">현재 전투 직업</span>
+                        <span class="class-title-tag" data-i18n="inv.current_class">현재 전투 직업</span>
                         <div id="playerClassBadge" class="player-class-badge class-warrior">⚔️ 게으른 검사</div>
                         <div id="playerClassDesc" class="player-class-desc-tag">묵직한 3단 베기 콤보</div>
                     </div>
 
                     <div class="stat-summary-box">
-                        <div class="stat-row"><span>공격력:</span><strong id="statSummaryAtk" style="color: #f87171;">20</strong></div>
-                        <div class="stat-row"><span>최대 체력:</span><strong id="statSummaryHp" style="color: #4ade80;">120</strong></div>
-                        <div class="stat-row"><span>최대 마나:</span><strong id="statSummaryMp" style="color: #60a5fa;">100</strong></div>
-                        <div class="stat-row"><span>이동속도:</span><strong id="statSummarySpd" style="color: #fbbf24;">175</strong></div>
-                        <div class="stat-row"><span>시련의 증표:</span><strong id="invTrialCoins" style="color: #38bdf8;">0 🪙</strong></div>
+                        <div class="stat-row"><span data-i18n="inv.stat_atk">공격력:</span><strong id="statSummaryAtk" style="color: #f87171;">20</strong></div>
+                        <div class="stat-row"><span data-i18n="inv.stat_hp">최대 체력:</span><strong id="statSummaryHp" style="color: #4ade80;">120</strong></div>
+                        <div class="stat-row"><span data-i18n="inv.stat_mp">최대 마나:</span><strong id="statSummaryMp" style="color: #60a5fa;">100</strong></div>
+                        <div class="stat-row"><span data-i18n="inv.stat_spd">이동속도:</span><strong id="statSummarySpd" style="color: #fbbf24;">175</strong></div>
+                        <div class="stat-row"><span data-i18n="inv.stat_trial_coins">시련의 증표:</span><strong id="invTrialCoins" style="color: #38bdf8;">0 🪙</strong></div>
                     </div>
                 </div>
 
                 <!-- Column 2: Bag Grid -->
                 <div class="bag-section">
                     <div class="bag-header">
-                        <h3>소지품 가방 (20칸)</h3>
+                        <h3 data-i18n="inv.bag_title">소지품 가방 (20칸)</h3>
                         <span id="invGold" class="gold-badge">0 G</span>
                     </div>
                     <div id="bagGrid" class="bag-grid"></div>
@@ -451,9 +451,9 @@
 
                 <!-- Column 3: Selected Item Detail Panel (No Tooltip Cutoff) -->
                 <div class="item-detail-section">
-                    <h3>아이템 상세 정보</h3>
+                    <h3 data-i18n="inv.item_detail_title">아이템 상세 정보</h3>
                     <div id="itemDetailCard" class="item-detail-card">
-                        <div class="detail-empty-state">가방에서 아이템을 선택하세요.</div>
+                        <div class="detail-empty-state" data-i18n="inv.item_detail_empty">가방에서 아이템을 선택하세요.</div>
                     </div>
                 </div>
             </div>
@@ -461,26 +461,26 @@
     </div>
 
     <!-- Shop Modal (Merchant NPC - Buy / Sell Dual Tabs) -->
-    <div id="shopModal" class="hidden modal-backdrop">
+    <div id="shopModal" class="hidden modal-backdrop" onclick="if(event.target===this) game.toggleShop()">
         <div class="shop-card">
             <div class="modal-header">
-                <h2 id="shopModalTitle">🛒 방랑 상인의 만물상</h2>
-                <button id="shopCloseBtn" class="dialogue-close">닫기 [F]</button>
+                <h2 id="shopModalTitle" data-i18n="shop.title">🛒 방랑 상인의 만물상</h2>
+                <button id="shopCloseBtn" class="dialogue-close" data-i18n="shop.close_btn" onclick="game.toggleShop()">닫기 [F]</button>
             </div>
             
             <!-- Dual Mode Tabs -->
             <div class="shop-tabs-row">
-                <button id="shopTabBuy" class="shop-tab active" onclick="game.switchShopTab('buy')">🛒 아이템 구매</button>
-                <button id="shopTabSell" class="shop-tab" onclick="game.switchShopTab('sell')">💰 아이템 판매</button>
+                <button id="shopTabBuy" class="shop-tab active" data-i18n="shop.tab_buy" onclick="game.switchShopTab('buy')">🛒 아이템 구매</button>
+                <button id="shopTabSell" class="shop-tab" data-i18n="shop.tab_sell" onclick="game.switchShopTab('sell')">💰 아이템 판매</button>
             </div>
 
             <div class="modal-key-guide desktop-only">
-                <span>조작: <strong>[← / → 또는 Tab]</strong> 탭 전환 &nbsp;•&nbsp; <strong>[↑ / ↓]</strong> 항목 선택 &nbsp;•&nbsp; <strong>[ENTER]</strong> 구매/판매 &nbsp;•&nbsp; <strong>[F]</strong> 닫기</span>
+                <span data-i18n="shop.controls">조작: <strong>[← / → 또는 Tab]</strong> 탭 전환 &nbsp;•&nbsp; <strong>[↑ / ↓]</strong> 항목 선택 &nbsp;•&nbsp; <strong>[ENTER]</strong> 구매/판매 &nbsp;•&nbsp; <strong>[F]</strong> 닫기</span>
             </div>
 
             <div class="shop-gold-bar">
-                <span>🪙 보유 골드: <strong id="shopGold" style="color: #facc15;">0 G</strong></span>
-                <span id="shopBagSpace" class="bag-space-badge">🎒 가방: <strong id="shopBagCount">0 / 20</strong></span>
+                <span><span data-i18n="shop.gold_label">🪙 보유 골드: </span><strong id="shopGold" style="color: #facc15;">0 G</strong></span>
+                <span id="shopBagSpace" class="bag-space-badge"><span data-i18n="shop.bag_label">🎒 가방: </span><strong id="shopBagCount">0 / 20</strong></span>
             </div>
 
             <div id="shopItemList" class="shop-item-list"></div>
@@ -489,48 +489,48 @@
     </div>
 
     <!-- Trial Tower Shop (아스텔의 시련 보물소) Modal -->
-    <div id="trialShopModal" class="hidden modal-backdrop">
+    <div id="trialShopModal" class="hidden modal-backdrop" onclick="if(event.target===this) game.toggleTrialShop()">
         <div class="shop-card trial-shop-theme">
             <div class="modal-header">
-                <h2>✨ 아스텔의 시련 보물소 (전설 직업 무기 교환)</h2>
-                <button id="trialShopCloseBtn" class="dialogue-close" onclick="game.toggleTrialShop()">닫기 [F/ESC]</button>
+                <h2 data-i18n="trial_shop.title">✨ 아스텔의 시련 보물소 (전설 직업 무기 교환)</h2>
+                <button id="trialShopCloseBtn" class="dialogue-close" data-i18n="trial_shop.close_btn" onclick="game.toggleTrialShop()">닫기 [F/ESC]</button>
             </div>
             <div class="modal-key-guide desktop-only">
-                <span>조작: <strong>[↑ / ↓ 방향키]</strong> 품목 선택 &nbsp;•&nbsp; <strong>[ENTER]</strong> 시련의 증표로 교환 &nbsp;•&nbsp; <strong>[F / ESC]</strong> 닫기</span>
+                <span data-i18n="trial_shop.controls">조작: <strong>[↑ / ↓ 방향키]</strong> 품목 선택 &nbsp;•&nbsp; <strong>[ENTER]</strong> 시련의 증표로 교환 &nbsp;•&nbsp; <strong>[F / ESC]</strong> 닫기</span>
             </div>
             <div class="shop-gold-bar trial-coin-bar">
-                <span>🪙 보유 시련의 증표: <strong id="trialShopCoins" style="color: #38bdf8;">0 개</strong></span>
-                <span id="trialShopBagSpace" class="bag-space-badge">🎒 가방: <strong id="trialShopBagCount">0 / 20</strong></span>
+                <span><span data-i18n="trial_shop.coins_label">🪙 보유 시련의 증표: </span><strong id="trialShopCoins" style="color: #38bdf8;">0 개</strong></span>
+                <span id="trialShopBagSpace" class="bag-space-badge"><span data-i18n="shop.bag_label">🎒 가방: </span><strong id="trialShopBagCount">0 / 20</strong></span>
             </div>
             <div id="trialShopItemList" class="shop-item-list"></div>
         </div>
     </div>
 
     <!-- Skill Book Modal (K Key - 9-Slot Custom Loadout & 12 Skill Library) -->
-    <div id="skillModal" class="hidden modal-backdrop">
+    <div id="skillModal" class="hidden modal-backdrop" onclick="if(event.target===this) game.toggleSkillBook()">
         <div class="skillbook-card">
             <div class="modal-header">
-                <h2>⚡ 지저씨의 스킬북 & 9슬롯 커스텀 장착</h2>
-                <button id="skillCloseBtn" class="dialogue-close">닫기 [K/F/ESC]</button>
+                <h2 data-i18n="skillbook.title">⚡ 지저씨의 스킬북 & 9슬롯 커스텀 장착</h2>
+                <button id="skillCloseBtn" class="dialogue-close" data-i18n="skillbook.close_btn" onclick="game.toggleSkillBook()">닫기 [K/F/ESC]</button>
             </div>
             <div class="modal-key-guide desktop-only">
-                <span>조작: <strong>[↑ / ↓]</strong> 스킬 선택 &nbsp;•&nbsp; <strong>[ENTER]</strong> 선택 후 배치할 키<strong>(Q, W, E, A, S, D, Z, X, C)</strong> 입력 &nbsp;•&nbsp; <strong>[DEL]</strong> 해제 &nbsp;•&nbsp; <strong>[X]</strong> 전체 해제 &nbsp;•&nbsp; <strong>[K / F / ESC]</strong> 닫기</span>
+                <span data-i18n="skillbook.controls">조작: <strong>[↑ / ↓]</strong> 스킬 선택 &nbsp;•&nbsp; <strong>[ENTER]</strong> 선택 후 배치할 키<strong>(Q, W, E, A, S, D, Z, X, C)</strong> 입력 &nbsp;•&nbsp; <strong>[DEL]</strong> 해제 &nbsp;•&nbsp; <strong>[X]</strong> 전체 해제 &nbsp;•&nbsp; <strong>[K / F / ESC]</strong> 닫기</span>
             </div>
 
             <div class="skillbook-layout">
                 <!-- Column 1: 9 Equipped Slots Grid -->
                 <div class="skill-slots-deck">
                     <div class="deck-title-row">
-                        <h3>🎯 장착된 9개 퀵슬롯</h3>
+                        <h3 data-i18n="skillbook.deck_title">🎯 장착된 9개 퀵슬롯</h3>
                         <span class="slot-count-badge" id="equippedSkillCount">6 / 9 슬롯 활성화</span>
-                        <button id="btnClearAllSkills" class="clear-all-btn" onclick="window.game.clearAllEquippedSkills()" title="모든 슬롯의 스킬을 한번에 해제합니다">🗑️ 전체 해제 [X]</button>
+                        <button id="btnClearAllSkills" class="clear-all-btn" data-i18n="skillbook.clear_all" onclick="window.game.clearAllEquippedSkills()" title="모든 슬롯의 스킬을 한번에 해제합니다">🗑️ 전체 해제 [X]</button>
                     </div>
                     
                     <div class="slots-3x3-grid" id="equippedSlotsGrid">
                         <!-- Dynamically rendered 9 slots: Q, W, E, A, S, D, Z, X, C -->
                     </div>
 
-                    <div class="skill-tip-banner">
+                    <div class="skill-tip-banner" data-i18n="skillbook.tip">
                         💡 <strong>팁</strong>: 모든 슬롯을 다 채우지 않아도 되며, 자주 쓰는 스킬만 원하는 키에 배치할 수 있습니다. 장착된 슬롯을 클릭하면 즉시 해제됩니다.
                     </div>
                 </div>
@@ -538,17 +538,17 @@
                 <!-- Column 2: Skill Library Catalog with Class Filter Tabs -->
                 <div class="skill-catalog-section">
                     <div class="deck-title-row">
-                        <h3 id="skillLibraryTitle">📖 보유 스킬 라이브러리 (25종)</h3>
+                        <h3 id="skillLibraryTitle" data-i18n="skillbook.lib_title_default">📖 보유 스킬 라이브러리 (25종)</h3>
                     </div>
 
                     <!-- Class Filter Tab Bar -->
                     <div class="skill-filter-bar">
-                        <button id="skillTab_all" class="skill-filter-btn active" data-filter="all" onclick="window.game.filterSkillBook('all')">전체 (All)</button>
-                        <button id="skillTab_warrior" class="skill-filter-btn class-warrior-tab" data-filter="warrior" onclick="window.game.filterSkillBook('warrior')">⚔️ 검사</button>
-                        <button id="skillTab_archer" class="skill-filter-btn class-archer-tab" data-filter="archer" onclick="window.game.filterSkillBook('archer')">🏹 궁수</button>
-                        <button id="skillTab_mage" class="skill-filter-btn class-mage-tab" data-filter="mage" onclick="window.game.filterSkillBook('mage')">🪄 마법사</button>
-                        <button id="skillTab_rogue" class="skill-filter-btn class-rogue-tab" data-filter="rogue" onclick="window.game.filterSkillBook('rogue')">🗡️ 암살자</button>
-                        <button id="skillTab_general" class="skill-filter-btn class-general-tab" data-filter="general" onclick="window.game.filterSkillBook('general')">✨ 공용</button>
+                        <button id="skillTab_all" class="skill-filter-btn active" data-i18n="skillbook.tab_all" data-filter="all" onclick="window.game.filterSkillBook('all')">전체 (All)</button>
+                        <button id="skillTab_warrior" class="skill-filter-btn class-warrior-tab" data-i18n="skillbook.tab_warrior" data-filter="warrior" onclick="window.game.filterSkillBook('warrior')">⚔️ 검사</button>
+                        <button id="skillTab_archer" class="skill-filter-btn class-archer-tab" data-i18n="skillbook.tab_archer" data-filter="archer" onclick="window.game.filterSkillBook('archer')">🏹 궁수</button>
+                        <button id="skillTab_mage" class="skill-filter-btn class-mage-tab" data-i18n="skillbook.tab_mage" data-filter="mage" onclick="window.game.filterSkillBook('mage')">🪄 마법사</button>
+                        <button id="skillTab_rogue" class="skill-filter-btn class-rogue-tab" data-i18n="skillbook.tab_rogue" data-filter="rogue" onclick="window.game.filterSkillBook('rogue')">🗡️ 암살자</button>
+                        <button id="skillTab_general" class="skill-filter-btn class-general-tab" data-i18n="skillbook.tab_general" data-filter="general" onclick="window.game.filterSkillBook('general')">✨ 공용</button>
                     </div>
 
                     <!-- Active 2nd Awakening Passive Info Box -->
@@ -564,7 +564,7 @@
         </div>
     </div>
 
-        <!-- Game Pause Modal (ESC Key / Pause Button) -->
+    <!-- Game Pause Modal (ESC Key / Pause Button) -->
     <div id="pauseModal" class="hidden modal-backdrop">
         <div class="pause-card">
             <div class="pause-header">
@@ -586,16 +586,17 @@
                     <span class="p-arrow">▶</span>
                     <span class="p-label" data-i18n="pause.guide">📖 모험 & 조작 가이드 (Guide)</span>
                 </button>
-                <button id="pauseBtnSave" class="pause-menu-btn" data-index="3" onclick="game.saveGame(); game.showNotification('💾 게임이 안전하게 저장되었습니다!');">
+                <button id="pauseBtnSave" class="pause-menu-btn" data-index="3" onclick="game.saveGame();">
                     <span class="p-arrow">▶</span>
                     <span class="p-label" data-i18n="pause.save">💾 게임 저장하기 (Quick Save)</span>
+                </button>
                 <button id="pauseBtnSettings" class="pause-menu-btn" data-index="4" onclick="game.togglePause(); game.toggleSettings();">
                     <span class="p-arrow">▶</span>
                     <span class="p-label" data-i18n="pause.settings">⚙️ 환경설정 (Settings) [P]</span>
                 </button>
                 <button id="pauseBtnTitle" class="pause-menu-btn" data-index="5" onclick="game.returnToTitle()">
                     <span class="p-arrow">▶</span>
-                    <span class="p-label" data-i18n="pause.title_screen">🏠 타이틀 화면으로 나가기 (Main Menu)</span>
+                    <span class="p-label" data-i18n="pause.title_menu">🏠 타이틀 화면으로 나가기 (Main Menu)</span>
                 </button>
                 <button id="pauseBtnQuit" class="pause-menu-btn quit-btn" data-index="6" onclick="game.quitGame()">
                     <span class="p-arrow">▶</span>
@@ -604,7 +605,7 @@
             </div>
             
             <div class="modal-key-guide desktop-only" style="margin-top: 14px;">
-                <span>조작: <strong>[↑ / ↓ 방향키]</strong> 이동 &nbsp;•&nbsp; <strong>[ENTER]</strong> 선택 &nbsp;•&nbsp; <strong>[ESC]</strong> 계속하기</span>
+                <span data-i18n="pause.guide_footer">조작: <strong>[↑ / ↓ 방향키]</strong> 이동 &nbsp;•&nbsp; <strong>[ENTER]</strong> 선택 &nbsp;•&nbsp; <strong>[ESC]</strong> 계속하기</span>
             </div>
         </div>
     </div>
@@ -663,7 +664,7 @@
             <div class="settings-scroll-body">
                 <!-- Section 0: 언어 설정 (Language) -->
                 <div>
-                    <div class="settings-section-title" data-i18n="settings.lang_title">🌐 언어 설정 (Language)</div>
+                    <div class="settings-section-title" data-i18n="settings.language_section">🌐 언어 설정 (Language)</div>
                     <div class="tutorial-card" style="gap: 8px;">
                         <div style="display: flex; gap: 10px; justify-content: center;">
                             <button id="btnLangKo" class="lang-select-btn" onclick="setLanguage('ko')">🇰🇷 한국어</button>
@@ -674,7 +675,7 @@
 
                 <!-- Section 1: 시스템 설정 -->
                 <div>
-                    <div class="settings-section-title" data-i18n="settings.sound_title">🔊 사운드 설정</div>
+                    <div class="settings-section-title" data-i18n="settings.sound_section">🔊 사운드 설정</div>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         <div class="setting-item">
                             <label data-i18n="settings.bgm">배경음악 음량 (BGM)</label>
@@ -690,10 +691,10 @@
 
                 <!-- Section 2: 편의 기능 & 배달앱 자동 물약 (Auto-Potion) -->
                 <div>
-                    <div class="settings-section-title" data-i18n="settings.auto_pot_title">🛵 편의 기능 & 배달앱 자동 물약 (Auto-Potion)</div>
+                    <div class="settings-section-title" data-i18n="settings.autopotion_section">🛵 편의 기능 & 배달앱 자동 물약 (Auto-Potion)</div>
                     <div class="tutorial-card" style="gap: 8px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                            <span style="font-weight: 800; font-size: 13px; color: #f8fafc;" data-i18n="settings.auto_pot_label">🛵 위기 탈출 자동 물약 결제:</span>
+                            <span style="font-weight: 800; font-size: 13px; color: #f8fafc;" data-i18n="settings.autopotion_label">🛵 위기 탈출 자동 물약 결제:</span>
                             <div class="auto-potion-btn-group" id="autoPotionBtnGroup">
                                 <button class="auto-potion-btn" data-thresh="0" onclick="game.setAutoPotionThreshold(0)">OFF</button>
                                 <button class="auto-potion-btn" data-thresh="0.2" onclick="game.setAutoPotionThreshold(0.2)">20%</button>
@@ -702,7 +703,7 @@
                                 <button class="auto-potion-btn" data-thresh="0.5" onclick="game.setAutoPotionThreshold(0.5)">50%</button>
                             </div>
                         </div>
-                        <p style="font-size: 11px; color: #94a3b8; margin-top: 2px;" data-i18n="settings.auto_pot_desc">
+                        <p style="font-size: 11px; color: #94a3b8; margin-top: 2px;" data-i18n="settings.autopotion_desc">
                             • 전투 중 체력이 설정 비율 이하로 떨어지면 가방의 HP 물약을 <strong>자동 소비("띵동! 배달 완료!")</strong>하여 위기에서 탈출합니다.
                         </p>
                     </div>
@@ -710,24 +711,24 @@
 
                 <!-- Section 3: 조작 및 전투 옵션 -->
                 <div>
-                    <div class="settings-section-title" data-i18n="settings.controls_title">⚔️ 조작 및 전투 효과</div>
+                    <div class="settings-section-title" data-i18n="settings.controls_section">⚔️ 조작 및 전투 효과</div>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         <div class="setting-item">
                             <label data-i18n="settings.dodge_mode">회피(대시) 조작 방식</label>
                             <select id="settingDodgeMode" style="background: #0f172a; border: 1.5px solid #334155; border-radius: 8px; padding: 6px 10px; color: #facc15; font-weight: 800; font-size: 12.5px; outline: none; cursor: pointer;">
-                                <option value="both">Space 키 + 방향키 더블 탭 둘 다 허용 (기본 권장)</option>
-                                <option value="space_only">Space 키만 사용</option>
-                                <option value="double_tap">방향키 더블 탭만 사용</option>
+                                <option value="both" data-i18n="settings.dodge_both">Space 키 + 방향키 더블 탭 둘 다 허용 (기본 권장)</option>
+                                <option value="space_only" data-i18n="settings.dodge_space">Space 키만 사용</option>
+                                <option value="double_tap" data-i18n="settings.dodge_double">방향키 더블 탭만 사용</option>
                             </select>
                         </div>
 
                         <div class="setting-item-toggle">
-                            <label data-i18n="settings.screen_shake">화면 흔들림 타격 효과 (Screen Shake)</label>
+                            <label data-i18n="settings.shake">화면 흔들림 타격 효과 (Screen Shake)</label>
                             <input type="checkbox" id="settingShake" checked>
                         </div>
 
                         <div class="setting-item-toggle">
-                            <label data-i18n="settings.auto_aim">스마트 몬스터 자동 타겟팅 (Auto Aim)</label>
+                            <label data-i18n="settings.aim">스마트 몬스터 자동 타겟팅 (Auto Aim)</label>
                             <input type="checkbox" id="settingAim" checked>
                         </div>
                     </div>
@@ -735,14 +736,14 @@
 
                 <!-- Section 4: 시크릿 코드 / 쿠폰 입력 -->
                 <div>
-                    <div class="settings-section-title" data-i18n="settings.secret_code_title">🎁 시크릿 코드 & 쿠폰 입력 (Secret Code)</div>
+                    <div class="settings-section-title" data-i18n="settings.secret_section">🎁 시크릿 코드 & 쿠폰 입력 (Secret Code)</div>
                     <div class="tutorial-card" style="gap: 8px;">
                         <div style="display: flex; gap: 8px; align-items: center;">
-                            <input type="text" id="devCheatInput" placeholder="시크릿 코드 입력" data-i18n-placeholder="settings.secret_code_placeholder"
+                            <input type="text" id="devCheatInput" placeholder="시크릿 코드 입력" data-i18n-placeholder="settings.secret_placeholder"
                                 style="flex: 1; background: #0f172a; border: 1.5px solid #f59e0b; border-radius: 8px; padding: 8px 12px; color: #facc15; font-weight: 800; font-size: 13px; outline: none;"
                                 onkeydown="if(event.key==='Enter') { game.applySecretCode(this.value); this.value=''; }"
                             >
-                            <button class="forge-upgrade-btn" style="padding: 8px 18px; font-size: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); white-space: nowrap;" onclick="const el=document.getElementById('devCheatInput'); game.applySecretCode(el.value); el.value='';">⚡ 코드 입력</button>
+                            <button class="forge-upgrade-btn" style="padding: 8px 18px; font-size: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); white-space: nowrap;" onclick="const el=document.getElementById('devCheatInput'); game.applySecretCode(el.value); el.value='';"><span data-i18n="settings.secret_submit">⚡ 코드 입력</span></button>
                         </div>
                         <div id="cheatFeedbackMsg" style="font-size: 11.5px; font-weight: 800; color: #4ade80; display: none;"></div>
                     </div>
@@ -750,15 +751,15 @@
 
                 <!-- Section 5: 버전 정보 & 온라인 핫패치 업데이트 -->
                 <div>
-                    <div class="settings-section-title">🚀 버전 정보 & 온라인 자동 업데이트 (Auto-Patch)</div>
+                    <div class="settings-section-title" data-i18n="settings.version_section">🚀 버전 정보 & 온라인 자동 업데이트 (Auto-Patch)</div>
                     <div class="tutorial-card" style="gap: 8px;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
-                                <span style="font-weight: 800; color: #f8fafc; font-size: 13px;">현재 게임 버전: </span>
-                                <span id="settingsVersionLabel" style="font-weight: 800; color: #38bdf8; background: #0f172a; padding: 2px 8px; border-radius: 6px; border: 1px solid #0284c7;">v2.2.0</span>
+                                <span style="font-weight: 800; color: #f8fafc; font-size: 13px;" data-i18n="settings.current_ver">현재 게임 버전: </span>
+                                <span id="settingsVersionLabel" style="font-weight: 800; color: #38bdf8; background: #0f172a; padding: 2px 8px; border-radius: 6px; border: 1px solid #0284c7;">v3.1.0</span>
                             </div>
                             <button id="btnCheckUpdateManual" class="forge-upgrade-btn" style="padding: 7px 16px; font-size: 11.5px; background: linear-gradient(135deg, #0284c7, #0369a1); white-space: nowrap;" onclick="game.checkForUpdates(true)">
-                                🔄 최신 업데이트 확인
+                                <span data-i18n="settings.check_update">🔄 최신 업데이트 확인</span>
                             </button>
                         </div>
                     </div>
@@ -766,19 +767,19 @@
 
                 <!-- Section 6: 세이브 데이터 백업 & 버전/기기 이전 -->
                 <div>
-                    <div class="settings-section-title">💾 세이브 데이터 백업 & 버전/기기 이전 (Cross-Save)</div>
+                    <div class="settings-section-title" data-i18n="settings.cross_save_section">💾 세이브 데이터 백업 & 버전/기기 이전 (Cross-Save)</div>
                     <div class="tutorial-card" style="gap: 8px;">
                         <div style="display: flex; gap: 8px;">
-                            <button class="forge-upgrade-btn" style="flex: 1; padding: 8px; font-size: 12px;" onclick="game.exportSaveCode()">📋 내 세이브 코드 복사 (백업)</button>
-                            <button class="forge-upgrade-btn" style="flex: 1; padding: 8px; font-size: 12px; background: #0284c7; border-color: #38bdf8;" onclick="const c = prompt('복사해둔 세이브 코드를 붙여넣으세요 (Ctrl+V):'); if(c) game.importSaveCode(c);">📥 세이브 코드 불러오기 (복구)</button>
+                            <button class="forge-upgrade-btn" style="flex: 1; padding: 8px; font-size: 12px;" onclick="game.exportSaveCode()"><span data-i18n="settings.export_code">📋 내 세이브 코드 복사 (백업)</span></button>
+                            <button class="forge-upgrade-btn" style="flex: 1; padding: 8px; font-size: 12px; background: #0284c7; border-color: #38bdf8;" onclick="const isEn = (typeof getLanguage === 'function' && getLanguage() === 'en'); const promptTxt = isEn ? 'Paste your copied save code (Ctrl+V):' : '복사해둔 세이브 코드를 붙여넣으세요 (Ctrl+V):'; const c = prompt(promptTxt); if(c) game.importSaveCode(c);"><span data-i18n="settings.import_code">📥 세이브 코드 불러오기 (복구)</span></button>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="settings-footer">
-                <span>단축키 <strong>[P]</strong> 또는 <strong>[F]</strong>로 닫을 수 있습니다.</span>
-                <button id="settingsCloseBtnBottom" class="dialogue-close" onclick="game.closeSettings()">확인 [P/F]</button>
+                <span data-i18n="settings.close_hint">단축키 <strong>[P]</strong> 또는 <strong>[F]</strong>로 닫을 수 있습니다.</span>
+                <button id="settingsCloseBtnBottom" class="dialogue-close" data-i18n="settings.confirm" onclick="game.closeSettings()">확인 [P/F]</button>
             </div>
         </div>
     </div>
@@ -953,7 +954,7 @@
         <div class="dialogue-header">
             <div class="npc-avatar">🧙‍♂️</div>
             <div id="dialogueSpeaker" data-i18n="dialogue.default_speaker">마을 장로</div>
-            <button id="dialogueCloseBtn" class="dialogue-close" data-i18n="dialogue.confirm_btn">확인 [F/Enter]</button>
+            <button id="dialogueCloseBtn" class="dialogue-close" data-i18n="dialogue.confirm_btn" onclick="game.closeDialogue()">확인 [F/Enter]</button>
         </div>
         <div id="dialogueText" data-i18n="dialogue.default_welcome">용사여, 마을에 오신 것을 환영하네!</div>
     </div>
@@ -1186,6 +1187,7 @@
     <script src="data/items.js"></script>
     <script src="data/skills.js"></script>
     <script src="data/quests.js"></script>
+    <script src="renderers/SpriteManager.js"></script>
     <script src="renderers/textures.js"></script>
     <script src="renderers/monsters.js"></script>
     <script src="renderers/bosses.js"></script>
